@@ -1,0 +1,16 @@
+{
+  "name": "bob-fisher-engine",
+  "module": "index.ts",
+  "type": "module",
+  "private": true,
+  "devDependencies": {
+    "@types/bun": "latest"
+  },
+  "peerDependencies": {
+    "typescript": "^5"
+  },
+  "dependencies": {
+    "mineflayer": "^4.37.1",
+    "prismarine-viewer": "^1.33.0"
+  }
+}
