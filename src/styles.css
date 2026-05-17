@@ -1,3 +1,45 @@
-body{
-  background-color: black;
+:root {
+  --bg-secondary: #2d2d2d;
+  --bg-elevated: #333333;
+  --bg-sidebar: #181818;
+  --bg-card: #2d2d2d;
+  --bg-panel: #252525;
+  --bg-color: #242424;
+  --leftbar-color: #303030;
+  --hover-blue: #62A0EA;
+  --surface-color: #2d2d2d;
+  --accent-color: #3584e4;
+  --accent-hover: #62a0ea;
+  --text-color: #ffffff;
+  --text-muted: #9a9996;
+  --border-color: #404040;
+  --border-color-rgb: 64, 64, 64;
+  --default-font: "Arial";
+  --error-color: #e01b24;
+  --radius: 5px;
+  --transition: 0.2s ease;
+  --input-color: #303030;
+  --primary: #3584e4;
+  --primary-hover: #62a0ea;
+  --secondary: #2d2d2d;
+  --secondary-hover: #404040;
+  --success: #33d17a;
+  --success-hover: #57e389;
+  --danger: #e01b24;
+  --danger-hover: #ff7b63;
+  --green-button: #26a269;
+  --green-button-hover: #1a5f4a;
+  --green-bright: #33d17a;
+  --ghost: rgba(255, 255, 255, 0.1);
+  --ghost-hover: rgba(255, 255, 255, 0.15);
+  --default-fontSize: 20px;
 }
+
+body {
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  font-family: var(--default-font);
+  font-size: var(--default-fontSize);
+}
+
+
