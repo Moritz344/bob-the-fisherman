@@ -1,16 +1,27 @@
 const mineflayer = require('mineflayer')
+const pathfinder = require('mineflayer-pathfinder').pathfinder;
+const Movements = require('mineflayer-pathfinder').Movements;
+const { GoalFollow } = require('mineflayer-pathfinder').goals;
 
+const username = "fishermanbob69";
+const port = 43273;
+const version = "1.21.11";
 
 const bot = mineflayer.createBot({
   host: 'localhost',
-  port: 34603 ,
-  auth: "offline",
-  username: "Bob_The_Fisher",
-  version: "1.18.2"
+  port,
+  auth: "microsoft",
+  username,
+  version:version
 });
+const mcData = require('minecraft-data')(bot.version);
+
+
+bot.loadPlugin(pathfinder);
 
 bot.once('spawn', () => {
   console.log("Bot spawned");
+
 })
 
 bot.on("end",() => {
@@ -18,38 +29,62 @@ bot.on("end",() => {
 })
 
 
-bot.on('chat', (username: any, message: any) => {
+bot.on('whisper', (username: any, message: any) => {
   if (username === bot.username) return
-  if (message == "start") {
+  if (message == "!start") {
     startFishing();
-  } else if (message == "stop") {
+  } else if (message == "!stop") {
     stopFishing();
-  } else if (message == "eat") {
+  } else if (message == "!eat") {
     setTimeout( () => {
     eat();
     },500);
+  } else if (message.includes("!follow")) {
+    const msg = message.split(" ");
+    if (msg.length >= 2) {
+      const playerToFollow = msg[1].trim("");
+      followPlayer(playerToFollow);
+    }
+  } else if (message == "!stop follow") {
+    stopFollowingPlayer();
+  } else if (message == "!find water") {
+    lookAtWater();
+  } else if (message == "!show inventory") {
+    const items = getInventory();
+    items.forEach( (x: any) => {
+      console.log(x.name);
+    })
   }
 })
 
-bot.on("physicTick", lookAtNearesPlayer);
+function getInventory() {
+  return bot.inventory.slots.filter( (x: any) => x != null);
+}
 
-function lookAtNearesPlayer() {
-  const playerFilter = (entity: any) => entity.type == "player";
-  const playerEntity = bot.nearestEntity(playerFilter);
+function stopFollowingPlayer() {
+  bot.pathfinder.stop();
+  bot.pathfinder.setGoal(null);
+}
+
+function followPlayer(playerName: string) {
+  if (isFishing) {
+    stopFishing();
+  }
+  const playerEntity = bot.nearestEntity( (e: any) => e.type == "player" && e.username == playerName);
 
   if (!playerEntity) {
     return;
   }
 
-  const pos = playerEntity.position.offset(0,playerEntity.height,0);
-  bot.lookAt(pos);
+  bot.pathfinder.setMovements(new Movements(bot, mcData));
+  bot.pathfinder.setGoal(new GoalFollow(playerEntity, 1),true);
+
 
 }
 
-async function stopFishing() {
-bot.removeListener("playerCollect",onCollect);
+function stopFishing() {
+  bot.removeListener("playerCollect",onCollect);
   if (isFishing) {
-    bot.chat("stop fishing");
     bot.activateItem();
     isFishing = false;
   }
@@ -58,15 +93,21 @@ bot.removeListener("playerCollect",onCollect);
 
 let isFishing = false;
 
+
 async function startFishing() {
   const items = bot.inventory.slots.filter( (x: any) => x != null);
   let hasRod = items.some( (x: any) => x.name == "fishing_rod");
   if (!hasRod) {
-    bot.chat("I don't have an fishing rod in my inventory");
+    console.log("I don't have an fishing rod in my inventory");
     return;
   }
 
-  console.log(bot.food);
+  const waterIsNearby = lookAtWater();
+  if (!waterIsNearby) {
+    return;
+  }
+
+
   if (bot.food < 20) {
     await eat();
   }
@@ -74,9 +115,8 @@ async function startFishing() {
 
   try {
     await bot.equip(bot.registry.itemsByName.fishing_rod.id, 'hand')
-    console.log("fishing rod:",bot.registry.itemsByName.fishing_rod.id)
   } catch (err: any) {
-    return bot.chat(err.message)
+    return console.log(err.message)
   }
 
   isFishing = true;
@@ -84,9 +124,8 @@ async function startFishing() {
 
   try{
     await bot.fish();
-    bot.chat("fish now!");
   } catch (err: any) {
-    bot.chat("Error while starting fishing:" + err.message);
+    console.log(err);
   }
   isFishing = false;
 }
@@ -97,13 +136,25 @@ function onCollect(player: any,entity: any) {
     return;
   }
   bot.removeListener("playerCollect", onCollect);
-  bot.chat("collected something");
+  console.log("collected something");
   setTimeout( () => {
     startFishing();
   },500);
 }
 
-function lookAtWater() {}
+function lookAtWater() {
+  const waterBlock = bot.findBlock({
+    point: bot.entity.position,
+    matching: (block: any) => block.name === 'water',
+    maxDistance: 10
+  });
+  if (!waterBlock) {
+    console.log("There is no water nearby!");
+    return false;
+  }
+  bot.lookAt(waterBlock.position.offset(0.5,2,0.5));
+  return true;
+}
 
 async function eat () {
   stopFishing()
@@ -113,21 +164,20 @@ async function eat () {
   console.log(items.map((x: any) => x.name));
 
   if (items.length == 0) {
-    bot.chat("No food in my inventory.");
+    console.log("No food in my inventory.");
     return;
   }
 
   try {
-    bot.chat("eating" + items[0].name);
     await bot.equip(items[0], 'hand')
   } catch (err: any) {
-    return bot.chat(err.message)
+    return console.log(err.message)
   }
 
   try {
     await bot.consume()
   } catch (err: any) {
-    return bot.chat(err.message)
+    console.log(err.message)
   }
 }
 
