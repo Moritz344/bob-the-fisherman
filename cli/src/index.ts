@@ -3,9 +3,15 @@ const pathfinder = require('mineflayer-pathfinder').pathfinder;
 const Movements = require('mineflayer-pathfinder').Movements;
 const { GoalFollow } = require('mineflayer-pathfinder').goals;
 
-const username = "fishermanbob69";
-const port = 43273;
-const version = "1.21.11";
+const argv = process.argv;
+const username = argv[2];
+const port = argv[3];
+const version = argv[4];
+if (argv.length < 5) {
+  console.log("Usage: ./index.ts <username> <port> <version>")
+  process.exit(0);
+}
+
 
 const bot = mineflayer.createBot({
   host: 'localhost',
