@@ -1,1 +1,8 @@
-<p>leftbar works!</p>
+<div class="container">
+  <div class="options-container">
+    <button (click)="onTab('home')" [class.active]="currentSelectedTab() == 'home'">Home</button>
+    <button (click)="onTab('log')"  [class.active]="currentSelectedTab() == 'log'">Log</button>
+    <button (click)="onTab('loot')" [class.active]="currentSelectedTab() == 'loot'">Loot</button>
+    <button (click)="onTab('view')" [class.active]="currentSelectedTab() == 'view'">World View</button>
+  </div>
+</div>
