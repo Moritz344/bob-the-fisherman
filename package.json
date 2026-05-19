@@ -35,7 +35,9 @@
     "cross-env": "^10.1.0",
     "electron": "^42.1.0",
     "electron-builder": "^26.8.1",
+    "minecraft-data": "^3.110.2",
     "mineflayer": "^4.37.1",
+    "mineflayer-pathfinder": "^2.4.5",
     "rxjs": "~7.8.0",
     "tslib": "^2.3.0",
     "wait-on": "^9.0.10"
