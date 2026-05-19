@@ -42,4 +42,15 @@ body {
   font-size: var(--default-fontSize);
 }
 
+button{
+  border: none;
+  background-color: #38383B;
+  border-radius: 5px;
+  padding: 5px;
+  font-size: 15px;
+  color: white;
+}
 
+button:hover{
+  background-color: var(--ghost-hover);
+}
