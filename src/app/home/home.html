@@ -1,2 +1,18 @@
 <app-leftbar></app-leftbar>
 <app-chat-log></app-chat-log>
+
+<div class="container">
+  @if (started()) {
+    <button class="start-btn" (click)="onStart()">Stop</button>
+  }@else {
+    <button class="start-btn" (click)="onStart()">Start</button>
+  }
+  <select [(ngModel)]="currentSelected().version">
+    @for (version of versionData(); track $index) {
+      <option>{{ version }}</option>
+    }
+  </select>
+  <input placeholder="Port Number" [(ngModel)]="currentSelected().port">
+  <input placeholder="Username" [(ngModel)]="currentSelected().username">
+  <input placeholder="Host" [(ngModel)]="currentSelected().host">
+</div>
