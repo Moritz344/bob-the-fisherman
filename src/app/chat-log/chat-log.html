@@ -1,1 +1,7 @@
-<p>chat-log works!</p>
+<div class="container">
+  <div class="message-container">
+    @for (msg of data(); track $index) {
+      <span>{{msg}}</span>
+    }
+  </div>
+</div>
