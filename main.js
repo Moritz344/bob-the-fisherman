@@ -13,6 +13,7 @@ const { GoalFollow } = require('mineflayer-pathfinder').goals;
 
 let bot;
 let isFishing = false;
+let win;
 
 function stopBot() {
   bot.quit();
@@ -76,6 +77,7 @@ function getInventory() {
 }
 
 function stopFollowingPlayer() {
+  win.webContents.send("game-logs","[INFORMATION] Stop following player");
   bot.pathfinder.stop();
   bot.pathfinder.setGoal(null);
 }
@@ -94,17 +96,19 @@ function followPlayer(playerName) {
 
   if (!playerEntity) {
     console.log("no player");
+    win.webContents.send("game-logs","[INFORMATION]: No player to follow found!");
     return;
   }
 
 
+  win.webContents.send("game-logs","[INFORMATION]: Following Player " + playerName);
   bot.pathfinder.setMovements(new Movements(bot, mcData));
   bot.pathfinder.setGoal(new GoalFollow(playerEntity, 1),true);
 }
 
 
 async function createWindow() {
-  const win = new BrowserWindow({
+  win = new BrowserWindow({
     width: 1200,
     height: 800,
     frame: false,
@@ -121,10 +125,12 @@ async function createWindow() {
   });
 
   ipcMain.handle("stop-bot",(_) => {
+    win.webContents.send("game-logs","[INFORMATION]: Bot stopped");
     stopBot();
   });
 
   ipcMain.handle("start-bot",(_,host,port,version,auth,username) => {
+    win.webContents.send("game-logs","[INFORMATION]: Bot spawned");
     initBot(auth,host,port,username,version);
   });
 
@@ -137,6 +143,7 @@ async function createWindow() {
 }
 
 function stopFishing() {
+  win.webContents.send("game-logs","[INFORMATION]: Stop Fishing");
   bot.removeListener("playerCollect",onCollect);
   if (isFishing) {
     bot.activateItem();
@@ -152,20 +159,24 @@ async function startFishing() {
   const items = bot.inventory.slots.filter( (x) => x != null);
   let hasRod = items.some( (x) => x.name == "fishing_rod");
   if (!hasRod) {
+    win.webContents.send("game-logs","[INFORMATION]: No fishing rod in my inventory!");
     console.log("I don't have an fishing rod in my inventory");
     return;
   }
 
   const waterIsNearby = lookAtWater();
   if (!waterIsNearby) {
+    win.webContents.send("game-logs","[INFORMATION]: Not Water nearby!");
     return;
   }
 
 
   if (bot.food < 20) {
+    win.webContents.send("game-logs","[INFORMATION]: Eating");
     await eat();
   }
 
+  win.webContents.send("game-logs","[INFORMATION]: Start fishing!");
 
   try {
     await bot.equip(bot.registry.itemsByName.fishing_rod.id, 'hand')
@@ -191,12 +202,14 @@ function onCollect(player,entity) {
   }
   bot.removeListener("playerCollect", onCollect);
   console.log("collected something");
+  win.webContents.send("game-logs","[INFORMATION]: Caught something!");
   setTimeout( () => {
     startFishing();
   },500);
 }
 
 function lookAtWater() {
+  win.webContents.send("game-logs","[INFORMATION]: Looking for water to fish in!");
   const waterBlock = bot.findBlock({
     point: bot.entity.position,
     matching: (block) => block.name === 'water',
