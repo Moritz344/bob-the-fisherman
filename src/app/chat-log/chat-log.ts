@@ -1,4 +1,5 @@
-import { Component,signal,OnInit } from '@angular/core';
+import { Component,signal,OnInit,inject } from '@angular/core';
+import { SettingsService } from '../settings-service';
 
 @Component({
   selector: 'app-chat-log',
@@ -7,23 +8,15 @@ import { Component,signal,OnInit } from '@angular/core';
   styleUrl: './chat-log.css',
 })
 export class ChatLog implements OnInit{
+  settings = inject(SettingsService);
   public data = signal<string[]>([]);
 
   constructor() {}
 
   ngOnInit(): void {
-    this.data().push("[Information] Caught 'Salmon'");
-    this.data().push("[Information] Caught 'Salmon'");
-    this.data().push("[Information] Caught 'Salmon'");
-    this.data().push("[Information] Caught 'Salmon'");
-    this.data().push("[Information] Caught 'Salmon'");
-    this.data().push("[Information] Caught 'Salmon'");
-    this.data().push("[Information] Caught 'Salmon'");
-    this.data().push("[Information] Caught 'Salmon'");
-    this.data().push("[Information] Caught 'Salmon'");
-    this.data().push("[Information] Caught 'Salmon'");
-    this.data().push("[Information] Caught 'Salmon'");
-    this.data().push("[Information] Caught 'Salmon'");
+    this.settings.logs.subscribe( (message: string) => {
+      this.data.update( m => [...m,message]);
+    });
   }
 
 }
