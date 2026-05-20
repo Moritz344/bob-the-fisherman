@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ChatLog } from '../chat-log/chat-log';
 import { Leftbar } from '../leftbar/leftbar';
-import { Settings } from '../settings';
+import { SettingsService } from '../settings-service';
 
 interface currentSelectedType{
   host: string,
@@ -20,7 +20,7 @@ interface currentSelectedType{
   styleUrl: './home.css',
 })
 export class Home implements OnInit {
-  public settings = inject(Settings);
+  public settings = inject(SettingsService);
 
   public started = signal<boolean>(false);
   public currentSelected = signal<currentSelectedType>({port: 0,username: "",version: "",auth: "",host: ""});
@@ -28,7 +28,6 @@ export class Home implements OnInit {
   // 36147
 
   constructor() {
-    this.initCurrentSelected();
   }
 
   onStart() {
@@ -41,25 +40,11 @@ export class Home implements OnInit {
     }
   }
 
-  initCurrentSelected() {
-    this.currentSelected.set({
-      host: "localhost",
-      auth: "offline",
-      version: "1.21.11",
-      username: "Bob",
-      port: 3000
-    });
-  }
 
   ngOnInit(): void {
-    (async () => {
-      await this.initVersions();
-    })();
+    this.currentSelected.set(this.settings.getSettings());
+    console.log("got",this.currentSelected());
   }
 
-  async initVersions() {
-    const data = await this.settings.getVersions();
-    this.versionData.set(data.reverse());
-  }
 
 }
