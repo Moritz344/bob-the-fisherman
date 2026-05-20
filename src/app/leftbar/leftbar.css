@@ -22,3 +22,10 @@
 .active{
   background-color: var(--accent-color);
 }
+
+.settings{
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translate(-50%);
+}
