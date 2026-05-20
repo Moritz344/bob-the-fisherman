@@ -1,0 +1,13 @@
+.h-center{
+  display: flex;
+  justify-content: center;
+}
+
+.settings{
+  display: grid;
+  grid-template-columns: repeat(2,200px);
+  justify-content: center;
+  gap: 10px;
+  align-items: center;
+
+}

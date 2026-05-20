@@ -1,1 +1,21 @@
-<p>settings works!</p>
+<app-leftbar></app-leftbar>
+
+<div class="container">
+  <h1 class="h-center">Bot Settings</h1>
+
+  <div class="settings">
+    Versions:
+    <select [(ngModel)]="currentSelected().version">
+      @for (version of versionData(); track $index) {
+        <option>{{ version }}</option>
+      }
+    </select>
+    Port:
+    <input placeholder="Port Number" [(ngModel)]="currentSelected().port">
+    Username:
+    <input placeholder="Username" [(ngModel)]="currentSelected().username">
+    Server:
+    <input placeholder="Host" [(ngModel)]="currentSelected().host">
+    <button (click)="save()">Save</button>
+  </div>
+</div>
