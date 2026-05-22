@@ -38,6 +38,7 @@
     "minecraft-data": "^3.110.2",
     "mineflayer": "^4.37.1",
     "mineflayer-pathfinder": "^2.4.5",
+    "prismarine-auth": "^3.1.1",
     "rxjs": "~7.8.0",
     "tslib": "^2.3.0",
     "wait-on": "^9.0.10"
