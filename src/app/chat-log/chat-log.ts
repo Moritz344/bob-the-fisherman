@@ -14,9 +14,8 @@ export class ChatLog implements OnInit{
   constructor() {}
 
   ngOnInit(): void {
-    this.settings.logs.subscribe( (message: string) => {
-      this.data.update( m => [...m,message]);
-    });
+    this.data.set(this.settings.getCurrentLogs() );
+    console.log(this.data());
   }
 
 }
