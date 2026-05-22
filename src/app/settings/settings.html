@@ -4,10 +4,15 @@
   <h1 class="h-center">Bot Settings</h1>
 
   <div class="settings">
+    Mode:
+    <select (change)="onChooseMode()" [(ngModel)]="currentSelected().auth">
+      <option value="offline">offline</option>
+      <option value="microsoft">online</option>
+    </select>
     Versions:
     <select [(ngModel)]="currentSelected().version">
       @for (version of versionData(); track $index) {
-        <option>{{ version }}</option>
+        <option [value]="version">{{ version }}</option>
       }
     </select>
     Port:
