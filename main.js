@@ -3,14 +3,13 @@ const {
   app,
   BrowserWindow,
   ipcMain,
+  dialog
 } = require("electron");
 
 // FIXME: load them if just in time to improve perfomance
 const mineflayer = require('mineflayer')
 const Movements = require('mineflayer-pathfinder').Movements;
 const { GoalFollow } = require('mineflayer-pathfinder').goals;
-
-
 let bot;
 let isFishing = false;
 let win;
@@ -18,56 +17,74 @@ let win;
 function stopBot() {
   bot.quit();
 }
-function initBot(auth,host, port,username,version) {
+async function initBot(auth,host, port,username,version) {
+    try {
 
-    bot = mineflayer.createBot({
-      host,
-      port,
-      auth,
-      username,
-      version
-    });
-
-
-
-
-  bot.once('spawn', () => {
-    console.log("Bot spawned");
-
-  })
-
-  bot.on("end",() => {
-    console.log("Bot stopped");
-  })
+      console.log("auth:",auth);
+      bot = await mineflayer.createBot({
+        host,
+        port,
+        auth,
+        username,
+        version,
+        onMsaCode: async (data) => {
+          await dialog.showMessageBox(win, {
+            type: 'info',
+            authTitle: 'Microsoft Login Required',
+            message: data.message
+          })
+        }
+      });
 
 
-  bot.on('whisper', (username, message) => {
-    if (username === bot.username) return
-    if (message == "!start") {
-      startFishing();
-    } else if (message == "!stop") {
-      stopFishing();
-    } else if (message == "!eat") {
-      setTimeout( () => {
-      eat();
-      },500);
-    } else if (message.includes("!follow")) {
-      const msg = message.split(" ");
-      if (msg.length >= 2) {
-        const playerToFollow = msg[1].trim("");
-        followPlayer(playerToFollow);
+
+
+    bot.once('spawn', () => {
+      console.log("Bot spawned");
+
+    })
+
+    bot.on("end",() => {
+      console.log("Bot stopped");
+    })
+
+
+    bot.on('whisper', (username, message) => {
+      if (username === bot.username) return
+      if (message == "!start") {
+        startFishing();
+      } else if (message == "!stop") {
+        stopFishing();
+      } else if (message == "!eat") {
+        setTimeout( () => {
+        eat();
+        },500);
+      } else if (message.includes("!follow")) {
+        const msg = message.split(" ");
+        if (msg.length >= 2) {
+          const playerToFollow = msg[1].trim("");
+          followPlayer(playerToFollow);
+        }
+      } else if (message == "!stop follow") {
+        stopFollowingPlayer();
+      } else if (message == "!find water") {
+        lookAtWater();
+      } else if (message == "!show inventory") {
+        const items = getInventory();
+        items.forEach( (x) => {
+          console.log(x.name);
+        })
       }
-    } else if (message == "!stop follow") {
-      stopFollowingPlayer();
-    } else if (message == "!find water") {
-      lookAtWater();
-    } else if (message == "!show inventory") {
-      const items = getInventory();
-      items.forEach( (x) => {
-        console.log(x.name);
-      })
+    })
+
+    } catch(err) {
+      await dialog.showMessageBox(win, {
+            type: 'Error',
+            authTitle: 'Bot Error',
+            message: err
+          })
+      console.log("Error starting Bot:",err);
     }
-  })
 
 }
 
@@ -129,8 +146,11 @@ async function createWindow() {
     stopBot();
   });
 
+
+
   ipcMain.handle("start-bot",(_,host,port,version,auth,username) => {
     win.webContents.send("game-logs","[INFORMATION]: Bot spawned");
+
     initBot(auth,host,port,username,version);
   });
 
