@@ -1,28 +1,25 @@
 import { Injectable,inject,signal } from '@angular/core';
 import { Subject,BehaviorSubject } from 'rxjs';
 import { Router } from '@angular/router';
+import { currentSelectedType } from './models/current.model';
 
-interface currentSelectedType{
-  host: string,
-  port: number,
-  username: string,
-  version: string,
-  auth: string
-}
 @Injectable({
   providedIn: 'root',
 })
 export class SettingsService {
   router = inject(Router);
-  public logs = new Subject<any>;
+  public logs = signal<string[]>([""]);
+  public started = signal<boolean>(false);
 
   public settingsSelected = signal<currentSelectedType>({
-    username: "",
-    host: "",
-    version: "",
-    auth: "",
-    port: 0
+    username: "fishermanbob69",
+    host: "localhost",
+    version: "1.21.11",
+    auth: "offline",
+    port: 46685,
+    started: false
   });
+
 
   constructor() {
     this.initGameLogs();
@@ -37,6 +34,15 @@ export class SettingsService {
     return this.settingsSelected();
   }
 
+  public setStarted(value: boolean) {
+    console.log("started value",value);
+    this.started.set(value);
+  }
+
+  public getStarted() {
+    return this.started();
+  }
+
   async getVersions() {
     return await (window as any).electronAPI.getMinecraftVersions();
   }
@@ -49,9 +55,13 @@ export class SettingsService {
     return await (window as any).electronAPI.stopBot();
   }
 
+  public getCurrentLogs() {
+    return this.logs();
+  }
+
   private async initGameLogs() {
-    (window as any).electronAPI.gameLogs((logs: string) => {
-      this.logs.next(logs);
+    (window as any).electronAPI.gameLogs((msg: string) => {
+      this.logs.update((old: string[]) => [...old,msg]);
     });
   }
 
