@@ -9,7 +9,9 @@ import { currentSelectedType } from './models/current.model';
 export class SettingsService {
   router = inject(Router);
   public logs = signal<string[]>([""]);
+  public errorLogs = signal<string[]>([""]);
   public started = signal<boolean>(false);
+  public currentTab = signal<string>("");
 
   public settingsSelected = signal<currentSelectedType>({
     username: "fishermanbob69",
@@ -25,9 +27,10 @@ export class SettingsService {
     this.initGameLogs();
   }
 
-  public saveSettings(data: any) {
+  async saveSettings(data: any) {
     this.settingsSelected.set(data);
     console.log(this.settingsSelected());
+    return await (window as any).electronAPI.saveBotSettings(data);
   }
 
   public getSettings() {
@@ -41,6 +44,11 @@ export class SettingsService {
 
   public getStarted() {
     return this.started();
+  }
+
+
+  async getLastBotSettings() {
+    return await (window as any).electronAPI.getBotSettings();
   }
 
   async getVersions() {
@@ -59,10 +67,21 @@ export class SettingsService {
     return this.logs();
   }
 
+  public showFormsError(msg: string) {
+  (window as any).electronAPI.showError("Forms Error", msg);
+  }
+
   private async initGameLogs() {
     (window as any).electronAPI.gameLogs((msg: string) => {
       this.logs.update((old: string[]) => [...old,msg]);
-    });
+
+      });
+      (window as any).electronAPI.botError((msg: string) => {
+        // 45197
+      (window as any).electronAPI.showError("Bot Error", msg);
+              this.logs.update((old: string[]) => [...old, "[ERROR] " + msg   ]);
+              this.started.set(false);
+        });
   }
 
   public goto(route: string) {
