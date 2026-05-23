@@ -23,37 +23,36 @@ interface currentSelectedType{
 export class Home implements OnInit {
   public settings = inject(SettingsService);
 
-  public started = signal<boolean>(false);
-  public currentSelected = signal<currentSelectedType>({port: 0,username: "",version: "",auth: "",host: "",started: false});
+  public started = this.settings.started;
+  public currentSelected = this.settings.settingsSelected;
   public versionData = signal([]);
-  // 36147
 
   constructor() {
+    this.initBotSettings();
   }
 
-  onStart() {
+  async initBotSettings() {
+    const settings = await this.settings.getLastBotSettings();
+    settings.started = false;
+    this.currentSelected.set(settings);
+  }
+
+  async onStart() {
     console.log(this.currentSelected());
     this.started.update( (x: boolean) => !x );
     if (this.started()) {
-      this.settings.startBot(this.currentSelected());
+      let p = await this.settings.startBot(this.currentSelected());
+      console.log("started:",p);
     } else {
-      this.settings.stopBot();
+      await this.settings.stopBot();
     }
-    this.settings.setStarted(this.started());
   }
+  // 45197
 
 
   ngOnInit(): void {
-    this.currentSelected.set(({
-      auth: this.settings.getSettings().auth,
-      username: this.settings.getSettings().username,
-      host: this.settings.getSettings().host,
-      version: this.settings.getSettings().version,
-      port: this.settings.getSettings().port,
-      started: this.settings.getStarted()
-    }))
-    this.started.set(this.currentSelected().started);
-    console.log("got",this.currentSelected());
+    this.started.set(this.currentSelected().started!);
+
   }
 
 
