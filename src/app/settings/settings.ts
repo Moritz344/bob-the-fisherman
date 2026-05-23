@@ -15,6 +15,8 @@ export class Settings implements OnInit{
   public settings = inject(SettingsService);
   public currentSelected = signal<currentSelectedType>({port: 3000,username: "Bob",version: "1.21.11",auth: "offline",host: "localhost"});
   public versionData = signal([]);
+  public formError = signal<boolean>(false);
+  public saved = signal<boolean>(false);
 
   constructor() {
     this.initVersions();
@@ -38,7 +40,6 @@ export class Settings implements OnInit{
 
   onChooseMode() {
     console.log(this.currentSelected().auth);
-    // 46685
 
 
 
@@ -50,6 +51,21 @@ export class Settings implements OnInit{
   }
 
   save() {
+    if (!this.currentSelected().host || this.currentSelected().host == "") {
+      this.settings.showFormsError("Server ist Pflichtfeld!");
+      return;
+    } else if (!this.currentSelected().port || this.currentSelected().port == 0) {
+      this.settings.showFormsError("Port ist Pflichtfeld!");
+      return;
+    } else if (this.currentSelected().username == "") {
+      if (this.currentSelected().auth == "offline") {
+        this.settings.showFormsError("Please enter a name for the Bot. This can be any name since you selected the offline mode.");
+      } else {
+        this.settings.showFormsError("Please enter a name for the Bot. This has to be the name of your minecraft account.");
+      }
+      return;
+    }
+    this.saved.set(true);
     this.settings.saveSettings(this.currentSelected());
   }
 }

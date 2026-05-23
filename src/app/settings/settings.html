@@ -2,10 +2,9 @@
 
 <div class="container">
   <h1 class="h-center">Bot Settings</h1>
-
   <div class="settings">
     Mode:
-    <select (change)="onChooseMode()" [(ngModel)]="currentSelected().auth">
+    <select [(ngModel)]="currentSelected().auth">
       <option value="offline">offline</option>
       <option value="microsoft">online</option>
     </select>
@@ -21,6 +20,6 @@
     <input placeholder="Username" [(ngModel)]="currentSelected().username">
     Server:
     <input placeholder="Host" [(ngModel)]="currentSelected().host">
-    <button (click)="save()">Save</button>
+    <button (click)="save()" style="font-size: 20px;width: 60px">Save</button>
   </div>
 </div>
