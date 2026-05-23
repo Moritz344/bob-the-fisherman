@@ -9,13 +9,13 @@ import { SettingsService } from '../settings-service';
 })
 export class ChatLog implements OnInit{
   settings = inject(SettingsService);
-  public data = signal<string[]>([]);
+  public data = this.settings.logs;
 
   constructor() {}
 
   ngOnInit(): void {
-    this.data.set(this.settings.getCurrentLogs() );
-    console.log(this.data());
+    //this.data.set(this.settings.getCurrentLogs());
+    //console.log("logs chat c:",this.data());
   }
 
 }
