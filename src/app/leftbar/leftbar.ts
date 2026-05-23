@@ -11,7 +11,7 @@ import { SettingsService } from '../settings-service';
 export class Leftbar implements OnInit {
   router = inject(Router);
   settings = inject(SettingsService);
-  public currentSelectedTab = signal<string>("");
+  public currentSelectedTab = this.settings.currentTab;
 
   constructor() {}
 
