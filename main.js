@@ -10,13 +10,22 @@ const {
 const mineflayer = require('mineflayer')
 const Movements = require('mineflayer-pathfinder').Movements;
 const { GoalFollow } = require('mineflayer-pathfinder').goals;
+
 let bot;
 let isFishing = false;
 let win;
+let store;
 
 function stopBot() {
   bot.quit();
 }
+
+async function initStore() {
+  const StoreModule = await import("electron-store");
+  store = new StoreModule.default();
+}
+
+
 async function initBot(auth,host, port,username,version) {
     try {
 
@@ -39,13 +48,19 @@ async function initBot(auth,host, port,username,version) {
 
 
 
+
     bot.once('spawn', () => {
       console.log("Bot spawned");
-
+      win.webContents.send("game-logs","Bot spawned");
     })
 
-    bot.on("end",() => {
-      console.log("Bot stopped");
+    bot.on("end",(reason) => {
+      // 45197
+      if (reason == "socketClosed") {
+        win.webContents.send("bot-error","Bot crashed! Please make sure the settings for the bot are correct." + "\n Settings: \nHost:  " + host + "\nPort: " + port + "\n" + "auth: " + auth + "\n" + "name:  " + username + "\n" + "version:  " + version);
+        return;
+      }
+      win.webContents.send("game-logs","Bot stopped");
     })
 
 
@@ -78,12 +93,7 @@ async function initBot(auth,host, port,username,version) {
     })
 
     } catch(err) {
-      await dialog.showMessageBox(win, {
-            type: 'Error',
-            authTitle: 'Bot Error',
-            message: err
-          })
-      console.log("Error starting Bot:",err);
+      console.log("Error starting Bot:");
     }
 
 }
@@ -146,11 +156,20 @@ async function createWindow() {
     stopBot();
   });
 
+  ipcMain.handle("save-settings",(_,data) => {
+    store.set("settings",data);
+  })
 
+  ipcMain.handle("show-error",(_,title,msg) => {
+    dialog.showErrorBox(title,msg);
+  });
+
+  ipcMain.handle("get-bot-settings",(_) => {
+    return store.get("settings");
+  })
 
   ipcMain.handle("start-bot",(_,host,port,version,auth,username) => {
-    win.webContents.send("game-logs","[INFORMATION]: Bot spawned");
-
+    win.webContents.send("game-logs","[INFORMATION]: Starting Bot...");
     initBot(auth,host,port,username,version);
   });
 
@@ -184,7 +203,13 @@ async function startFishing() {
     return;
   }
 
-  const waterIsNearby = lookAtWater();
+
+  if (isFishing) {
+    return;
+  }
+
+  const waterIsNearby = await lookAtWater();
+  console.log(waterIsNearby);
   if (!waterIsNearby) {
     win.webContents.send("game-logs","[INFORMATION]: Not Water nearby!");
     return;
@@ -228,7 +253,7 @@ function onCollect(player,entity) {
   },500);
 }
 
-function lookAtWater() {
+async function lookAtWater() {
   win.webContents.send("game-logs","[INFORMATION]: Looking for water to fish in!");
   const waterBlock = bot.findBlock({
     point: bot.entity.position,
@@ -239,7 +264,8 @@ function lookAtWater() {
     console.log("There is no water nearby!");
     return false;
   }
-  bot.lookAt(waterBlock.position.offset(0.5,2,0.5));
+  console.log("looking at water...");
+  await bot.lookAt(waterBlock.position.offset(0.5,2,0.5));
   return true;
 }
 
@@ -270,6 +296,7 @@ async function eat () {
 
 
 app.whenReady().then(async () => {
+  await initStore();
   await createWindow();
 });
 
