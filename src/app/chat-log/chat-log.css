@@ -6,13 +6,32 @@
   left: 10%;
   top: 70%;
   border: 1px solid white;
+  display: flex;
+  flex-direction: column;
 }
 
 .message-container{
   display: flex;
   flex-direction: column;
   padding: 10px;
-  max-height: 270px;
-  line-height: 40px;
+  flex: 1;
+  min-height: 0;
+  line-height: 30px;
   overflow-y: scroll;
+
+}
+
+.toolbar{
+  display: flex;
+  flex-direction: row;
+  gap: 5px;
+  justify-content: flex-end;
+}
+
+.err{
+  color: var(--danger-hover);
+}
+
+.info{
+  color: white;
 }

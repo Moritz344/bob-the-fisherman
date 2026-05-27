@@ -1,10 +1,15 @@
-<div class="container">
-  <div class="message-container">
-    @if (data().length == 0) {
+<div #container class="container">
+  <div class="toolbar">
+    <button (click)="generateTestLogs()">test</button>
+    <button (click)="clear()">clear</button>
+    <button (click)="scrollToBottom()">bottom</button>
+  </div>
+  <div #messages class="message-container">
+    @if (data().length == 1) {
       <span>Generate some logs by starting the bot!</span>
     }
     @for (msg of data(); track $index) {
-      <span>{{msg}}</span>
+      <span [class.err]="msg.includes('ERROR')" [class.info]="msg.includes('INFORMATION')"> {{msg}}</span>
     }
   </div>
 </div>
