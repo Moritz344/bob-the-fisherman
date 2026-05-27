@@ -8,5 +8,6 @@ contextBridge.exposeInMainWorld("electronAPI", {
   stopBot: () => ipcRenderer.invoke("stop-bot"),
   gameLogs: (callback) => ipcRenderer.on("game-logs", (_event, data) => callback(data)),
   botError: (callback) => ipcRenderer.on("bot-error", (_event, msg) => callback(msg)),
+  loot: (callback) => ipcRenderer.on("loot-log", (_event, msg) => callback(msg)),
   showError: (title,msg) => ipcRenderer.invoke("show-error",title,msg),
 });
