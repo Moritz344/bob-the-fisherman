@@ -15,11 +15,11 @@
       }
     </select>
     Port:
-    <input placeholder="Port Number" [(ngModel)]="currentSelected().port">
+    <input [class.error]="currentSelected().port == 0" [(ngModel)]="currentSelected().port">
     Username:
-    <input placeholder="Username" [(ngModel)]="currentSelected().username">
+    <input [class.error]="currentSelected().username == ''"  [(ngModel)]="currentSelected().username">
     Server:
-    <input placeholder="Host" [(ngModel)]="currentSelected().host">
+    <input spellcheck="false" [class.error]="currentSelected().host == ''"[(ngModel)]="currentSelected().host">
     <button (click)="save()" style="font-size: 20px;width: 60px">Save</button>
   </div>
 </div>
