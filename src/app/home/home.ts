@@ -5,14 +5,7 @@ import { ChatLog } from '../chat-log/chat-log';
 import { Leftbar } from '../leftbar/leftbar';
 import { SettingsService } from '../settings-service';
 
-interface currentSelectedType{
-  host: string,
-  port: number,
-  username: string,
-  version: string,
-  auth: string,
-  started: boolean
-}
+// TODO: type in chat-log commands like !start,!stop etc? 
 
 @Component({
   selector: 'app-home',
@@ -51,7 +44,8 @@ export class Home implements OnInit {
 
 
   ngOnInit(): void {
-    this.started.set(this.currentSelected().started!);
+    console.log("current state",this.currentSelected().started);
+    this.started.set(this.started());
 
   }
 
