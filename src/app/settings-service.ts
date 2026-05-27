@@ -22,6 +22,8 @@ export class SettingsService {
     started: false
   });
 
+  public caughtItems = signal<string[]>([""]);
+
 
   constructor() {
     this.initGameLogs();
@@ -72,16 +74,22 @@ export class SettingsService {
   }
 
   private async initGameLogs() {
-    (window as any).electronAPI.gameLogs((msg: string) => {
-      this.logs.update((old: string[]) => [...old,msg]);
-
+      (window as any).electronAPI.gameLogs((msg: string) => {
+        this.logs.update((old: string[]) => [...old,msg]);
       });
+
       (window as any).electronAPI.botError((msg: string) => {
-        // 45197
       (window as any).electronAPI.showError("Bot Error", msg);
               this.logs.update((old: string[]) => [...old, "[ERROR] " + msg   ]);
               this.started.set(false);
-        });
+      });
+
+      (window as any).electronAPI.loot((msg: string) => {
+        const item: any = msg.split("Caught").at(-1);
+        this.caughtItems.update( (items: string[]) => [...items,item]);
+        this.logs.update( (old: string[]) => [...old,msg]);
+        console.log(this.caughtItems());
+      });
   }
 
   public goto(route: string) {
