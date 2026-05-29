@@ -36,11 +36,11 @@ export class Home implements OnInit {
     if (this.started()) {
       let p = await this.settings.startBot(this.currentSelected());
       console.log("started:",p);
+      await this.settings.initLootItems();
     } else {
       await this.settings.stopBot();
     }
   }
-  // 45197
 
 
   ngOnInit(): void {
