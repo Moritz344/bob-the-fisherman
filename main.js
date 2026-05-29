@@ -6,6 +6,7 @@ const {
   dialog
 } = require("electron");
 
+
 // FIXME: load them if just in time to improve perfomance
 const mineflayer = require('mineflayer')
 const Movements = require('mineflayer-pathfinder').Movements;
@@ -27,7 +28,7 @@ async function initStore() {
 
 function getLogTime() {
     const date = new Date();
-    return dateString = "[" + date.getHours().toString().padStart(2,"0") + ":" + date.getMinutes().toString().padStart(2,"0") + ":" + date.getSeconds().toString().padStart(2,"0") + "] ";
+    return "[" + date.getHours().toString().padStart(2,"0") + ":" + date.getMinutes().toString().padStart(2,"0") + ":" + date.getSeconds().toString().padStart(2,"0") + "] ";
 }
 
 
@@ -74,6 +75,7 @@ async function initBot(auth,host, port,username,version) {
     bot.on('whisper', (username, message) => {
       if (username === bot.username) return
       if (message == "!start") {
+        win.webContents.send("game-logs", getLogTime() + "[INFORMATION]: Start fishing!");
         startFishing();
       } else if (message == "!stop") {
         stopFishing();
@@ -159,6 +161,8 @@ async function createWindow() {
     return mineflayer.testedVersions
   });
 
+
+
   ipcMain.handle("stop-bot",(_) => {
     stopBot();
   });
@@ -178,6 +182,19 @@ async function createWindow() {
   ipcMain.handle("start-bot",(_,host,port,version,auth,username) => {
     win.webContents.send("game-logs",getLogTime() + "[INFORMATION]: Starting Bot...");
     initBot(auth,host,port,username,version);
+  });
+
+  ipcMain.handle("init-loot",async(_) => {
+    while (!bot.entity) {
+        await new Promise(r => setTimeout(r, 500));
+    }
+    const slots = bot.inventory.slots.filter( x => x != null);
+
+    return slots.map( x => ({
+      name: x.displayName,
+      count: x.count
+    }))
+
   });
 
   if (process.env.ELECTRON_DEV) {
@@ -227,7 +244,6 @@ async function startFishing() {
     await eat();
   }
 
-  win.webContents.send("game-logs", getLogTime() + "[INFORMATION]: Start fishing!");
 
   try {
     await bot.equip(bot.registry.itemsByName.fishing_rod.id, 'hand')
@@ -261,16 +277,24 @@ function onCollect(player,entity) {
   const slots = bot.inventory.slots.filter( x => x != null);
   const itemId = entity.metadata.at(-1).itemId;
   const item = slots.find(x => x.type == itemId);
+  console.log("collected",item);
 
   if (!item) {
     return;
   };
 
-  win.webContents.send("loot-log", getLogTime() + "[INFORMATION]: Caught " + item.displayName);
+
+
+  const lootObj = {
+    name: item.displayName,
+    count: item.count,
+  }
+  win.webContents.send("loot-log", lootObj);
   setTimeout( () => {
     startFishing();
   },500);
 }
+
 
 async function lookAtWater() {
   const waterBlock = bot.findBlock({
