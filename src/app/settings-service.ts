@@ -22,11 +22,17 @@ export class SettingsService {
     started: false
   });
 
-  public caughtItems = signal<string[]>([""]);
+  public caughtItems = signal<{name: string,count: number}[]>([]);
 
 
   constructor() {
     this.initGameLogs();
+  }
+
+  async initLootItems() {
+    let items =  await (window as any).electronAPI.initLoot();
+    console.log("items",items);
+    this.caughtItems.set(items);
   }
 
   async saveSettings(data: any) {
@@ -84,10 +90,18 @@ export class SettingsService {
               this.started.set(false);
       });
 
-      (window as any).electronAPI.loot((msg: string) => {
-        const item: any = msg.split("Caught").at(-1);
-        this.caughtItems.update( (items: string[]) => [...items,item]);
-        this.logs.update( (old: string[]) => [...old,msg]);
+      (window as any).electronAPI.loot((loot: { name: string,count: number}) => {
+        console.log("loot",loot);
+        this.caughtItems.update( (items: {name: string,count: number}[]) => {
+          const exists = this.caughtItems().find( (x: any) => x.name === loot.name);
+          if (exists) {
+            return items.map((x) =>
+              x.name === loot.name ? { ...x,count: loot.count }: x,
+            );
+          }
+
+          return [...items,loot];
+        });
         console.log(this.caughtItems());
       });
   }
