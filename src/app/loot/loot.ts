@@ -1,4 +1,4 @@
-import { Component,inject } from '@angular/core';
+import { Component,inject,OnInit } from '@angular/core';
 import { Leftbar } from '../leftbar/leftbar';
 import { SettingsService } from '../settings-service';
 
@@ -8,10 +8,17 @@ import { SettingsService } from '../settings-service';
   templateUrl: './loot.html',
   styleUrl: './loot.css',
 })
-export class Loot {
+export class Loot implements OnInit {
   public settings = inject(SettingsService);
   public items = this.settings.caughtItems;
 
-  constructor() {}
+  constructor() {
+  }
+
+
+  ngOnInit() {
+    console.log(this.items());
+
+  }
 
 }

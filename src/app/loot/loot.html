@@ -4,17 +4,14 @@
      <tr>
       <span class="table-header">Item</span>
       @for (item of items(); track $index) {
-          <td> {{ item }} </td>
+            <td> {{ item.name }} </td>
       }
      </tr>
     <tr>
       <span class="table-header">Count</span>
-      <td>0</td>
-      <td>0</td>
-      <td>0</td>
-      <td>0</td>
-      <td>0</td>
-      <td>0</td>
+      @for (item of items();track $index) {
+        <td>{{ item.count }}</td>
+      }
     </tr>
   </table>
 </div>
