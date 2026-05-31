@@ -1,7 +1,7 @@
 import { Injectable,inject,signal } from '@angular/core';
 import { Subject,BehaviorSubject } from 'rxjs';
 import { Router } from '@angular/router';
-import { currentSelectedType } from './models/current.model';
+import { currentSelectedType,currentSelectedActionType } from './models/current.model';
 
 @Injectable({
   providedIn: 'root',
@@ -22,18 +22,63 @@ export class SettingsService {
     started: false
   });
 
-  public caughtItems = signal<{name: string,count: number}[]>([]);
+  public settingsActionSelected = signal<currentSelectedActionType>({
+    waterMaxDistance: 10,
+    playerToFollow: ""
+  })
+
+  public caughtItems = signal<{displayName: string,name: string,count: number,img: string}[]>([]);
 
 
   constructor() {
     this.initGameLogs();
   }
 
-  async initLootItems() {
-    let items =  await (window as any).electronAPI.initLoot();
-    console.log("items",items);
-    this.caughtItems.set(items);
+  async startFishing() {
+    return await (window as any).electronAPI.startFishing();
   }
+
+  async initLootItems() {
+    const items = await (window as any).electronAPI.initLoot();
+    const unique_items: any = [];
+    items.forEach( (x: any) => {
+      const exists = unique_items.find( (b: any) => b.name == x.name);
+      if (exists) {
+        const index = unique_items.indexOf(exists);
+        unique_items[index].count = exists.count + x.count;
+      }
+      if (!exists) {
+        unique_items.push(x);
+      }
+    })
+    this.caughtItems.set(unique_items);
+  }
+
+  async saveActionSettings(data: currentSelectedActionType) {
+    this.settingsActionSelected.set(data);
+    console.log(this.settingsActionSelected());
+    return await (window as any).electronAPI.saveBotActionSettings(data);
+  }
+
+  async getItemImage(name: string) {
+    console.log("img for",name);
+    const url = "https://atlas.playcdu.co/search/first/minecraft/" + name;
+    try {
+      const response = await fetch(url, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json"
+        }
+      })
+      return response.url;
+  
+    } catch (err) {
+      console.log("Error getting img for item",err);
+      return "";
+    }
+  
+  }
+
 
   async saveSettings(data: any) {
     this.settingsSelected.set(data);
@@ -45,6 +90,10 @@ export class SettingsService {
     return this.settingsSelected();
   }
 
+  public getActionSettings() {
+    return this.settingsActionSelected();
+  }
+
   public setStarted(value: boolean) {
     console.log("started value",value);
     this.started.set(value);
@@ -54,6 +103,10 @@ export class SettingsService {
     return this.started();
   }
 
+
+  async getLastBotActionSettings() {
+    return await (window as any).electronAPI.getActionSettings();
+  }
 
   async getLastBotSettings() {
     return await (window as any).electronAPI.getBotSettings();
@@ -90,13 +143,20 @@ export class SettingsService {
               this.started.set(false);
       });
 
-      (window as any).electronAPI.loot((loot: { name: string,count: number}) => {
+      (window as any).electronAPI.loot(async(loot: { name: string,displayName: string,count: number,img: string}) => {
         console.log("loot",loot);
-        this.caughtItems.update( (items: {name: string,count: number}[]) => {
-          const exists = this.caughtItems().find( (x: any) => x.name === loot.name);
-          if (exists) {
+          const exists = this.caughtItems().find(x => x.name === loot.name);
+          if (!exists) {
+            loot.img = await this.getItemImage(loot.name);
+            console.log("new loot get img for item! ");
+          }
+
+        this.caughtItems.update( (items: {displayName: string,name: string,count: number,img: string}[]) => {
+          const found = items.find( (x: any) => x.name == loot.name);
+          console.log("loot exists",exists);
+          if (found) {
             return items.map((x) =>
-              x.name === loot.name ? { ...x,count: loot.count }: x,
+              x.name === loot.name ? { ...x,count: x.count + 1 }: x,
             );
           }
 
