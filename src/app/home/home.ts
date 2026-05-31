@@ -18,7 +18,12 @@ export class Home implements OnInit {
 
   public started = this.settings.started;
   public currentSelected = this.settings.settingsSelected;
+  public currentSelectedActionSettings = this.settings.settingsActionSelected;
   public versionData = signal([]);
+
+  public isFishing = signal<boolean>(false);
+  public isFollowingPlayer = signal<boolean>(false);
+  public isLookingForWater = signal<boolean>(false);
 
   constructor() {
     this.initBotSettings();
@@ -28,6 +33,10 @@ export class Home implements OnInit {
     const settings = await this.settings.getLastBotSettings();
     settings.started = false;
     this.currentSelected.set(settings);
+
+    const settingsAction = await this.settings.getLastBotActionSettings();
+    console.log(settingsAction);
+    this.currentSelectedActionSettings.set(settingsAction)
   }
 
   async onStart() {
@@ -40,6 +49,31 @@ export class Home implements OnInit {
     } else {
       await this.settings.stopBot();
     }
+  }
+
+  async onStartFishing() {
+    console.log("fishing",this.isFishing());
+    if (!this.isFishing()) {
+      this.settings.startFishing();
+      console.log("fish!");
+    }
+    this.isFishing.update( (x: boolean) => !x);
+  }
+
+  async onFindWater() {
+    this.isLookingForWater.update( (x: boolean) => !x);
+    if (!this.isLookingForWater()) {
+
+    }
+
+  }
+
+  async onFollowPlayer() {
+    this.isFollowingPlayer.update( (x: boolean) => !x);
+    if (!this.isFollowingPlayer()) {
+
+    }
+
   }
 
 
