@@ -1,5 +1,5 @@
 import { Component,signal,inject,OnInit } from '@angular/core';
-import { Leftbar } from '../leftbar/leftbar';
+import { Topbar } from '../topbar/topbar';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { SettingsService } from '../settings-service';
@@ -7,7 +7,7 @@ import { currentSelectedType,currentSelectedActionType } from '../models/current
 
 @Component({
   selector: 'app-settings',
-  imports: [Leftbar,FormsModule,CommonModule],
+  imports: [Topbar,FormsModule,CommonModule],
   templateUrl: './settings.html',
   styleUrl: './settings.css',
 })
@@ -79,5 +79,6 @@ export class Settings implements OnInit{
     }
     this.saved.set(true);
     this.settings.saveSettings(this.currentSelected());
+    console.log("saved",this.currentSelected());
   }
 }
