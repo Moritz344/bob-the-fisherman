@@ -1,7 +1,7 @@
 <app-leftbar></app-leftbar>
 
 <div class="container">
-  <h1 class="h-center">Bot Settings</h1>
+  <h1 class="h-center">General Bot Settings</h1>
   <div class="settings">
     Mode:
     <select [(ngModel)]="currentSelected().auth">
@@ -20,6 +20,15 @@
     <input [class.error]="currentSelected().username == ''"  [(ngModel)]="currentSelected().username">
     Server:
     <input spellcheck="false" [class.error]="currentSelected().host == ''"[(ngModel)]="currentSelected().host">
-    <button (click)="save()" style="font-size: 20px;width: 60px">Save</button>
+    <button (click)="saveBotGeneralSettings()" style="font-size: 20px;width: 60px">Save</button>
+  </div>
+  <h1 class="h-center">Bot Action Settings</h1>
+  <div class="settings">
+  Player Follow
+  <input [(ngModel)]="currentSelectedAction().playerToFollow">
+  Water Max Distance
+  <input [(ngModel)]="currentSelectedAction().waterMaxDistance">
+
+    <button (click)="saveBotActionSettings()" style="font-size: 20px;width: 60px">Save</button>
   </div>
 </div>

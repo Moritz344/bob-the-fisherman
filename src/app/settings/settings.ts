@@ -3,7 +3,7 @@ import { Leftbar } from '../leftbar/leftbar';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { SettingsService } from '../settings-service';
-import { currentSelectedType } from '../models/current.model';
+import { currentSelectedType,currentSelectedActionType } from '../models/current.model';
 
 @Component({
   selector: 'app-settings',
@@ -14,6 +14,7 @@ import { currentSelectedType } from '../models/current.model';
 export class Settings implements OnInit{
   public settings = inject(SettingsService);
   public currentSelected = signal<currentSelectedType>({port: 3000,username: "Bob",version: "1.21.11",auth: "offline",host: "localhost"});
+  public currentSelectedAction = signal<currentSelectedActionType>({playerToFollow: "",waterMaxDistance: 10});
   public versionData = signal([]);
   public formError = signal<boolean>(false);
   public saved = signal<boolean>(false);
@@ -27,15 +28,22 @@ export class Settings implements OnInit{
   }
 
   initCurrentSelected() {
+    const generalSettings = this.settings.getSettings();
     this.currentSelected.set({
-      host: this.settings.getSettings().host,
-      auth: this.settings.getSettings().auth,
-      version: this.settings.getSettings().version,
-      username: this.settings.getSettings().username,
-      port: this.settings.getSettings().port,
+      host: generalSettings.host,
+      auth: generalSettings.auth,
+      version: generalSettings.version,
+      username: generalSettings.username,
+      port: generalSettings.port,
       started: this.settings.getStarted()
     });
-    console.log("settings got:",this.currentSelected());
+
+    const actionSettings = this.settings.getActionSettings();
+    this.currentSelectedAction.set({
+      playerToFollow: actionSettings.playerToFollow,
+      waterMaxDistance: actionSettings.waterMaxDistance,
+    });
+    console.log("settings got:",this.currentSelectedAction());
   }
 
   onChooseMode() {
@@ -50,7 +58,11 @@ export class Settings implements OnInit{
     this.versionData.set(data.reverse());
   }
 
-  save() {
+  saveBotActionSettings() {
+    this.settings.saveActionSettings(this.currentSelectedAction());
+  }
+
+  saveBotGeneralSettings() {
     if (!this.currentSelected().host || this.currentSelected().host == "") {
       this.settings.showFormsError("Server ist Pflichtfeld!");
       return;
