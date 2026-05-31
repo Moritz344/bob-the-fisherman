@@ -68,6 +68,7 @@ td {
   display: flex;
   flex-direction: column;
   padding: 10px 12px;
+  height: 30px;
   text-align: left;
 }
 
