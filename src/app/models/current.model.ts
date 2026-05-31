@@ -6,3 +6,8 @@ export interface currentSelectedType{
   auth: string,
   started?: boolean
 }
+
+export interface currentSelectedActionType{
+  playerToFollow: string,
+  waterMaxDistance: number
+}
