@@ -99,7 +99,6 @@ function stopFishing() {
 
 let isFishing = false;
 
-
 async function startFishing() {
   const items = bot.inventory.slots.filter( (x: any) => x != null);
   let hasRod = items.some( (x: any) => x.name == "fishing_rod");
@@ -122,19 +121,21 @@ async function startFishing() {
   try {
     await bot.equip(bot.registry.itemsByName.fishing_rod.id, 'hand')
   } catch (err: any) {
-    return console.log(err.message)
+    console.log(err.message)
   }
 
   isFishing = true;
   bot.on("playerCollect",onCollect);
 
-  try{
+  try {
     await bot.fish();
-  } catch (err: any) {
+  } catch (err) {
     console.log(err);
   }
   isFishing = false;
 }
+
+
 
 
 function onCollect(player: any,entity: any) {
