@@ -8,3 +8,26 @@
     <button class="start-btn" (click)="onStart()">Start</button>
   }
 </div>
+<div class="action-menu">
+  <button (click)="onStartFishing()">
+  @if (isFishing()) {
+    Stop Fishing
+  } @else {
+    Start Fishing
+  }
+  </button>
+  <button (click)="onFollowPlayer()">
+  @if (isFollowingPlayer()) {
+    Stop Following Player
+  } @else {
+    Start Following Player
+  }
+  </button>
+  <button (click)="onFindWater()">
+  @if(isLookingForWater()) {
+    Stop Looking For Water
+  } @else {
+    Start Looking For Water
+  }
+  </button>
+</div>
