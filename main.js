@@ -45,7 +45,7 @@ async function getItemImage(name) {
 
 function getLogTime() {
     const date = new Date();
-    return "[" + date.getHours().toString().padStart(2,"0") + ":" + date.getMinutes().toString().padStart(2,"0") + ":" + date.getSeconds().toString().padStart(2,"0") + "] ";
+    return date.getHours().toString().padStart(2,"0") + ":" + date.getMinutes().toString().padStart(2,"0") + ":" + date.getSeconds().toString().padStart(2,"0") ;
 }
 
 
@@ -53,7 +53,7 @@ async function initBot(auth,host, port,username,version) {
     try {
 
       console.log("auth:",auth);
-      win.webContents.send("game-logs",  getLogTime() + "[INFORMATION]: Creating Bot...");
+      win.webContents.send("game-logs",  getLogTime() + " Creating Bot...");
       bot = await mineflayer.createBot({
         host,
         port,
@@ -73,7 +73,7 @@ async function initBot(auth,host, port,username,version) {
 
     bot.once('spawn', () => {
       console.log("Bot spawned");
-      win.webContents.send("game-logs",  getLogTime() + "[INFORMATION]: Bot spawned");
+      win.webContents.send("game-logs",  getLogTime() + " Bot spawned");
     })
 
     //bot.on("kicked",(reason,loggedIn) => {
@@ -86,7 +86,7 @@ async function initBot(auth,host, port,username,version) {
       if (reason == "socketClosed") {
         win.webContents.send("bot-error","Bot crashed! Please make sure the settings for the bot are correct." + "\n Settings: \nHost:  " + host + "\nPort: " + port + "\n" + "auth: " + auth + "\n" + "name:  " + username + "\n" + "version:  " + version);
       }
-      win.webContents.send("game-logs","[INFORMATION] Bot stopped");
+      win.webContents.send("game-logs"," Bot stopped");
     })
 
 
@@ -131,7 +131,7 @@ function getInventory() {
 }
 
 function stopFollowingPlayer() {
-  win.webContents.send("game-logs","[INFORMATION] Stop following player");
+  win.webContents.send("game-logs"," Stop following player");
   bot.pathfinder.stop();
   bot.pathfinder.setGoal(null);
 }
@@ -150,12 +150,12 @@ function followPlayer(playerName) {
 
   if (!playerEntity) {
     console.log("no player");
-    win.webContents.send("game-logs","[INFORMATION]: No player to follow found!");
+    win.webContents.send("game-logs"," No player to follow found!");
     return;
   }
 
 
-  win.webContents.send("game-logs","[INFORMATION]: Following Player " + playerName);
+  win.webContents.send("game-logs"," Following Player " + playerName);
   bot.pathfinder.setMovements(new Movements(bot, mcData));
   bot.pathfinder.setGoal(new GoalFollow(playerEntity, 1),true);
 }
@@ -212,7 +212,7 @@ async function createWindow() {
   })
 
   ipcMain.handle("start-bot",(_,host,port,version,auth,username) => {
-    win.webContents.send("game-logs",getLogTime() + "[INFORMATION]: Starting Bot...");
+    win.webContents.send("game-logs",getLogTime() + " Starting Bot...");
     initBot(auth,host,port,username,version);
   });
 
@@ -244,7 +244,7 @@ async function createWindow() {
 }
 
 function stopFishing() {
-  win.webContents.send("game-logs", getLogTime() + "[INFORMATION]: Stop Fishing");
+  win.webContents.send("game-logs", getLogTime() + " Stop Fishing");
   bot.removeListener("playerCollect",onCollect);
   if (isFishing) {
     bot.activateItem();
@@ -261,20 +261,20 @@ async function startFishing() {
   const items = bot.inventory.slots.filter( (x) => x != null);
   let hasRod = items.some( (x) => x.name == "fishing_rod");
   if (!hasRod) {
-    win.webContents.send("game-logs",getLogTime() + "[INFORMATION]: No fishing rod in my inventory!");
+    win.webContents.send("game-logs",getLogTime() + " No fishing rod in my inventory!");
     console.log("I don't have an fishing rod in my inventory");
     return;
   }
 
   const waterIsNearby = lookAtWater();
   if (!waterIsNearby) {
-    win.webContents.send("game-logs", getLogTime() + "[INFORMATION]: Not Water nearby!");
+    win.webContents.send("game-logs", getLogTime() + " Not Water nearby!");
     return;
   }
 
 
   if (bot.food < 20) {
-    win.webContents.send("game-logs",getLogTime() + "[INFORMATION]: Eating");
+    win.webContents.send("game-logs",getLogTime() + " Eating");
     await eat();
   }
 
@@ -309,7 +309,7 @@ async function onCollect(player,entity) {
   const item = slots.find(x => x.type == itemId);
 
   if (!item) {
-    win.webContents.send("game-log", getLogTime() + "[INFORMATION]: I was not able to get the collected item!");
+    win.webContents.send("game-log", getLogTime() + " I was not able to get the collected item!");
   }
 
   const lootObj = {
