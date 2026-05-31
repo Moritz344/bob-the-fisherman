@@ -1,9 +1,9 @@
 import { Component } from '@angular/core';
-import { Leftbar } from '../leftbar/leftbar'; 
+import { Topbar } from '../topbar/topbar'; 
 
 @Component({
   selector: 'app-world-view',
-  imports: [Leftbar],
+  imports: [Topbar],
   templateUrl: './world-view.html',
   styleUrl: './world-view.css',
 })
