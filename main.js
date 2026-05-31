@@ -26,6 +26,23 @@ async function initStore() {
   store = new StoreModule.default();
 }
 
+async function getItemImage(name) {
+  const url = "https://atlas.playcdu.co/search/first/minecraft/" + name;
+  try {
+    const response = await fetch(url, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json"
+      }
+    })
+    return response.url;
+
+  } catch (err) {
+    console.log("Error getting img for item",err);
+  }
+
+}
+
 function getLogTime() {
     const date = new Date();
     return "[" + date.getHours().toString().padStart(2,"0") + ":" + date.getMinutes().toString().padStart(2,"0") + ":" + date.getSeconds().toString().padStart(2,"0") + "] ";
@@ -36,6 +53,7 @@ async function initBot(auth,host, port,username,version) {
     try {
 
       console.log("auth:",auth);
+      win.webContents.send("game-logs",  getLogTime() + "[INFORMATION]: Creating Bot...");
       bot = await mineflayer.createBot({
         host,
         port,
@@ -55,7 +73,7 @@ async function initBot(auth,host, port,username,version) {
 
     bot.once('spawn', () => {
       console.log("Bot spawned");
-      win.webContents.send("game-logs",  getLogTime() + "[INFORMATION] Bot spawned");
+      win.webContents.send("game-logs",  getLogTime() + "[INFORMATION]: Bot spawned");
     })
 
     //bot.on("kicked",(reason,loggedIn) => {
@@ -72,10 +90,9 @@ async function initBot(auth,host, port,username,version) {
     })
 
 
-    bot.on('whisper', (username, message) => {
+    bot.on('whisper', async(username, message) => {
       if (username === bot.username) return
       if (message == "!start") {
-        win.webContents.send("game-logs", getLogTime() + "[INFORMATION]: Start fishing!");
         startFishing();
       } else if (message == "!stop") {
         stopFishing();
@@ -171,12 +188,27 @@ async function createWindow() {
     store.set("settings",data);
   })
 
+  ipcMain.handle("save-action-settings",(_,data) => {
+    store.set("actions",data);
+  })
+
   ipcMain.handle("show-error",(_,title,msg) => {
     dialog.showErrorBox(title,msg);
   });
 
   ipcMain.handle("get-bot-settings",(_) => {
     return store.get("settings");
+  })
+
+  ipcMain.handle("get-bot-action-settings",(_) => {
+    return store.get("actions");
+  })
+
+  ipcMain.handle("start-fishing",async(_) => {
+    setTimeout( () => {
+      console.log("start fishing!");
+      startFishing();
+    },1000);
   })
 
   ipcMain.handle("start-bot",(_,host,port,version,auth,username) => {
@@ -190,10 +222,16 @@ async function createWindow() {
     }
     const slots = bot.inventory.slots.filter( x => x != null);
 
-    return slots.map( x => ({
-      name: x.displayName,
-      count: x.count
-    }))
+
+    return await Promise.all(slots.map(async (x) => {
+    let r = await getItemImage(x.name);
+    return {
+        name: x.name,
+        displayName: x.displayName,
+        count: x.count,
+        img: r ? r : null
+    }
+  }));
 
   });
 
@@ -219,6 +257,7 @@ function stopFishing() {
 
 
 async function startFishing() {
+  console.log("start fishing called");
   const items = bot.inventory.slots.filter( (x) => x != null);
   let hasRod = items.some( (x) => x.name == "fishing_rod");
   if (!hasRod) {
@@ -227,12 +266,7 @@ async function startFishing() {
     return;
   }
 
-
-  if (isFishing) {
-    return;
-  }
-
-  const waterIsNearby = await lookAtWater();
+  const waterIsNearby = lookAtWater();
   if (!waterIsNearby) {
     win.webContents.send("game-logs", getLogTime() + "[INFORMATION]: Not Water nearby!");
     return;
@@ -248,27 +282,23 @@ async function startFishing() {
   try {
     await bot.equip(bot.registry.itemsByName.fishing_rod.id, 'hand')
   } catch (err) {
-    return console.log(err.message)
+    console.log(err.message)
   }
 
   isFishing = true;
   bot.on("playerCollect",onCollect);
 
-  try{
-    await bot.fish();
-  } catch (err) {
-    console.log(err);
-  }
+  await bot.fish();
   isFishing = false;
 }
 
 
-function onCollect(player,entity) {
+async function onCollect(player,entity) {
   if (player !== bot.entity) {
     return;
   }
 
-  if (entity.type == "orb") {
+  if (entity.type == "orb" || entity.name == 'experience_orb') {
     return;
   }
 
@@ -277,18 +307,18 @@ function onCollect(player,entity) {
   const slots = bot.inventory.slots.filter( x => x != null);
   const itemId = entity.metadata.at(-1).itemId;
   const item = slots.find(x => x.type == itemId);
-  console.log("collected",item);
 
   if (!item) {
-    return;
-  };
-
-
+    win.webContents.send("game-log", getLogTime() + "[INFORMATION]: I was not able to get the collected item!");
+  }
 
   const lootObj = {
-    name: item.displayName,
+    name: item.name,
+    displayName: item.displayName,
     count: item.count,
+    img: null
   }
+  console.log(lootObj);
   win.webContents.send("loot-log", lootObj);
   setTimeout( () => {
     startFishing();
