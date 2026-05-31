@@ -3,13 +3,14 @@ import { Subject,BehaviorSubject } from 'rxjs';
 import { Router } from '@angular/router';
 import { currentSelectedType,currentSelectedActionType } from './models/current.model';
 
+// TODO: track currentMode across routes
+
 @Injectable({
   providedIn: 'root',
 })
 export class SettingsService {
   router = inject(Router);
-  public logs = signal<string[]>([""]);
-  public errorLogs = signal<string[]>([""]);
+  public logs = signal<{msg: string,time: string,type: string}[]>([]);
   public started = signal<boolean>(false);
   public currentTab = signal<string>("");
 
@@ -134,13 +135,16 @@ export class SettingsService {
 
   private async initGameLogs() {
       (window as any).electronAPI.gameLogs((msg: string) => {
-        this.logs.update((old: string[]) => [...old,msg]);
+        const match = msg.match(/^(\d{2}:\d{2}:\d{2})\s+(.*)/);
+        const time = match![1];
+        const message = match![2];
+        this.logs.update((old: {msg: string,time: string,type:string}[]) => [...old,{msg:message,time:time,type: "info"}]);
       });
 
       (window as any).electronAPI.botError((msg: string) => {
-      (window as any).electronAPI.showError("Bot Error", msg);
-              this.logs.update((old: string[]) => [...old, "[ERROR] " + msg   ]);
+              this.logs.update((old: {msg: string,time: string,type:string}[]) => [...old, {msg: msg,time: "",type: "error"}]);
               this.started.set(false);
+      (window as any).electronAPI.showError("Bot Error", msg);
       });
 
       (window as any).electronAPI.loot(async(loot: { name: string,displayName: string,count: number,img: string}) => {
