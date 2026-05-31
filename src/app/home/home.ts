@@ -2,14 +2,14 @@ import { Component,OnInit,signal,inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ChatLog } from '../chat-log/chat-log';
-import { Leftbar } from '../leftbar/leftbar';
+import { Topbar } from '../topbar/topbar';
 import { SettingsService } from '../settings-service';
 
 // TODO: type in chat-log commands like !start,!stop etc? 
 
 @Component({
   selector: 'app-home',
-  imports: [ChatLog,Leftbar,CommonModule,FormsModule],
+  imports: [ChatLog,Topbar,CommonModule,FormsModule],
   templateUrl: './home.html',
   styleUrl: './home.css',
 })
@@ -24,6 +24,8 @@ export class Home implements OnInit {
   public isFishing = signal<boolean>(false);
   public isFollowingPlayer = signal<boolean>(false);
   public isLookingForWater = signal<boolean>(false);
+
+  public currentMode = signal<string>("");
 
   constructor() {
     this.initBotSettings();
@@ -52,7 +54,6 @@ export class Home implements OnInit {
   }
 
   async onStartFishing() {
-    console.log("fishing",this.isFishing());
     if (!this.isFishing()) {
       this.settings.startFishing();
       console.log("fish!");
@@ -64,6 +65,24 @@ export class Home implements OnInit {
     this.isLookingForWater.update( (x: boolean) => !x);
     if (!this.isLookingForWater()) {
 
+    }
+
+  }
+
+  onSelectMode(mode: string) {
+    this.currentMode.set(mode);
+    console.log(this.currentMode());
+
+    switch (this.currentMode()) {
+      case "fishing":
+        this.onStartFishing()
+        break;
+      case "find_water":
+        break;
+      case "follow_player":
+        break;
+      default:
+        break;
     }
 
   }
