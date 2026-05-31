@@ -13,23 +13,22 @@ export class ChatLog implements OnInit{
   public data = this.settings.logs;
   @ViewChild("container") container!: ElementRef;
   @ViewChild("messages") messages!: ElementRef;
-  @Input() top = "70%";
+
+  public timeMsg: string = "";
+  public msg: string = "";
 
   constructor() {
-    afterNextRender( () => {
-      this.container.nativeElement.style.top = this.top
-    });
-
     effect(() => {
       this.data();
       afterNextRender(() => this.scrollToBottom(), { injector: this.injector });
     });
 
+    console.log("data",this.data());
 
   }
 
   clear() {
-    this.data.set([""]);
+    this.data.set([]);
   }
 
   scrollToBottom() {
@@ -39,8 +38,8 @@ export class ChatLog implements OnInit{
    }
   }
   generateTestLogs() {
-    for (let i=0;i<30;i++) {
-      this.data.update( (x: any) => [...x, i])
+    for (let i=0;i<10;i++) {
+      this.data.update( (x: any) => [...x, {msg: "test" + i,time: "",type: "info"}])
     }
   }
 

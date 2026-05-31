@@ -1,20 +1,23 @@
-.container{
-  position: absolute;
-  bottom: 0px;
-  background-color: #303030;
-  right: 0;
-  left: 10%;
-  top: 70%;
-  border: 1px solid white;
+:host {
   display: flex;
   flex-direction: column;
+  height: 100%;
+  min-height: 0;
+}
+
+.container{
+  background-color: #303030;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  border-radius: 5px;
 }
 
 .message-container{
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: repeat(2,90px);
   padding: 10px;
-  flex: 1;
   min-height: 0;
   line-height: 30px;
   overflow-y: scroll;
@@ -26,6 +29,7 @@
   flex-direction: row;
   gap: 5px;
   justify-content: flex-end;
+  padding: 5px;
 }
 
 .err{
@@ -34,4 +38,13 @@
 
 .info{
   color: white;
+}
+
+.error{
+  color: var(--danger);
+  background-color: transparent;
+}
+
+.msg{
+  width: 1000px;
 }
