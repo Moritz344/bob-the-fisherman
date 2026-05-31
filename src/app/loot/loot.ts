@@ -1,11 +1,11 @@
 import { Component,inject,OnInit,signal } from '@angular/core';
-import { Leftbar } from '../leftbar/leftbar';
+import { Topbar } from '../topbar/topbar';
 import { SettingsService } from '../settings-service';
-import {NgOptimizedImage} from '@angular/common';
+import { NgOptimizedImage } from '@angular/common';
 
 @Component({
   selector: 'app-loot',
-  imports: [Leftbar,NgOptimizedImage],
+  imports: [Topbar,NgOptimizedImage],
   templateUrl: './loot.html',
   styleUrl: './loot.css',
 })

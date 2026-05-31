@@ -1,4 +1,4 @@
-<app-leftbar></app-leftbar>
+<app-topbar></app-topbar>
 
 <div class="container">
   <table>
@@ -7,16 +7,16 @@
       @for (item of items(); track $index) {
             <td style="display: flex;flex-direction: row;justify-content: left">
             @if (item.img) {
-              <img [ngSrc]="item.img" width="20" height="20" style="float: left;margin-right: 5px">
+              <img animate.enter="enter-animation" [ngSrc]="item.img" width="30" height="30" style="float: left;margin-right: 5px">
             }
-             <span >{{ item.displayName }}</span>
+             <span style="font-size: 20px" >{{ item.displayName }}</span>
             </td>
       }
      </tr>
     <tr>
       <th class="table-header">Count</th>
       @for (item of items();track $index) {
-        <td>{{ item.count }}</td>
+        <td style="font-size: 20px">{{ item.count }}</td>
       }
     </tr>
   </table>
