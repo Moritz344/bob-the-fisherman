@@ -23,36 +23,7 @@
   </div>
 </div>
 
-<div class="bot-mode-container">
-  <span style="color: var(--text-muted)">Tasks</span>
-  <div class="mode" [class.selected]="currentMode() == 'fishing'" [class.unselected]="currentMode() != 'fishing'">
-    <div (click)="onSelectMode('fishing')" class="items">
-      <span>Auto Fishing </span>
-      <span>Automatically fish</span>
-    </div>
-  </div>
-  <div
-    (click)="onSelectMode('follow_player')"
-    [class.selected]="currentMode() == 'follow_player'"
-    [class.unselected]="currentMode() != 'follow_player'"
-    class="mode">
-    <div class="items">
-      <span>Follow Player</span>
-      <span>Bot Follows {{ currentSelectedActionSettings().playerToFollow }}</span>
-    </div>
-  </div>
-  <div
-    (click)="onSelectMode('find_water')"
-    [class.selected]="currentMode() == 'find_water'"
-    [class.unselected]="currentMode() != 'find_water'"
-    class="mode">
-    <div class="items">
-      <span>Find Water </span>
-      <span>Bot Looks for Water with max distance of {{ currentSelectedActionSettings().waterMaxDistance }}</span>
-    </div>
-  </div>
-</div>
-
+<span style="color: var(--text-muted);margin-bottom: -10px;margin-top: 10px">Logs</span>
 <div class="log-container">
-  <app-chat-log></app-chat-log>
+  <app-chat-log (command)="onCommand($event)"></app-chat-log>
 </div>

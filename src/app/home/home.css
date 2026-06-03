@@ -75,7 +75,7 @@ app-chat-log {
 }
 
 .selected{
-  background-color: var(--primary-hover);
+  background-color: var(--hover-color);
 }
 
 .items{
