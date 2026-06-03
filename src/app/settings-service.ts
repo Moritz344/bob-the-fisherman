@@ -13,6 +13,7 @@ export class SettingsService {
   public logs = signal<{msg: string,time: string,type: string}[]>([]);
   public started = signal<boolean>(false);
   public currentTab = signal<string>("");
+  public currentTask = signal<string>("");
 
   public settingsSelected = signal<currentSelectedType>({
     username: "fishermanbob69",
@@ -35,8 +36,28 @@ export class SettingsService {
     this.initGameLogs();
   }
 
+  getLogTime() {
+    const date = new Date();
+    return date.getHours().toString().padStart(2,"0") + ":" + date.getMinutes().toString().padStart(2,"0") + ":" + date.getSeconds().toString().padStart(2,"0") ;
+}
   async startFishing() {
     return await (window as any).electronAPI.startFishing();
+  }
+
+  async stopFishing() {
+    return await (window as any).electronAPI.stopFishing();
+  }
+
+  async followPlayer(name: string) {
+    return await (window as any).electronAPI.followPlayer(name);
+  }
+
+  async stopFollowingPlayer() {
+    return await (window as any).electronAPI.stopFollowing();
+  }
+
+  async findWater() {
+    return await (window as any).electronAPI.findWater();
   }
 
   async initLootItems() {
@@ -72,12 +93,12 @@ export class SettingsService {
         }
       })
       return response.url;
-  
+
     } catch (err) {
       console.log("Error getting img for item",err);
       return "";
     }
-  
+
   }
 
 
@@ -135,9 +156,16 @@ export class SettingsService {
 
   private async initGameLogs() {
       (window as any).electronAPI.gameLogs((msg: string) => {
+        console.log("log",msg);
         const match = msg.match(/^(\d{2}:\d{2}:\d{2})\s+(.*)/);
-        const time = match![1];
-        const message = match![2];
+        let time = match![1];
+        if (!time) {
+          time = "";
+        }
+        let message = match![2];
+        if (!message) {
+          message = "";
+        }
         this.logs.update((old: {msg: string,time: string,type:string}[]) => [...old,{msg:message,time:time,type: "info"}]);
       });
 
@@ -148,17 +176,14 @@ export class SettingsService {
       });
 
       (window as any).electronAPI.loot(async(loot: { name: string,displayName: string,count: number,img: string}) => {
-        console.log("loot",loot);
+        this.logs.update((old: {msg: string,time: string,type:string}[]) => [...old,{msg:"Caught " + loot.displayName + "!",time:this.getLogTime(),type: "info"}]);
           const exists = this.caughtItems().find(x => x.name === loot.name);
           if (!exists) {
             loot.img = await this.getItemImage(loot.name);
-            console.log("new loot get img for item! ");
           }
 
         this.caughtItems.update( (items: {displayName: string,name: string,count: number,img: string}[]) => {
-          const found = items.find( (x: any) => x.name == loot.name);
-          console.log("loot exists",exists);
-          if (found) {
+          if (exists) {
             return items.map((x) =>
               x.name === loot.name ? { ...x,count: x.count + 1 }: x,
             );
