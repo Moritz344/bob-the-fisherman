@@ -6,7 +6,7 @@
   </div>
   <div #messages class="message-container">
     @if (data().length == 0) {
-      <span class="msg">Generate some logs by starting the bot!</span>
+      <!--<span class="msg">Generate some logs by starting the bot!</span>-->
     }
     @for (msg of data(); track $index) {
       <span animate.enter="chat-enter-animation" style="color: var(--text-muted);width: 100%">  {{ msg.time }} </span>
@@ -14,3 +14,4 @@
     }
   </div>
 </div>
+<input #inputBox class="input-box" [(ngModel)]="commandInput" (keydown.code.enter)="onCommand()">
