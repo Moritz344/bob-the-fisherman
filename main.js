@@ -71,10 +71,17 @@ async function initBot(auth,host, port,username,version) {
 
 
 
-    bot.once('spawn', () => {
+    bot.once('spawn', async() => {
       console.log("Bot spawned");
       win.webContents.send("game-logs",  getLogTime() + " Bot spawned");
-    })
+      await checkForFishingRoadInInventory();
+      //await pathFindToWater();
+      // FIXME: this works because the world loads in this time i think needs better fix
+      setTimeout( async() => {
+        await startFishing();
+      },3000);
+
+    });
 
     //bot.on("kicked",(reason,loggedIn) => {
     //  console.log(reason,loggedIn);
@@ -102,14 +109,18 @@ async function initBot(auth,host, port,username,version) {
         },500);
       } else if (message.includes("!follow")) {
         const msg = message.split(" ");
-        if (msg.length >= 2) {
+        if (msg && msg.length >= 2) {
           const playerToFollow = msg[1].trim("");
           followPlayer(playerToFollow);
         }
       } else if (message == "!stop follow") {
         stopFollowingPlayer();
       } else if (message == "!find water") {
-        lookAtWater();
+        const waterBlock = await checkForWaterNearby();
+        if (waterBlock) {
+          await bot.lookAt(waterBlock.position.offset(0.5, 0.5, 0.5), true)
+        }
+
       } else if (message == "!show inventory") {
         const items = getInventory();
         items.forEach( (x) => {
@@ -131,12 +142,21 @@ function getInventory() {
 }
 
 function stopFollowingPlayer() {
-  win.webContents.send("game-logs"," Stop following player");
+  win.webContents.send("game-logs", getLogTime() + " Stop following player");
   bot.pathfinder.stop();
   bot.pathfinder.setGoal(null);
 }
 
 function followPlayer(playerName) {
+  if (!bot) {
+    console.log("no bot");
+    return;
+  }
+
+  if (!playerName) {
+    console.log("no player specified");
+    return;
+  }
 
   const pathfinder = require('mineflayer-pathfinder').pathfinder;
   bot.loadPlugin(pathfinder);
@@ -179,6 +199,13 @@ async function createWindow() {
   });
 
 
+  ipcMain.handle("follow-player",async(_,name) => {
+    await followPlayer(name);
+  });
+
+  ipcMain.handle("find-water",async(_) => {
+    await lookAtWater();
+  });
 
   ipcMain.handle("stop-bot",(_) => {
     stopBot();
@@ -204,6 +231,16 @@ async function createWindow() {
     return store.get("actions");
   })
 
+  ipcMain.handle("stop-fishing",async(_) => {
+      console.log("stop fishing!");
+      await stopFishing();
+  })
+
+  ipcMain.handle("stop-following",async(_) => {
+    console.log("stop following player!");
+    await stopFollowingPlayer();
+  })
+
   ipcMain.handle("start-fishing",async(_) => {
     setTimeout( () => {
       console.log("start fishing!");
@@ -211,9 +248,9 @@ async function createWindow() {
     },1000);
   })
 
-  ipcMain.handle("start-bot",(_,host,port,version,auth,username) => {
+  ipcMain.handle("start-bot",async(_,host,port,version,auth,username) => {
     win.webContents.send("game-logs",getLogTime() + " Starting Bot...");
-    initBot(auth,host,port,username,version);
+    await initBot(auth,host,port,username,version);
   });
 
   ipcMain.handle("init-loot",async(_) => {
@@ -254,23 +291,29 @@ function stopFishing() {
 }
 
 
+function checkForFishingRoadInInventory() {
+  if (!bot) { return; }
+
+  const items = bot.inventory.slots.filter( (x) => x != null);
+  const hasRod = items.some( (x) => x.name == "fishing_rod");
+  if (!hasRod) {
+    win.webContents.send("game-logs",getLogTime() + " No fishing rod in my inventory!");
+    console.log("I don't have an fishing rod in my inventory");
+  }
+}
 
 
 async function startFishing() {
   console.log("start fishing called");
-  const items = bot.inventory.slots.filter( (x) => x != null);
-  let hasRod = items.some( (x) => x.name == "fishing_rod");
-  if (!hasRod) {
-    win.webContents.send("game-logs",getLogTime() + " No fishing rod in my inventory!");
-    console.log("I don't have an fishing rod in my inventory");
-    return;
-  }
 
-  const waterIsNearby = lookAtWater();
-  if (!waterIsNearby) {
-    win.webContents.send("game-logs", getLogTime() + " Not Water nearby!");
-    return;
-  }
+    const waterBlock = await checkForWaterNearby();
+    if (waterBlock) {
+      console.log("look at water!");
+      await bot.lookAt(waterBlock.position.offset(0.5, 2, 0.5), true)
+    } else {
+      console.log("no water!");
+      return;
+    }
 
 
   if (bot.food < 20) {
@@ -288,7 +331,12 @@ async function startFishing() {
   isFishing = true;
   bot.on("playerCollect",onCollect);
 
-  await bot.fish();
+  try {
+    await bot.fish();
+    console.log("fish!");
+  } catch (err) {
+    console.log(err);
+  }
   isFishing = false;
 }
 
@@ -310,6 +358,7 @@ async function onCollect(player,entity) {
 
   if (!item) {
     win.webContents.send("game-log", getLogTime() + " I was not able to get the collected item!");
+    return;
   }
 
   const lootObj = {
@@ -318,27 +367,83 @@ async function onCollect(player,entity) {
     count: item.count,
     img: null
   }
-  console.log(lootObj);
   win.webContents.send("loot-log", lootObj);
   setTimeout( () => {
     startFishing();
   },500);
 }
 
+async function checkForWaterNearby() {
+  try {
+    const waterBlock = await bot.findBlock({
+      point: bot.entity.position,
+      matching: (block) => block.name === 'water',
+      maxDistance: 10
+    })
+    if (!waterBlock) {
+      return false;
+    }
+    return waterBlock;
 
-async function lookAtWater() {
-  const waterBlock = bot.findBlock({
-    point: bot.entity.position,
-    matching: (block) => block.name === 'water',
-    maxDistance: 10
-  });
-  if (!waterBlock) {
-    console.log("There is no water nearby!");
-    return false;
+  } catch (err) {
+    console.log(err);
   }
-  await bot.lookAt(waterBlock.position.offset(0.5,2,0.5));
-  return true;
 }
+
+async function pathFindToWater() {
+  console.log("look at water called");
+  if (!bot) return
+
+  const waterBlock = await checkForWaterNearby();
+  if (!waterBlock) {
+    console.log("no water leaving");
+    return;
+  }
+
+  const pos = waterBlock.position
+  const dirs = [[1,0,0],[-1,0,0],[0,0,1],[0,0,-1]]
+  let spot = null
+  for (const [dx,,dz] of dirs) {
+    const floorBlock = bot.blockAt(pos.offset(dx, -1, dz))
+    if (floorBlock && floorBlock.boundingBox === 'block') {
+      const headBlock = bot.blockAt(pos.offset(dx, 0, dz))
+      if (!headBlock || headBlock.boundingBox !== 'block') {
+        spot = pos.offset(dx, 0, dz)
+        break
+      }
+    }
+  }
+
+  if (!spot) {
+    console.log("No safe spot next to water")
+    return
+  }
+
+  const { pathfinder } = require('mineflayer-pathfinder')
+  const Movements = require('mineflayer-pathfinder').Movements
+  const { GoalBlock } = require('mineflayer-pathfinder').goals
+  const mcData = require('minecraft-data')(bot.version)
+
+  bot.loadPlugin(pathfinder)
+
+  const movements = new Movements(bot, mcData)
+  movements.canDig = false
+
+  bot.pathfinder.setMovements(movements)
+  bot.pathfinder.setGoal(new GoalBlock(spot.x, spot.y, spot.z))
+
+  await new Promise(resolve => {
+    bot.once('goal_reached', resolve)
+    setTimeout(resolve, 8000)
+  })
+
+  //await bot.pathfinder.stop();
+  //await bot.pathfinder.setGoal(null);
+  await bot.lookAt(waterBlock.position.offset(0.5, 2, 0.5))
+}
+
+
+
 
 async function eat () {
   stopFishing()
