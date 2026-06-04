@@ -25,8 +25,9 @@ const mcData = require('minecraft-data')(bot.version);
 
 bot.loadPlugin(pathfinder);
 
-bot.once('spawn', () => {
+bot.once('spawn', async() => {
   console.log("Bot spawned");
+  await startFishing();
 
 })
 
@@ -107,7 +108,8 @@ async function startFishing() {
     return;
   }
 
-  const waterIsNearby = lookAtWater();
+  const waterIsNearby = await lookAtWater();
+  console.log("nearby water?",waterIsNearby);
   if (!waterIsNearby) {
     return;
   }
@@ -149,19 +151,45 @@ function onCollect(player: any,entity: any) {
   },500);
 }
 
-function lookAtWater() {
+async function lookAtWater () {
+  const { GoalNear } = require('mineflayer-pathfinder/lib/goals')
+
   const waterBlock = bot.findBlock({
     point: bot.entity.position,
     matching: (block: any) => block.name === 'water',
-    maxDistance: 10
-  });
-  if (!waterBlock) {
-    console.log("There is no water nearby!");
-    return false;
-  }
-  bot.lookAt(waterBlock.position.offset(0.5,2,0.5));
-  return true;
+    maxDistance: 50
+  })
+  if (!waterBlock) return
+
+  const waterPos = waterBlock.position
+  const movements = new Movements(bot, mcData)
+  movements.canDig = false
+
+  const goal = new GoalNear(waterPos.x, waterPos.y, waterPos.z, 2)
+  const path = await bot.pathfinder.getPathTo(movements, goal, 1000)
+  if (path.status !== 'success') return
+
+  bot.pathfinder.setMovements(movements)
+  bot.pathfinder.setGoal(goal)
+
+  // wait until the bot actually arrives at the water
+  await new Promise<void>(resolve => {
+    const onGoal = () => {
+      bot.removeListener('goal_reached', onGoal)
+      resolve()
+    }
+    bot.on('goal_reached', onGoal)
+    // safety timeout — if stuck, move on anyway
+    setTimeout(() => {
+      bot.removeListener('goal_reached', onGoal)
+      resolve()
+    }, 8000)
+  })
+
+  return true
 }
+
+
 
 async function eat () {
   stopFishing()
