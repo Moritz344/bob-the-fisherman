@@ -1,0 +1,9 @@
+@if (botError().error) {
+<div (click)="onClose()" class="screen"></div>
+<div class="container">
+  <button style="position: absolute;top: 10px;right: 10px" (click)="onClose()"><img src="close.svg"></button>
+  <h1 class="h-center">{{ botError().title }}</h1>
+  <p class="m">{{ botError().msg }}</p>
+</div>
+
+}
