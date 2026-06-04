@@ -54,7 +54,7 @@ async function initBot(auth,host, port,username,version) {
 
       console.log("auth:",auth);
       win.webContents.send("game-logs",  getLogTime() + " Creating Bot...");
-      bot = await mineflayer.createBot({
+      bot = mineflayer.createBot({
         host,
         port,
         auth,
@@ -74,7 +74,7 @@ async function initBot(auth,host, port,username,version) {
     bot.once('spawn', async() => {
       console.log("Bot spawned");
       win.webContents.send("game-logs",  getLogTime() + " Bot spawned");
-      await checkForFishingRoadInInventory();
+      checkForFishingRoadInInventory();
       //await pathFindToWater();
       // FIXME: this works because the world loads in this time i think needs better fix
       setTimeout( async() => {
@@ -84,7 +84,6 @@ async function initBot(auth,host, port,username,version) {
     });
 
     //bot.on("kicked",(reason,loggedIn) => {
-    //  console.log(reason,loggedIn);
     //  win.webContents.send("bot-error","Bot Kicked!");
     //});
 
@@ -93,7 +92,6 @@ async function initBot(auth,host, port,username,version) {
       if (reason == "socketClosed") {
         win.webContents.send("bot-error","Bot crashed! Please make sure the settings for the bot are correct." + "\n Settings: \nHost:  " + host + "\nPort: " + port + "\n" + "auth: " + auth + "\n" + "name:  " + username + "\n" + "version:  " + version);
       }
-      win.webContents.send("game-logs"," Bot stopped");
     })
 
 
@@ -169,7 +167,6 @@ function followPlayer(playerName) {
   const playerEntity = bot.nearestEntity( (e) => e.type == "player" && e.username == playerName);
 
   if (!playerEntity) {
-    console.log("no player");
     win.webContents.send("game-logs"," No player to follow found!");
     return;
   }
@@ -200,8 +197,9 @@ async function createWindow() {
 
 
   ipcMain.handle("follow-player",async(_,name) => {
-    await followPlayer(name);
+    followPlayer(name);
   });
+
 
   ipcMain.handle("find-water",async(_) => {
     await lookAtWater();
@@ -241,7 +239,7 @@ async function createWindow() {
     await stopFollowingPlayer();
   })
 
-  ipcMain.handle("start-fishing",async(_) => {
+  ipcMain.handle("start-fishing",(_) => {
     setTimeout( () => {
       console.log("start fishing!");
       startFishing();
@@ -304,14 +302,15 @@ function checkForFishingRoadInInventory() {
 
 
 async function startFishing() {
-  console.log("start fishing called");
+    if (isFishing) {
+      return;
+    }
 
     const waterBlock = await checkForWaterNearby();
     if (waterBlock) {
-      console.log("look at water!");
       await bot.lookAt(waterBlock.position.offset(0.5, 2, 0.5), true)
     } else {
-      console.log("no water!");
+      win.webContents.send("game-logs",getLogTime() + " I found no water to fish in!");
       return;
     }
 
