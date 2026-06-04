@@ -1,4 +1,4 @@
-# Minecraft Bot For AFK Fishing
+# Bob The Fisherman
 minecraft bot for afk fishing
 
 <img width="1450" height="941" alt="screenshot-2026-06-04_17-12-28" src="https://github.com/user-attachments/assets/54ae3903-c12a-4361-b3c8-5db5fa87e4c0" />
