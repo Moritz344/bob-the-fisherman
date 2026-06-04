@@ -1,17 +1,24 @@
+
+
 <div #container class="container">
   <div class="toolbar">
-    <button (click)="generateTestLogs()">test</button>
-    <button (click)="clear()"><img src="clear.svg"></button>
-    <button (click)="scrollToBottom()"><img src="bottom.svg"></button>
+    <!--<button (click)="generateTestLogs()">test</button>-->
+    <button title="Clear logs" (click)="clear()"><img src="clear.svg"></button>
+    <button title="Scroll to the Bottom" (click)="scrollToBottom()"><img src="bottom.svg"></button>
   </div>
-  <div #messages class="message-container">
     @if (data().length == 0) {
-      <!--<span class="msg">Generate some logs by starting the bot!</span>-->
+      <div class="nothing">
+        <img src="404.png">
+        <span>Generate some logs by starting the bot! <br>Use the settings to configure your Bot!</span>
+      </div>
     }
+  <div #messages  class="message-container">
     @for (msg of data(); track $index) {
       <span animate.enter="chat-enter-animation" style="color: var(--text-muted);width: 100%">  {{ msg.time }} </span>
       <span animate.enter="chat-enter-animation" class="msg" [class.error]="msg.type == 'error'"> {{msg.msg}}</span>
     }
   </div>
+<input placeholder="Type a command!" #inputBox class="input-box" [(ngModel)]="commandInput" (keydown.code.enter)="onCommand()">
 </div>
-<input #inputBox class="input-box" [(ngModel)]="commandInput" (keydown.code.enter)="onCommand()">
+
+

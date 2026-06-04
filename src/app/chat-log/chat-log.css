@@ -49,10 +49,25 @@
 }
 
 .input-box{
-  border: 1px solid white;
+  position: absolute;
+  bottom: 0px;
+  right: 8px;
+  left: 10px;
+  background-color: var(--surface-color);
+  margin-bottom: 10px;
   outline: none;
 }
 
 .msg{
   width: 90vw;
 }
+
+.nothing {
+  display: flex;
+  margin-top: 300px;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+
