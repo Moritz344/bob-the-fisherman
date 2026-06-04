@@ -13,7 +13,8 @@ export class SettingsService {
   public logs = signal<{msg: string,time: string,type: string}[]>([]);
   public started = signal<boolean>(false);
   public currentTab = signal<string>("");
-  public currentTask = signal<string>("");
+  public currentTask = signal<string>("Nothing");
+  public error = signal<{title: string,msg: string,error: boolean}>({title: "",msg: "",error: false});
 
   public settingsSelected = signal<currentSelectedType>({
     username: "fishermanbob69",
@@ -83,7 +84,6 @@ export class SettingsService {
   }
 
   async getItemImage(name: string) {
-    console.log("img for",name);
     const url = "https://atlas.playcdu.co/search/first/minecraft/" + name;
     try {
       const response = await fetch(url, {
@@ -170,13 +170,17 @@ export class SettingsService {
       });
 
       (window as any).electronAPI.botError((msg: string) => {
-              this.logs.update((old: {msg: string,time: string,type:string}[]) => [...old, {msg: msg,time: "",type: "error"}]);
-              this.started.set(false);
-      (window as any).electronAPI.showError("Bot Error", msg);
+        //this.error.set({title: "Bot Crashed",msg: msg,error: true});
+        //console.log(this.error());
+        this.logs.update((old: {msg: string,time: string,type:string}[]) => [...old, {msg: msg,time: "",type: "error"}]);
+        this.currentTask.set("Nothing");
+        this.started.set(false);
+        //(window as any).electronAPI.showError("Bot Error", msg);
       });
 
+
       (window as any).electronAPI.loot(async(loot: { name: string,displayName: string,count: number,img: string}) => {
-        this.logs.update((old: {msg: string,time: string,type:string}[]) => [...old,{msg:"Caught " + loot.displayName + "!",time:this.getLogTime(),type: "info"}]);
+          this.logs.update((old: {msg: string,time: string,type:string}[]) => [...old,{msg:"Caught " + loot.displayName + "!",time:this.getLogTime(),type: "info"}]);
           const exists = this.caughtItems().find(x => x.name === loot.name);
           if (!exists) {
             loot.img = await this.getItemImage(loot.name);
@@ -191,7 +195,6 @@ export class SettingsService {
 
           return [...items,loot];
         });
-        console.log(this.caughtItems());
       });
   }
 
