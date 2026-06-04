@@ -138,12 +138,12 @@ td:hover{
 
 ::-webkit-scrollbar-thumb {
   height: 100px;
-  background-color: var(--primary);
+  background-color: var(--ghost);
   border-radius: 5px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background-color: var(--primary-hover);
+  background-color: var(--ghost-hover);
   height: 100px;
   border-radius: 5px;
 }
@@ -179,6 +179,7 @@ body {
 }
 
 button{
+  outline: none;
   border: none;
   background-color: #38383B;
   border-radius: 5px;
