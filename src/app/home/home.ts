@@ -4,12 +4,13 @@ import { FormsModule } from '@angular/forms';
 import { ChatLog } from '../chat-log/chat-log';
 import { Topbar } from '../topbar/topbar';
 import { SettingsService } from '../settings-service';
+import { Alert } from '../alert/alert';
 
 // TODO: type in chat-log commands like !start,!stop etc? 
 
 @Component({
   selector: 'app-home',
-  imports: [ChatLog,Topbar,CommonModule,FormsModule],
+  imports: [ChatLog,Topbar,CommonModule,FormsModule,Alert],
   templateUrl: './home.html',
   styleUrl: './home.css',
 })
@@ -37,7 +38,6 @@ export class Home implements OnInit {
     this.currentSelected.set(settings);
 
     const settingsAction = await this.settings.getLastBotActionSettings();
-    console.log(settingsAction);
     this.currentSelectedActionSettings.set(settingsAction)
   }
 
@@ -45,8 +45,9 @@ export class Home implements OnInit {
     console.log(this.currentSelected());
     this.started.update( (x: boolean) => !x );
     if (this.started()) {
-      let p = await this.settings.startBot(this.currentSelected());
-      console.log("started:",p);
+      await this.settings.startBot(this.currentSelected());
+      this.isFishing.set(true);
+      this.currentBotTask.set("Fishing");
       await this.settings.initLootItems();
     } else {
       await this.settings.stopBot();
@@ -61,31 +62,33 @@ export class Home implements OnInit {
       this.onStopFollowingPlayer();
       this.onStopFishing();
     } else if (command.includes("follow")) {
-      let playerToFollow = command.split(" ")[1];
-      console.log(playerToFollow);
-      if (playerToFollow == '' || !playerToFollow) {
-        playerToFollow = this.currentSelectedActionSettings().playerToFollow;
+      const playerToFollow = command.split(" ")[1];
+      if (playerToFollow) {
+        this.onFollowPlayer(playerToFollow);
       }
-      this.onFollowPlayer(playerToFollow);
     }
   }
 
-  onStopFishing() {
-    if (!this.isFishing()) {
-      return;
-    }
+  async onStopFishing() {
     this.isFollowingPlayer.set(false);
     this.isLookingForWater.set(false);
 
-    this.settings.stopFishing();
+    this.currentBotTask.set("Nothing");
+
+    await this.settings.stopFishing();
     this.isFishing.set(false);
   }
 
   async onStartFishing() {
+    if (this.isFishing()) {
+      return;
+    }
+
     this.isFollowingPlayer.set(false);
     this.isLookingForWater.set(false);
 
     await this.settings.startFishing();
+    this.currentBotTask.set("Fishing");
 
     this.isFishing.set(true);
   }
@@ -99,17 +102,20 @@ export class Home implements OnInit {
   }
 
   onStopFollowingPlayer() {
-    if (!this.isFollowingPlayer()) {
-      return;
-    }
     this.isLookingForWater.set(false);
     this.isFishing.set(false);
+
+    this.currentBotTask.set("Nothing");
 
     this.settings.stopFollowingPlayer();
     this.isFollowingPlayer.set(false);
   }
 
   async onFollowPlayer(name: string) {
+    if (this.isFollowingPlayer()) {
+      return;
+    }
+    this.currentBotTask.set("Following");
     this.isLookingForWater.set(false);
     this.isFishing.set(false);
 
@@ -120,7 +126,6 @@ export class Home implements OnInit {
 
   }
   ngOnInit(): void {
-    console.log("current state",this.currentSelected().started);
     this.started.set(this.started());
 
   }

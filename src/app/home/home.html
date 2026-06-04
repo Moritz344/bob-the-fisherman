@@ -1,16 +1,17 @@
 <app-topbar></app-topbar>
+<!--<app-alert></app-alert>-->
 
 <div class="bot-state-container">
   <div class="left">
-    <span style="color: var(--text-muted)">Bot Status </span>
-    <span style="font-size: 25px">
+    <span animate.enter="enter-animation" style="color: var(--text-muted)">Bot Status </span>
+    <span animate.enter="enter-animation" style="font-size: 25px">
       @if (started()) {
         Active
       }@else {
         Stopped
       }
     </span>
-    <span style="color: var(--text-muted)">Mode: Auto fishing </span>
+    <span animate.enter="enter-animation"  style="color: var(--text-muted)">Task: {{ currentBotTask() }}  </span>
   </div>
   <div class="right">
     <button [class.started]="started() == true" [class.stopped]="started() == false" (click)="onStart()">
