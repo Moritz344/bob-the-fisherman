@@ -1,23 +1,30 @@
 <app-topbar></app-topbar>
 
-<div class="container">
-  <table>
-     <tr style="width: 100%">
-      <th class="table-header">Item</th>
-      @for (item of items(); track $index) {
-            <td style="display: flex;flex-direction: row;justify-content: left">
-            @if (item.img) {
-              <img animate.enter="enter-animation" [ngSrc]="item.img" width="30" height="30" style="float: left;margin-right: 5px">
-            }
-             <span style="font-size: 20px" >{{ item.displayName }}</span>
-            </td>
-      }
-     </tr>
-    <tr style="width: 20%">
-      <th class="table-header">Count</th>
-      @for (item of items();track $index) {
-        <td style="font-size: 20px;text-align: center">{{ item.count }}</td>
-      }
-    </tr>
-  </table>
-</div>
+@if (items().length > 0) {
+  <div class="container">
+    <table>
+       <tr style="width: 100%">
+        <th class="table-header">Item</th>
+        @for (item of items(); track $index) {
+              <td animate.enter="enter-animation"  style="display: flex;flex-direction: row;justify-content: left">
+              @if (item.img) {
+                <img animate.enter="enter-animation" [ngSrc]="item.img" width="30" height="30" style="float: left;margin-right: 5px">
+              }
+               <span style="font-size: 20px" >{{ item.displayName }}</span>
+              </td>
+        }
+       </tr>
+      <tr style="width: 20%">
+        <th class="table-header">Count</th>
+        @for (item of items();track $index) {
+          <td animate.enter="enter-animation"  style="font-size: 20px;text-align: center">{{ item.count }}</td>
+        }
+      </tr>
+    </table>
+  </div>
+}@else{
+  <div class="nothing">
+    <img src="404.png">
+    <span>See the loot by starting the bot! <br>Use the settings to configure your Bot!</span>
+  </div>
+}

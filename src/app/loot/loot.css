@@ -1,3 +1,12 @@
 .container{
   margin-top: 20px
 }
+
+
+.nothing {
+  display: flex;
+  margin-top: 300px;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
