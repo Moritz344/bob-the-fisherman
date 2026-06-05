@@ -53,10 +53,11 @@ async function initBot(auth,host, port,username,version) {
     try {
 
       console.log("auth:",auth);
+      console.log("port",port);
       win.webContents.send("game-logs",  getLogTime() + " Creating Bot...");
       bot = mineflayer.createBot({
         host,
-        port,
+        ...(port ? { port: Number(port) } : {}),
         auth,
         username,
         version,
@@ -182,7 +183,7 @@ async function createWindow() {
   win = new BrowserWindow({
     width: 1200,
     height: 800,
-    frame: false,
+    frame: true,
     titleBarStyle: "hidden",
     webPreferences: {
       nodeIntegration: false,
