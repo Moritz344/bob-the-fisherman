@@ -60,11 +60,9 @@ export class Settings implements OnInit{
   }
 
   saveBotGeneralSettings() {
+    console.log(typeof this.currentSelected().port);
     if (!this.currentSelected().host || this.currentSelected().host == "") {
       this.settings.showFormsError("Server ist Pflichtfeld!");
-      return;
-    } else if (!this.currentSelected().port || this.currentSelected().port == 0 && this.currentSelected().auth == "offline") {
-      this.settings.showFormsError("Port ist Pflichtfeld!");
       return;
     } else if (this.currentSelected().username == "") {
       if (this.currentSelected().auth == "offline") {
@@ -73,9 +71,6 @@ export class Settings implements OnInit{
         this.settings.showFormsError("Please enter a name for the Bot. This has to be the name of your minecraft account.");
       }
       return;
-    }
-    if (this.currentSelected().auth == "microsoft") {
-      this.currentSelected().port = 0;
     }
     this.saved.set(true);
     this.settings.saveSettings(this.currentSelected());

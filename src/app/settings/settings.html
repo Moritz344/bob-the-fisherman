@@ -14,10 +14,8 @@
         <option [value]="version">{{ version }}</option>
       }
     </select>
-    @if (currentSelected().auth == "offline") {
-      Port:
-      <input (change)="saveBotGeneralSettings()" [class.error]="currentSelected().port == 0" [(ngModel)]="currentSelected().port">
-    }
+    Port:
+    <input (change)="saveBotGeneralSettings()" placeholder="25565" [(ngModel)]="currentSelected().port">
     Username:
     <input (change)="saveBotGeneralSettings()" [class.error]="currentSelected().username == ''"  [(ngModel)]="currentSelected().username">
     Server:
