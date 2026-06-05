@@ -1,6 +1,8 @@
 # dependencies (bun install)
 node_modules
 
+src/run.sh
+
 # output
 out
 dist
