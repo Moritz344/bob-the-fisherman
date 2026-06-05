@@ -15,3 +15,36 @@ minecraft bot for afk fishing
 
 
 </details>
+
+
+# Usage
+```bash
+git clone https://github.com/Moritz344/bob-the-fisherman.git
+cd bob-the-fisherman/
+```
+There is a cli and gui.
+
+## cli
+Cli is in cli/ in the root project.
+<br>
+To start:
+```bash
+cd bob-the-fisherman/
+cd cli/
+bun install
+bun run index.ts
+```
+<details>
+  <summary>Screenshot</summary>
+  <img width="970" height="612" alt="screenshot-2026-06-05_15-14-03" src="https://github.com/user-attachments/assets/8d29c12f-9da8-4158-a8ed-e7f2952968d7" />
+</details>
+
+## App
+App is an angular + electron app.
+<br>
+To start:
+```bash
+cd bob-the-fisherman/
+npm install
+npm start
+```
