@@ -2,73 +2,139 @@ const mineflayer = require('mineflayer')
 const pathfinder = require('mineflayer-pathfinder').pathfinder;
 const Movements = require('mineflayer-pathfinder').Movements;
 const { GoalFollow } = require('mineflayer-pathfinder').goals;
+import { Command } from 'commander';
+import fs from 'fs';
+import path from 'path';
 
-const argv = process.argv;
-const username = argv[2];
-const port = argv[3];
-const version = argv[4];
-if (argv.length < 5) {
-  console.log("Usage: ./index.ts <username> <port> <version>")
-  process.exit(0);
-}
+const program = new Command();
+const pkg = JSON.parse(fs.readFileSync(path.join(__dirname, "../package.json"), "utf-8"));
 
+let bot: any;
+let mcData: any;
+const currentBotCommands = [
+  {name: "!start",desc: "start fishing"},
+  {name: "!show inventory",desc: "list every item with name and count"},
+  {name: "!find water",desc: "find water nearby and look at it"},
+  {name: "!stop",desc: "stop every task"},
+  {name: "!stop follow",desc: "stop following player"},
+]
 
-const bot = mineflayer.createBot({
-  host: 'localhost',
-  port,
-  auth: "microsoft",
-  username,
-  version:version
-});
-const mcData = require('minecraft-data')(bot.version);
+function HandleCommands() {
+  program
+    .name("bob-fisher-cli")
+    .description("minecraft bot for afk fishing")
+    .version(pkg.version)
 
-
-bot.loadPlugin(pathfinder);
-
-bot.once('spawn', async() => {
-  console.log("Bot spawned");
-  await startFishing();
-
-})
-
-bot.on("end",() => {
-  console.log("Bot stopped");
-})
-
-
-bot.on('whisper', (username: any, message: any) => {
-  if (username === bot.username) return
-  if (message == "!start") {
-    startFishing();
-  } else if (message == "!stop") {
-    stopFishing();
-  } else if (message == "!eat") {
-    setTimeout( () => {
-    eat();
-    },500);
-  } else if (message.includes("!follow")) {
-    const msg = message.split(" ");
-    if (msg.length >= 2) {
-      const playerToFollow = msg[1].trim("");
-      followPlayer(playerToFollow);
-    }
-  } else if (message == "!stop follow") {
-    stopFollowingPlayer();
-  } else if (message == "!find water") {
-    lookAtWater();
-  } else if (message == "!show inventory") {
-    const items = getInventory();
-    items.forEach( (x: any) => {
-      console.log(x.name);
+  program
+    .command("start")
+    .argument('<auth>')
+    .argument('<username>')
+    .argument('[port]','port default 25565')
+    .argument('<version>')
+    .argument('<host>')
+    .action( (auth,username,port,version,host) => {
+      initBot(auth,username,port || '',version,host);
     })
-  }
-})
+    .description("start bot")
 
-function getInventory() {
-  return bot.inventory.slots.filter( (x: any) => x != null);
+
+  program
+    .command("commands")
+    .description("available ingame commands")
+    .action( () => {
+      showHelp();
+    })
+
+  program.parse(process.argv);
+
 }
+HandleCommands();
+
+function printAsciiArt(username: string) {
+    const asciiArt = fs.readFileSync(path.join(__dirname,"./ascii.txt"),"utf-8");
+    const ascii = `
+    ${asciiArt}
+    Whisper me with /msg ${username}
+  `
+  console.log(ascii);
+}
+
+
+function initBot(auth: string,username: string,port: number | string,version: string,host: string) {
+  printAsciiArt(username);
+  bot = mineflayer.createBot({
+    host,
+    port,
+    auth,
+    username,
+    version:version
+  });
+
+  mcData = require('minecraft-data')(bot.version);
+
+  bot.loadPlugin(pathfinder);
+
+  bot.once('spawn', async() => {
+    prettyLog("Bot spawned");
+  })
+
+  bot.on("end",() => {
+    prettyLog("Bot stopped");
+  })
+
+
+  bot.on('whisper', (username: any, message: any) => {
+    if (username === bot.username) return
+    if (message == "!start") {
+      setTimeout( () => {
+        startFishing()
+      },1000);
+    } else if (message == "!stop") {
+      stopFishing();
+    } else if (message == "!eat") {
+      setTimeout( () => {
+      eat();
+      },500);
+    } else if (message.includes("!follow")) {
+      const msg = message.split(" ");
+      if (msg.length >= 2) {
+        const playerToFollow = msg[1].trim("");
+        followPlayer(playerToFollow);
+      }
+    } else if (message == "!stop follow") {
+      stopFollowingPlayer();
+    } else if (message == "!find water") {
+      checkForWaterNearby();
+    } else if (message == "!show inventory") {
+      showInventory();
+    } else if (message == "!help") {
+      showHelp();
+    }
+  })
+
+  bot.on('error', (err: any) => prettyLog('Error:' + err));
+  //bot.on('kicked', (reason: any) => console.log('Kicked:', reason));
+}
+
+function showHelp() {
+  currentBotCommands.forEach( (command: {name: string,desc: string}) => {
+    console.log(command.name + " - " + command.desc);
+  });
+  console.log("");
+}
+
+function showInventory() {
+    const items = bot.inventory.slots.filter( (x: any) => x != null);
+    items.forEach( (x: any) => {
+      console.log("Slot: " + x.slot.toString().padStart(2,"0") + " " + x.displayName + " " + x.count);
+    });
+    console.log("");
+
+}
+
 
 function stopFollowingPlayer() {
+  prettyLog("Stop following player");
   bot.pathfinder.stop();
   bot.pathfinder.setGoal(null);
 }
@@ -80,9 +146,11 @@ function followPlayer(playerName: string) {
   const playerEntity = bot.nearestEntity( (e: any) => e.type == "player" && e.username == playerName);
 
   if (!playerEntity) {
+    prettyLog("I can't find this player to follow");
     return;
   }
 
+  prettyLog("Lead the way " + playerName + "!");
   bot.pathfinder.setMovements(new Movements(bot, mcData));
   bot.pathfinder.setGoal(new GoalFollow(playerEntity, 1),true);
 
@@ -100,93 +168,109 @@ function stopFishing() {
 
 let isFishing = false;
 
+function getLogTime() {
+  const date = new Date();
+  return date.getHours().toString().padStart(2,"0") + ":" + date.getMinutes().toString().padStart(2,"0") + ":" + date.getSeconds().toString().padStart(2,"0") ;
+}
+
+function prettyLog(msg: string) {
+  let logString =  getLogTime() + " " + msg;
+  console.log(logString);
+}
+
 async function startFishing() {
-  const items = bot.inventory.slots.filter( (x: any) => x != null);
-  let hasRod = items.some( (x: any) => x.name == "fishing_rod");
-  if (!hasRod) {
-    console.log("I don't have an fishing rod in my inventory");
+  if (isFishing) {
+    prettyLog("Im already fishing!");
     return;
   }
 
-  const waterIsNearby = await lookAtWater();
-  console.log("nearby water?",waterIsNearby);
-  if (!waterIsNearby) {
+  const hasRod = checkForFishingRodInInventory();
+  if (!hasRod) {
+    prettyLog("No fishing rod in my inventory");
     return;
   }
+
+  const waterBlock = await checkForWaterNearby();
+  if (!waterBlock) {
+    return;
+  }
+
 
 
   if (bot.food < 20) {
+    prettyLog("I need to eat! Hunger: " + bot.food);
     await eat();
   }
 
-
-  try {
-    await bot.equip(bot.registry.itemsByName.fishing_rod.id, 'hand')
-  } catch (err: any) {
-    console.log(err.message)
-  }
 
   isFishing = true;
   bot.on("playerCollect",onCollect);
 
   try {
+    await bot.equip(bot.registry.itemsByName.fishing_rod.id, 'hand')
     await bot.fish();
   } catch (err) {
-    console.log(err);
+    //prettyLog("ERROR: Something went wrong while trying to fish!");
   }
   isFishing = false;
 }
 
+function checkForFishingRodInInventory(): boolean {
+  if (!bot) { return false; }
+
+  const items = bot.inventory.slots.filter( (x: any) => x != null);
+  const hasRod = items.some( (x: any) => x.name == "fishing_rod");
+  return hasRod;
+}
 
 
+async function checkForWaterNearby(): Promise<boolean>{
+  try {
+    const maxDistance = 10;
+    const waterBlock = await bot.findBlock({
+      point: bot.entity.position,
+      matching: (block: any) => block.name === 'water',
+      maxDistance: maxDistance
+    })
+    if (!waterBlock) {
+      prettyLog("No water found in distance of " + maxDistance + " blocks");
+      return false;
+    }
+    await bot.lookAt(waterBlock.position.offset(0.5, 2, 0.5), true)
+    return true;
+
+  } catch (err) {
+    console.log(err);
+    return false;
+  }
+}
 
 function onCollect(player: any,entity: any) {
   if (player !== bot.entity) {
     return;
   }
+
+  if (entity.type == "orb" || entity.name == 'experience_orb') {
+    return;
+  }
+
+  const slots = bot.inventory.slots.filter( (x: any) => x != null);
+  const itemId = entity.metadata.at(-1).itemId;
+  const item = slots.find((x: any) => x.type == itemId);
+  if (!item) {
+    prettyLog("Collected item not found!");
+    setTimeout( () => {
+      startFishing();
+    },500);
+    return;
+  }
+
   bot.removeListener("playerCollect", onCollect);
-  console.log("collected something");
+  prettyLog("Caught " + item.displayName + " count: " + item.count);
+
   setTimeout( () => {
     startFishing();
   },500);
-}
-
-async function lookAtWater () {
-  const { GoalNear } = require('mineflayer-pathfinder/lib/goals')
-
-  const waterBlock = bot.findBlock({
-    point: bot.entity.position,
-    matching: (block: any) => block.name === 'water',
-    maxDistance: 50
-  })
-  if (!waterBlock) return
-
-  const waterPos = waterBlock.position
-  const movements = new Movements(bot, mcData)
-  movements.canDig = false
-
-  const goal = new GoalNear(waterPos.x, waterPos.y, waterPos.z, 2)
-  const path = await bot.pathfinder.getPathTo(movements, goal, 1000)
-  if (path.status !== 'success') return
-
-  bot.pathfinder.setMovements(movements)
-  bot.pathfinder.setGoal(goal)
-
-  // wait until the bot actually arrives at the water
-  await new Promise<void>(resolve => {
-    const onGoal = () => {
-      bot.removeListener('goal_reached', onGoal)
-      resolve()
-    }
-    bot.on('goal_reached', onGoal)
-    // safety timeout — if stuck, move on anyway
-    setTimeout(() => {
-      bot.removeListener('goal_reached', onGoal)
-      resolve()
-    }, 8000)
-  })
-
-  return true
 }
 
 
@@ -217,5 +301,3 @@ async function eat () {
 }
 
 
-bot.on('error', (err: any) => console.log('Error:', err));
-bot.on('kicked', (reason: any) => console.log('Kicked:', reason));
