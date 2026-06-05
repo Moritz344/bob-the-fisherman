@@ -13,7 +13,7 @@ import { currentSelectedType,currentSelectedActionType } from '../models/current
 })
 export class Settings implements OnInit{
   public settings = inject(SettingsService);
-  public currentSelected = signal<currentSelectedType>({port: 3000,username: "Bob",version: "1.21.11",auth: "offline",host: "localhost"});
+  public currentSelected = signal<currentSelectedType>({port: 0,username: "Bob",version: "1.21.11",auth: "offline",host: "localhost"});
   public currentSelectedAction = signal<currentSelectedActionType>({playerToFollow: "",waterMaxDistance: 10});
   public versionData = signal([]);
   public formError = signal<boolean>(false);
@@ -48,9 +48,6 @@ export class Settings implements OnInit{
 
   onChooseMode() {
     console.log(this.currentSelected().auth);
-
-
-
   }
 
   async initVersions() {
@@ -66,7 +63,7 @@ export class Settings implements OnInit{
     if (!this.currentSelected().host || this.currentSelected().host == "") {
       this.settings.showFormsError("Server ist Pflichtfeld!");
       return;
-    } else if (!this.currentSelected().port || this.currentSelected().port == 0) {
+    } else if (!this.currentSelected().port || this.currentSelected().port == 0 && this.currentSelected().auth == "offline") {
       this.settings.showFormsError("Port ist Pflichtfeld!");
       return;
     } else if (this.currentSelected().username == "") {
@@ -76,6 +73,9 @@ export class Settings implements OnInit{
         this.settings.showFormsError("Please enter a name for the Bot. This has to be the name of your minecraft account.");
       }
       return;
+    }
+    if (this.currentSelected().auth == "microsoft") {
+      this.currentSelected().port = 0;
     }
     this.saved.set(true);
     this.settings.saveSettings(this.currentSelected());
