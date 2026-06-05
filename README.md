@@ -24,10 +24,8 @@ cd bob-the-fisherman/
 ```
 There is a cli and gui.
 
-## cli
-Cli is in cli/ in the root project.
-<br>
-To start:
+## CLI
+Located at `bob-the-fisherman/cli/` - Bun project.
 ```bash
 cd bob-the-fisherman/
 cd cli/
@@ -40,9 +38,7 @@ bun run index.ts
 </details>
 
 ## App
-App is an angular + electron app.
-<br>
-To start:
+Angular + Electron app.
 ```bash
 cd bob-the-fisherman/
 npm install
