@@ -70,6 +70,9 @@ export class Home implements OnInit {
   }
 
   async onStopFishing() {
+    if (!this.isFishing()) {
+      return;
+    }
     this.isFollowingPlayer.set(false);
     this.isLookingForWater.set(false);
 
@@ -102,6 +105,10 @@ export class Home implements OnInit {
   }
 
   onStopFollowingPlayer() {
+    if (!this.isFollowingPlayer()) {
+      return;
+    }
+
     this.isLookingForWater.set(false);
     this.isFishing.set(false);
 
