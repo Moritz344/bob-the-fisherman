@@ -232,12 +232,12 @@ async function createWindow() {
 
   ipcMain.handle("stop-fishing",async(_) => {
       console.log("stop fishing!");
-      await stopFishing();
+      stopFishing();
   })
 
   ipcMain.handle("stop-following",async(_) => {
     console.log("stop following player!");
-    await stopFollowingPlayer();
+    stopFollowingPlayer();
   })
 
   ipcMain.handle("start-fishing",(_) => {
@@ -390,57 +390,6 @@ async function checkForWaterNearby() {
   }
 }
 
-async function pathFindToWater() {
-  console.log("look at water called");
-  if (!bot) return
-
-  const waterBlock = await checkForWaterNearby();
-  if (!waterBlock) {
-    console.log("no water leaving");
-    return;
-  }
-
-  const pos = waterBlock.position
-  const dirs = [[1,0,0],[-1,0,0],[0,0,1],[0,0,-1]]
-  let spot = null
-  for (const [dx,,dz] of dirs) {
-    const floorBlock = bot.blockAt(pos.offset(dx, -1, dz))
-    if (floorBlock && floorBlock.boundingBox === 'block') {
-      const headBlock = bot.blockAt(pos.offset(dx, 0, dz))
-      if (!headBlock || headBlock.boundingBox !== 'block') {
-        spot = pos.offset(dx, 0, dz)
-        break
-      }
-    }
-  }
-
-  if (!spot) {
-    console.log("No safe spot next to water")
-    return
-  }
-
-  const { pathfinder } = require('mineflayer-pathfinder')
-  const Movements = require('mineflayer-pathfinder').Movements
-  const { GoalBlock } = require('mineflayer-pathfinder').goals
-  const mcData = require('minecraft-data')(bot.version)
-
-  bot.loadPlugin(pathfinder)
-
-  const movements = new Movements(bot, mcData)
-  movements.canDig = false
-
-  bot.pathfinder.setMovements(movements)
-  bot.pathfinder.setGoal(new GoalBlock(spot.x, spot.y, spot.z))
-
-  await new Promise(resolve => {
-    bot.once('goal_reached', resolve)
-    setTimeout(resolve, 8000)
-  })
-
-  //await bot.pathfinder.stop();
-  //await bot.pathfinder.setGoal(null);
-  await bot.lookAt(waterBlock.position.offset(0.5, 2, 0.5))
-}
 
 
 
