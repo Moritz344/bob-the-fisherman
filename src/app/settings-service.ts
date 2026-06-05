@@ -21,7 +21,7 @@ export class SettingsService {
     host: "localhost",
     version: "1.21.11",
     auth: "offline",
-    port: 46685,
+    port: 0,
     started: false
   });
 
