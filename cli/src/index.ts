@@ -13,11 +13,19 @@ let bot: any;
 let mcData: any;
 const currentBotCommands = [
   {name: "!start",desc: "start fishing"},
-  {name: "!show inventory",desc: "list every item with name and count"},
+  {name: "!show inventory",desc: "list every item with name,count and slot number"},
   {name: "!find water",desc: "find water nearby and look at it"},
-  {name: "!stop",desc: "stop every task"},
+  {name: "!stop",desc: "stop fishing"},
   {name: "!stop follow",desc: "stop following player"},
 ]
+
+const botStartCooldown = 2000;
+let botReady = false;
+
+// colors
+const resetColor = '\x1b[0m';
+const red = '\x1b[31m';
+const gray = '\x1b[90m';
 
 function HandleCommands() {
   program
@@ -51,6 +59,9 @@ function HandleCommands() {
 HandleCommands();
 
 function printAsciiArt(username: string) {
+    if (!username) {
+      return;
+    }
     const asciiArt = fs.readFileSync(path.join(__dirname,"./ascii.txt"),"utf-8");
     const ascii = `
     ${asciiArt}
@@ -61,59 +72,86 @@ function printAsciiArt(username: string) {
 
 
 function initBot(auth: string,username: string,port: number | string,version: string,host: string) {
-  printAsciiArt(username);
-  bot = mineflayer.createBot({
-    host,
-    port,
-    auth,
-    username,
-    version:version
-  });
+    printAsciiArt(username);
+    bot = mineflayer.createBot({
+      host,
+      port,
+      auth,
+      username,
+      version:version,
+      hideErrors: true
+    });
 
-  mcData = require('minecraft-data')(bot.version);
-
-  bot.loadPlugin(pathfinder);
-
-  bot.once('spawn', async() => {
-    prettyLog("Bot spawned");
-  })
-
-  bot.on("end",() => {
-    prettyLog("Bot stopped");
-  })
-
-
-  bot.on('whisper', (username: any, message: any) => {
-    if (username === bot.username) return
-    if (message == "!start") {
-      setTimeout( () => {
-        startFishing()
-      },1000);
-    } else if (message == "!stop") {
-      stopFishing();
-    } else if (message == "!eat") {
-      setTimeout( () => {
-      eat();
-      },500);
-    } else if (message.includes("!follow")) {
-      const msg = message.split(" ");
-      if (msg.length >= 2) {
-        const playerToFollow = msg[1].trim("");
-        followPlayer(playerToFollow);
+    bot.on('error', (err: any) => {
+      if (err.code == 'ECONNREFUSED') {
+        prettyLog( red + "ERROR: Port " + port + " on "  + host + " not found" + resetColor);
+      } else if (err.code == 'ENOTFOUND') {
+        prettyLog(red + "ERROR: Server " + host + " not found" + resetColor);
+      } else if (err.code == 'ETIMEDOUT') {
+        prettyLog(red + "ERROR: Server unreachable" + resetColor);
+      } else if (err.code == 'ECONNRESET') {
+        prettyLog(red + "ERROR: Connection was killed" + resetColor)
+      } else if (err.code == 'EHOSTUNREACH') {
+        prettyLog(red + "ERROR: No route to host" + resetColor);
+      } else if (err.code == 'EAI_AGAIN') {
+        prettyLog(red + 'ERROR: DNS temporary failure' + resetColor)
+      } else if (err.code == 'EPIPE') {
+        prettyLog(red + 'ERROR: Wrote to a closed connection' + resetColor)
+      } else if (err.code == 'ERR_SOCKET_BAD_PORT') {
+        prettyLog(red + "ERROR: Bad port " + port + resetColor);
+      } else {
+        prettyLog(red + "ERROR: unexpected error: " + err.code + resetColor);
       }
-    } else if (message == "!stop follow") {
-      stopFollowingPlayer();
-    } else if (message == "!find water") {
-      checkForWaterNearby();
-    } else if (message == "!show inventory") {
-      showInventory();
-    } else if (message == "!help") {
-      showHelp();
-    }
-  })
+    });
 
-  bot.on('error', (err: any) => prettyLog('Error:' + err));
-  //bot.on('kicked', (reason: any) => console.log('Kicked:', reason));
+    mcData = require('minecraft-data')(bot.version);
+
+    bot.loadPlugin(pathfinder);
+
+    bot.once('spawn', async() => {
+      prettyLog("Bot spawned on " + host );
+      setTimeout( () => {
+        botReady = true;
+      },botStartCooldown);
+    })
+
+
+    bot.on("end",() => {
+      prettyLog("Bot stopped");
+    })
+
+
+    bot.on('whisper', (username: any, message: any) => {
+      if (username === bot.username) return
+      if (message == "!start") {
+        setTimeout( () => {
+          startFishing()
+        },1000);
+      } else if (message == "!stop") {
+        stopFishing();
+      } else if (message == "!eat") {
+        setTimeout( () => {
+        eat();
+        },500);
+      } else if (message.includes("!follow")) {
+        const msg = message.split(" ");
+        if (msg.length >= 2) {
+          const playerToFollow = msg[1].trim("");
+          followPlayer(playerToFollow);
+        }
+      } else if (message == "!stop follow") {
+        stopFollowingPlayer();
+      } else if (message == "!find water") {
+        checkForWaterNearby();
+      } else if (message == "!show inventory") {
+        showInventory();
+      } else if (message == "!help") {
+        showHelp();
+      }
+    })
+
+    //bot.on('kicked', (reason: any) => console.log('Kicked:', reason));
+
 }
 
 function showHelp() {
@@ -124,11 +162,16 @@ function showHelp() {
 }
 
 function showInventory() {
-    const items = bot.inventory.slots.filter( (x: any) => x != null);
-    items.forEach( (x: any) => {
-      console.log("Slot: " + x.slot.toString().padStart(2,"0") + " " + x.displayName + " " + x.count);
-    });
-    console.log("");
+    const items = bot.inventory.slots.filter( (x: any) => x != null).map( (x: any) => ({ slot: x.slot,count: x.count,name: x.displayName}));
+    const Table = require('cli-table3');
+
+    const table = new Table();
+    const cols = 5;
+    for (let i = 0; i < items.length; i += cols) {
+      table.push(items.slice(i, i + cols).map((x: any) => ` ${x.name}\n Count: ${x.count} \n Slot: ${x.slot} `));
+    }
+    console.log(table.toString());
+
 
 }
 
@@ -174,13 +217,17 @@ function getLogTime() {
 }
 
 function prettyLog(msg: string) {
-  let logString =  getLogTime() + " " + msg;
+  const logString = gray + getLogTime() + resetColor + " " + msg;
   console.log(logString);
 }
 
 async function startFishing() {
+  if (!botReady) {
+    prettyLog("Bot is not ready please wait a second");
+    return;
+  }
   if (isFishing) {
-    prettyLog("Im already fishing!");
+    stopFishing();
     return;
   }
 
@@ -266,7 +313,14 @@ function onCollect(player: any,entity: any) {
   }
 
   bot.removeListener("playerCollect", onCollect);
-  prettyLog("Caught " + item.displayName + " count: " + item.count);
+
+  const itemCountArray = slots.filter( (x: any) => x.displayName == item.displayName).map((x: any) => x.count);
+  let totalCountOfItems = 0;
+  itemCountArray.forEach( (count: number) => {
+    totalCountOfItems += count;
+  });
+
+  prettyLog("Caught " + item.displayName + " count: " + totalCountOfItems);
 
   setTimeout( () => {
     startFishing();
