@@ -1,7 +1,9 @@
+import { createRequire } from 'module';
+const require = createRequire(import.meta.url);
+const engine = require("../../bot-engine.cjs");
+
 const mineflayer = require('mineflayer')
 const pathfinder = require('mineflayer-pathfinder').pathfinder;
-const Movements = require('mineflayer-pathfinder').Movements;
-const { GoalFollow } = require('mineflayer-pathfinder').goals;
 import { Command } from 'commander';
 import fs from 'fs';
 import path from 'path';
@@ -10,7 +12,6 @@ const program = new Command();
 const pkg = JSON.parse(fs.readFileSync(path.join(__dirname, "../package.json"), "utf-8"));
 
 let bot: any;
-let mcData: any;
 const currentBotCommands = [
   {name: "!start",desc: "start fishing"},
   {name: "!show inventory",desc: "list every item with name,count and slot number"},
@@ -20,7 +21,6 @@ const currentBotCommands = [
 ]
 
 const botStartCooldown = 2000;
-let botReady = false;
 
 // colors
 const resetColor = '\x1b[0m';
@@ -75,7 +75,7 @@ function initBot(auth: string,username: string,port: number | string,version: st
     printAsciiArt(username);
     bot = mineflayer.createBot({
       host,
-      port,
+      ...(port ? { port: Number(port) } : {}),
       auth,
       username,
       version:version,
@@ -104,20 +104,22 @@ function initBot(auth: string,username: string,port: number | string,version: st
       }
     });
 
-    mcData = require('minecraft-data')(bot.version);
+    const mcData = require('minecraft-data')(bot.version);
+    engine.setBot(bot, mcData);
 
     bot.loadPlugin(pathfinder);
 
     bot.once('spawn', async() => {
       prettyLog("Bot spawned on " + host );
       setTimeout( () => {
-        botReady = true;
+        engine.setBotReady(true);
       },botStartCooldown);
     })
 
 
-    bot.on("end",() => {
-      prettyLog("Bot stopped");
+    bot.on("end",(reason: any) => {
+      const errorMessage = engine.error(reason.code,{host,port});
+      prettyLog(red + errorMessage + resetColor);
     })
 
 
@@ -125,32 +127,30 @@ function initBot(auth: string,username: string,port: number | string,version: st
       if (username === bot.username) return
       if (message == "!start") {
         setTimeout( () => {
-          startFishing()
+          engine.startFishing()
         },1000);
       } else if (message == "!stop") {
-        stopFishing();
+        engine.stopFishing();
       } else if (message == "!eat") {
         setTimeout( () => {
-        eat();
+        engine.eat();
         },500);
       } else if (message.includes("!follow")) {
         const msg = message.split(" ");
         if (msg.length >= 2) {
           const playerToFollow = msg[1].trim("");
-          followPlayer(playerToFollow);
+          engine.followPlayer(playerToFollow);
         }
       } else if (message == "!stop follow") {
-        stopFollowingPlayer();
+        engine.stopFollowingPlayer();
       } else if (message == "!find water") {
-        checkForWaterNearby();
+        engine.checkForWaterNearby();
       } else if (message == "!show inventory") {
         showInventory();
       } else if (message == "!help") {
         showHelp();
       }
     })
-
-    //bot.on('kicked', (reason: any) => console.log('Kicked:', reason));
 
 }
 
@@ -172,186 +172,11 @@ function showInventory() {
     }
     console.log(table.toString());
 
-
-}
-
-
-function stopFollowingPlayer() {
-  prettyLog("Stop following player");
-  bot.pathfinder.stop();
-  bot.pathfinder.setGoal(null);
-}
-
-function followPlayer(playerName: string) {
-  if (isFishing) {
-    stopFishing();
-  }
-  const playerEntity = bot.nearestEntity( (e: any) => e.type == "player" && e.username == playerName);
-
-  if (!playerEntity) {
-    prettyLog("I can't find this player to follow");
-    return;
-  }
-
-  prettyLog("Lead the way " + playerName + "!");
-  bot.pathfinder.setMovements(new Movements(bot, mcData));
-  bot.pathfinder.setGoal(new GoalFollow(playerEntity, 1),true);
-
-
-}
-
-function stopFishing() {
-  bot.removeListener("playerCollect",onCollect);
-  if (isFishing) {
-    bot.activateItem();
-    isFishing = false;
-  }
-
-}
-
-let isFishing = false;
-
-function getLogTime() {
-  const date = new Date();
-  return date.getHours().toString().padStart(2,"0") + ":" + date.getMinutes().toString().padStart(2,"0") + ":" + date.getSeconds().toString().padStart(2,"0") ;
 }
 
 function prettyLog(msg: string) {
-  const logString = gray + getLogTime() + resetColor + " " + msg;
+  const logString = gray + engine.getLogTime() + resetColor + " " + msg;
   console.log(logString);
 }
 
-async function startFishing() {
-  if (!botReady) {
-    prettyLog("Bot is not ready please wait a second");
-    return;
-  }
-  if (isFishing) {
-    stopFishing();
-    return;
-  }
-
-  const hasRod = checkForFishingRodInInventory();
-  if (!hasRod) {
-    prettyLog("No fishing rod in my inventory");
-    return;
-  }
-
-  const waterBlock = await checkForWaterNearby();
-  if (!waterBlock) {
-    return;
-  }
-
-
-
-  if (bot.food < 20) {
-    prettyLog("I need to eat! Hunger: " + bot.food);
-    await eat();
-  }
-
-
-  isFishing = true;
-  bot.on("playerCollect",onCollect);
-
-  try {
-    await bot.equip(bot.registry.itemsByName.fishing_rod.id, 'hand')
-    await bot.fish();
-  } catch (err) {
-    //prettyLog("ERROR: Something went wrong while trying to fish!");
-  }
-  isFishing = false;
-}
-
-function checkForFishingRodInInventory(): boolean {
-  if (!bot) { return false; }
-
-  const items = bot.inventory.slots.filter( (x: any) => x != null);
-  const hasRod = items.some( (x: any) => x.name == "fishing_rod");
-  return hasRod;
-}
-
-
-async function checkForWaterNearby(): Promise<boolean>{
-  try {
-    const maxDistance = 10;
-    const waterBlock = await bot.findBlock({
-      point: bot.entity.position,
-      matching: (block: any) => block.name === 'water',
-      maxDistance: maxDistance
-    })
-    if (!waterBlock) {
-      prettyLog("No water found in distance of " + maxDistance + " blocks");
-      return false;
-    }
-    await bot.lookAt(waterBlock.position.offset(0.5, 2, 0.5), true)
-    return true;
-
-  } catch (err) {
-    console.log(err);
-    return false;
-  }
-}
-
-function onCollect(player: any,entity: any) {
-  if (player !== bot.entity) {
-    return;
-  }
-
-  if (entity.type == "orb" || entity.name == 'experience_orb') {
-    return;
-  }
-
-  const slots = bot.inventory.slots.filter( (x: any) => x != null);
-  const itemId = entity.metadata.at(-1).itemId;
-  const item = slots.find((x: any) => x.type == itemId);
-  if (!item) {
-    prettyLog("Collected item not found!");
-    setTimeout( () => {
-      startFishing();
-    },500);
-    return;
-  }
-
-  bot.removeListener("playerCollect", onCollect);
-
-  const itemCountArray = slots.filter( (x: any) => x.displayName == item.displayName).map((x: any) => x.count);
-  let totalCountOfItems = 0;
-  itemCountArray.forEach( (count: number) => {
-    totalCountOfItems += count;
-  });
-
-  prettyLog("Caught " + item.displayName + " count: " + totalCountOfItems);
-
-  setTimeout( () => {
-    startFishing();
-  },500);
-}
-
-
-
-async function eat () {
-  stopFishing()
-
-  const slots = bot.inventory.slots;
-  const items = slots.filter( (x: any) => x != null && bot.registry.foodsByName[x.name]);
-  console.log(items.map((x: any) => x.name));
-
-  if (items.length == 0) {
-    console.log("No food in my inventory.");
-    return;
-  }
-
-  try {
-    await bot.equip(items[0], 'hand')
-  } catch (err: any) {
-    return console.log(err.message)
-  }
-
-  try {
-    await bot.consume()
-  } catch (err: any) {
-    console.log(err.message)
-  }
-}
-
-
+engine.setLogFn(prettyLog);
