@@ -149,10 +149,11 @@ td:hover{
 }
 
 .error{
-  background-color: var(--danger);
+  color: var(--danger);
 }
 
 select{
+  outline: none;
   background-color: var(--bg-secondary);
   border: none;
   border-radius: 5px;
@@ -162,6 +163,7 @@ select{
 }
 
 input{
+  outline: none;
   background-color: var(--bg-secondary);
   border: none;
   border-radius: 5px;
