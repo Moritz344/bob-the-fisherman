@@ -1,14 +1,12 @@
 import { Component,signal,inject,OnInit } from '@angular/core';
 import { Topbar } from '../topbar/topbar';
-import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
 import { SettingsService } from '../settings-service';
 import { currentSelectedType,currentSelectedActionType } from '../models/current.model';
 import {form, FormField, FormRoot,required} from '@angular/forms/signals';
 
 @Component({
   selector: 'app-settings',
-  imports: [Topbar,FormsModule,CommonModule,FormField,FormRoot],
+  imports: [Topbar,FormField,FormRoot],
   templateUrl: './settings.html',
   styleUrl: './settings.css',
 })
@@ -18,13 +16,14 @@ export class Settings implements OnInit{
     username: "Bob",
     version: "1.21.11",
     auth: "offline",
-    host: "localhost"
+    host: "localhost",
+    started: false
   })
   public settings = inject(SettingsService);
 
   public currentSelectedAction = signal<currentSelectedActionType>({playerToFollow: "",waterMaxDistance: 10});
 
-  public versionData = signal([]);
+  public versionData = signal<string[]>([]);
   public formError = signal<boolean>(false);
   public saved = signal<boolean>(false);
 
@@ -34,11 +33,11 @@ export class Settings implements OnInit{
   });
 
   constructor() {
-    this.initVersions();
   }
 
   ngOnInit(): void {
     this.initCurrentSelected();
+    this.initVersions();
   }
 
   initCurrentSelected() {
@@ -60,10 +59,7 @@ export class Settings implements OnInit{
     console.log("settings got:",this.currentSelectedAction());
   }
 
-  onChooseMode() {
-  }
-
-  async initVersions() {
+   async initVersions() {
     const data = await this.settings.getVersions();
     this.versionData.set(data.reverse());
   }
