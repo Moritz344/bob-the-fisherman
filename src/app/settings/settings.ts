@@ -4,20 +4,34 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { SettingsService } from '../settings-service';
 import { currentSelectedType,currentSelectedActionType } from '../models/current.model';
+import {form, FormField, FormRoot,required} from '@angular/forms/signals';
 
 @Component({
   selector: 'app-settings',
-  imports: [Topbar,FormsModule,CommonModule],
+  imports: [Topbar,FormsModule,CommonModule,FormField,FormRoot],
   templateUrl: './settings.html',
   styleUrl: './settings.css',
 })
 export class Settings implements OnInit{
+  public settingsModel = signal<currentSelectedType>({
+    port: 0,
+    username: "Bob",
+    version: "1.21.11",
+    auth: "offline",
+    host: "localhost"
+  })
   public settings = inject(SettingsService);
-  public currentSelected = signal<currentSelectedType>({port: 0,username: "Bob",version: "1.21.11",auth: "offline",host: "localhost"});
+
   public currentSelectedAction = signal<currentSelectedActionType>({playerToFollow: "",waterMaxDistance: 10});
+
   public versionData = signal([]);
   public formError = signal<boolean>(false);
   public saved = signal<boolean>(false);
+
+  public settingsForm = form(this.settingsModel, (field) => {
+    required(field.host, { message: 'Please enter a hostname!' });
+    required(field.username, { message: 'Please enter a username!' });
+  });
 
   constructor() {
     this.initVersions();
@@ -29,7 +43,7 @@ export class Settings implements OnInit{
 
   initCurrentSelected() {
     const generalSettings = this.settings.getSettings();
-    this.currentSelected.set({
+    this.settingsModel.set({
       host: generalSettings.host,
       auth: generalSettings.auth,
       version: generalSettings.version,
@@ -47,7 +61,6 @@ export class Settings implements OnInit{
   }
 
   onChooseMode() {
-    console.log(this.currentSelected().auth);
   }
 
   async initVersions() {
@@ -60,20 +73,11 @@ export class Settings implements OnInit{
   }
 
   saveBotGeneralSettings() {
-    console.log(typeof this.currentSelected().port);
-    if (!this.currentSelected().host || this.currentSelected().host == "") {
-      this.settings.showFormsError("Server ist Pflichtfeld!");
-      return;
-    } else if (this.currentSelected().username == "") {
-      if (this.currentSelected().auth == "offline") {
-        this.settings.showFormsError("Please enter a name for the Bot. This can be any name since you selected the offline mode.");
-      } else {
-        this.settings.showFormsError("Please enter a name for the Bot. This has to be the name of your minecraft account.");
-      }
+    if (this.settingsForm().invalid()) {
       return;
     }
+
     this.saved.set(true);
-    this.settings.saveSettings(this.currentSelected());
-    console.log("saved",this.currentSelected());
+    this.settings.saveSettings(this.settingsModel());
   }
 }

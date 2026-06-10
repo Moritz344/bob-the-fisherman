@@ -3,11 +3,24 @@
   justify-content: center;
 }
 
-.settings{
-  display: grid;
-  grid-template-columns: repeat(2,200px);
-  justify-content: center;
-  gap: 10px;
-  align-items: center;
 
+.settings{
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 20px;
+  align-items: center;
+  margin-left: 200px;
+}
+
+.settings select{
+  width: 280px;
+}
+
+
+
+
+.error-container{
+  width: 500px;
+  margin-top: 5px;
 }
