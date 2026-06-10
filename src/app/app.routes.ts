@@ -1,12 +1,8 @@
 import { Routes } from '@angular/router';
-import { Home } from './home/home';
-import { Settings } from './settings/settings';
-import { Loot } from './loot/loot';
-import { Log } from './log/log';
 
 export const routes: Routes = [
-  { path: "",component: Home},
-  { path: "settings",component: Settings},
-  { path: "log",component: Log},
-  { path: "loot",component: Loot},
+  { path: "",loadComponent: () => import("./home/home").then(m => m.Home)},
+  { path: "settings", loadComponent: () => import("./settings/settings").then(h => h.Settings)},
+  { path: "log",loadComponent: () => import("./log/log").then(l => l.Log)},
+  { path: "loot",loadComponent: () => import("./loot/loot").then(l => l.Loot)},
 ];
