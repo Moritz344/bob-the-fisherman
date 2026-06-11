@@ -107,6 +107,9 @@ async function startFishing() {
   }
   if (isFishing) {
     stopFishing();
+    setTimeout( async() => {
+      await startFishing();
+    },500)
     return;
   }
   const hasRod = checkForFishingRodInInventory();
@@ -116,6 +119,7 @@ async function startFishing() {
   }
   const foundWater = await checkForWaterNearby();
   if (!foundWater) {
+    logFn("No water nearby");
     return;
   }
   if (bot.food < 20) {
@@ -165,7 +169,6 @@ async function checkForWaterNearby() {
 function onCollect(player, entity) {
   if (player !== bot.entity) return;
   if (entity.type == "orb" || entity.name == 'experience_orb') return;
-  logFn("Collected item");
 
   const slots = bot.inventory.slots.filter(x => x != null);
   const itemId = entity.metadata.at(-1).itemId;
