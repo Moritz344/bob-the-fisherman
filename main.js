@@ -133,7 +133,7 @@ async function createWindow() {
     width: 1200,
     height: 800,
     frame: true,
-    titleBarStyle: "hidden",
+    //titleBarStyle: "hidden",
     webPreferences: {
       nodeIntegration: false,
       contextIsolation: true,
@@ -188,12 +188,9 @@ async function createWindow() {
     engine.stopFollowingPlayer();
   })
 
-  ipcMain.handle("start-fishing",(_) => {
-    setTimeout( () => {
-      console.log("start fishing!");
-      engine.startFishing();
-    },1000);
-  })
+  ipcMain.handle("start-fishing",async(_) => {
+    await engine.startFishing();
+  });
 
   ipcMain.handle("start-bot",async(_,host,port,version,auth,username) => {
     win.webContents.send("game-logs",engine.getLogTime() + " Starting Bot...");
