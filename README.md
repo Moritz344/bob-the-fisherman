@@ -9,13 +9,13 @@ minecraft bot for afk fishing
 
 <details>
   <summary> More Screenshots </summary>
-  <img width="1433" height="937" alt="screenshot-2026-06-04_17-12-53" src="https://github.com/user-attachments/assets/6cfc0f45-882e-4dc7-9344-c8a5d7ded994" />
-  
+
   <img width="1433" height="937" alt="screenshot-2026-06-04_17-13-08" src="https://github.com/user-attachments/assets/ecbdd59e-88a6-41b7-a2bc-bf64f23d83e0" />
 
 
-
   <img width="1045" height="785" alt="screenshot-2026-06-04_17-16-20" src="https://github.com/user-attachments/assets/af9b7d3b-3bc3-4239-b87c-23513492b83b" />
+
+  <img width="1916" height="1080" alt="screenshot-2026-06-11_16-48-00" src="https://github.com/user-attachments/assets/762d5786-fd4b-4a4b-a22b-a4803e1eba81" />
 
 
 </details>
