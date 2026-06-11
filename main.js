@@ -8,6 +8,8 @@ const {
 const engine = require("./bot-engine.cjs");
 const mineflayer = require('mineflayer');
 
+// TODO: send notifcation that bot caught something when window is not focused
+
 let bot;
 let win;
 let store;
