@@ -71,6 +71,10 @@ async function initBot(auth,host, port,username,version) {
       win.webContents.send("game-logs", engine.getLogTime() + " " + msg);
     });
 
+    engine.setLootLogFn((msg) => {
+      win.webContents.send("loot-log",msg);
+    });
+
     bot.once('spawn', async() => {
       win.webContents.send("game-logs",  engine.getLogTime() + " Bot spawned");
       setTimeout( () => {
@@ -80,6 +84,7 @@ async function initBot(auth,host, port,username,version) {
     });
 
     bot.on("error",(err) => {
+      console.log(err);
       const errorMessage = engine.error(err.code,{ host,port});
       win.webContents.send("bot-error",errorMessage);
     })
@@ -198,7 +203,7 @@ async function createWindow() {
   });
 
   ipcMain.handle("init-loot",async(_) => {
-    while (!bot.entity) {
+    while (!engine.getBotReady()) {
         await new Promise(r => setTimeout(r, 500));
     }
     const slots = bot.inventory.slots.filter( x => x != null);
