@@ -55,7 +55,6 @@ export class ChatLog implements OnInit{
 
     if (this.commandInput().trim() == "start") {
       this.command.emit("start");
-      this.settings.startFishing();
     } else if (this.commandInput().trim() == "stop") {
       this.command.emit("stop");
     } else if (this.commandInput().split(" ")[0] == "follow") {
