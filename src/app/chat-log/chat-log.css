@@ -48,6 +48,11 @@
   background-color: transparent;
 }
 
+.command{
+  color: var(--text-muted);
+
+}
+
 .input-box{
   position: absolute;
   bottom: 0px;
@@ -64,7 +69,7 @@
 
 .nothing {
   display: flex;
-  margin-top: 300px;
+  margin-top: 15%;
   flex-direction: column;
   justify-content: center;
   align-items: center;

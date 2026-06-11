@@ -15,7 +15,7 @@
   <div #messages  class="message-container">
     @for (msg of data(); track $index) {
       <span animate.enter="chat-enter-animation" style="color: var(--text-muted);width: 100%">  {{ msg.time }} </span>
-      <span animate.enter="chat-enter-animation" class="msg" [class.error]="msg.type == 'error'"> {{msg.msg}}</span>
+      <span animate.enter="chat-enter-animation" class="msg" [class.command]="msg.type == 'cmd'" [class.error]="msg.type == 'error'"> {{msg.msg}}</span>
     }
   </div>
 <input placeholder="Type a command!" #inputBox class="input-box" [(ngModel)]="commandInput" (keydown.code.enter)="onCommand()">

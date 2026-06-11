@@ -21,6 +21,7 @@ export class ChatLog implements OnInit{
   public timeMsg: string = "";
   public msg: string = "";
   public commandInput = signal<string>("");
+  public started = this.settings.started;
 
   constructor() {
     this.data();
@@ -48,18 +49,24 @@ export class ChatLog implements OnInit{
   }
 
   onCommand() {
+    if (!this.started()) {
+      return;
+    }
+
     if (this.commandInput().trim() == "start") {
       this.command.emit("start");
       this.settings.startFishing();
     } else if (this.commandInput().trim() == "stop") {
       this.command.emit("stop");
-    } else if (this.commandInput().includes("follow")) {
+    } else if (this.commandInput().split(" ")[0] == "follow") {
       const splitCommand = this.commandInput().split(" ");
       let player = splitCommand[1];
       if (!player) {
         player = "";
       }
       this.command.emit(splitCommand[0] + " " + player);
+    } else if (this.commandInput().trim() == "help") {
+      this.settings.sendLog("Available commands: start,stop,follow <name>");
     }
     this.commandInput.set("");
   }
