@@ -6,7 +6,6 @@ import { Topbar } from '../topbar/topbar';
 import { SettingsService } from '../settings-service';
 import { Alert } from '../alert/alert';
 
-// TODO: type in chat-log commands like !start,!stop etc? 
 
 @Component({
   selector: 'app-home',
