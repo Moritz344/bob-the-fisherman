@@ -61,6 +61,10 @@ export class SettingsService {
     return await (window as any).electronAPI.findWater();
   }
 
+  sendLog(msg: string,type?: string) {
+    this.logs.update( (x: any) => [...x,{msg: msg,time: this.getLogTime(),type: (type) ? type : ""}])
+  }
+
   async initLootItems() {
     const items = await (window as any).electronAPI.initLoot();
     const unique_items: any = [];
@@ -170,9 +174,7 @@ export class SettingsService {
       });
 
       (window as any).electronAPI.botError((msg: string) => {
-        //this.error.set({title: "Bot Crashed",msg: msg,error: true});
-        //console.log(this.error());
-        this.logs.update((old: {msg: string,time: string,type:string}[]) => [...old, {msg: msg,time: "",type: "error"}]);
+        this.logs.update((old: {msg: string,time: string,type:string}[]) => [...old, {msg: msg,time: this.getLogTime(),type: "error"}]);
         this.currentTask.set("Nothing");
         this.started.set(false);
         //(window as any).electronAPI.showError("Bot Error", msg);
