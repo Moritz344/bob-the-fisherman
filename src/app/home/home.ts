@@ -27,6 +27,7 @@ export class Home implements OnInit {
   public isLookingForWater = signal<boolean>(false);
 
   public currentBotTask = this.settings.currentTask;
+  public logs = this.settings.logs;
 
   constructor() {
     this.initBotSettings();
@@ -46,8 +47,6 @@ export class Home implements OnInit {
     this.started.update( (x: boolean) => !x );
     if (this.started()) {
       await this.settings.startBot(this.currentSelected());
-      this.isFishing.set(true);
-      this.currentBotTask.set("Fishing");
       await this.settings.initLootItems();
     } else {
       await this.settings.stopBot();
@@ -55,7 +54,7 @@ export class Home implements OnInit {
   }
 
   onCommand(command: string) {
-      console.log("COMMAND:",command);
+    console.log("COMMAND:",command);
     if (command == "start" ) {
       this.onStartFishing();
     } else if (command == "stop") {
