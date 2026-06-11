@@ -1,5 +1,9 @@
-# Bob The Fisherman
-minecraft bot for afk fishing
+
+<h1 align="center"> 
+  <img width="180" height="180" alt="bob" src="https://github.com/user-attachments/assets/25292f6c-2992-464e-93be-676711801f0e" />
+  <br>
+  Bob The Fisherman 
+</h1>
 
 > [!WARNING]
 > **This project is a work in progress. Expect changes and possible instability.**
