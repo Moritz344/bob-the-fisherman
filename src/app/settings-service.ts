@@ -181,7 +181,7 @@ export class SettingsService {
 
 
       (window as any).electronAPI.loot(async(loot: { name: string,displayName: string,count: number,img: string}) => {
-          this.logs.update((old: {msg: string,time: string,type:string}[]) => [...old,{msg:"Caught " + loot.displayName + "!" + "(" + loot.count + ")",time:this.getLogTime(),type: "info"}]);
+          this.logs.update((old: {msg: string,time: string,type:string}[]) => [...old,{msg:"Caught " + loot.displayName + "!" + " (" + loot.count + 1 + ")",time:this.getLogTime(),type: "info"}]);
           const exists = this.caughtItems().find(x => x.name === loot.name);
           if (!exists) {
             loot.img = await this.getItemImage(loot.name);
