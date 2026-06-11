@@ -82,30 +82,17 @@ function initBot(auth: string,username: string,port: number | string,version: st
       hideErrors: true
     });
 
+
     bot.on('error', (err: any) => {
-      if (err.code == 'ECONNREFUSED') {
-        prettyLog( red + "ERROR: Port " + port + " on "  + host + " not found" + resetColor);
-      } else if (err.code == 'ENOTFOUND') {
-        prettyLog(red + "ERROR: Server " + host + " not found" + resetColor);
-      } else if (err.code == 'ETIMEDOUT') {
-        prettyLog(red + "ERROR: Server unreachable" + resetColor);
-      } else if (err.code == 'ECONNRESET') {
-        prettyLog(red + "ERROR: Connection was killed" + resetColor)
-      } else if (err.code == 'EHOSTUNREACH') {
-        prettyLog(red + "ERROR: No route to host" + resetColor);
-      } else if (err.code == 'EAI_AGAIN') {
-        prettyLog(red + 'ERROR: DNS temporary failure' + resetColor)
-      } else if (err.code == 'EPIPE') {
-        prettyLog(red + 'ERROR: Wrote to a closed connection' + resetColor)
-      } else if (err.code == 'ERR_SOCKET_BAD_PORT') {
-        prettyLog(red + "ERROR: Bad port " + port + resetColor);
-      } else {
-        prettyLog(red + "ERROR: unexpected error: " + err.code + resetColor);
-      }
+      const errorMessage = engine.error(err.code,{ port,host});
+      prettyLog(red + errorMessage + resetColor);
     });
 
     const mcData = require('minecraft-data')(bot.version);
     engine.setBot(bot, mcData);
+    engine.setLootLogFn( (msg: {time: string,name: string,displayName: string,count: number,img: null }) => {
+      prettyLog("Caught " + msg.displayName + "! (" + msg.count + ")");
+    });
 
     bot.loadPlugin(pathfinder);
 
@@ -118,8 +105,7 @@ function initBot(auth: string,username: string,port: number | string,version: st
 
 
     bot.on("end",(reason: any) => {
-      const errorMessage = engine.error(reason.code,{host,port});
-      prettyLog(red + errorMessage + resetColor);
+      prettyLog("Bot stopped");
     })
 
 
