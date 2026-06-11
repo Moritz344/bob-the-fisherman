@@ -5,12 +5,17 @@ const { GoalFollow } = require('mineflayer-pathfinder').goals;
 let bot;
 let mcData;
 let logFn = console.log;
+let logLootFn = console.log;
 
 let botReady = false;
 let isFishing = false;
 
 function setLogFn(fn) {
   logFn = fn;
+}
+
+function setLootLogFn(fn) {
+  logLootFn = fn;
 }
 
 function setBot(botInstance, mcDataInstance) {
@@ -30,9 +35,13 @@ function setBotReady(v) {
   botReady = v;
 }
 
+function getBotReady() {
+  return botReady;
+}
+
 function error(code,botInfo) {
    if (!code) {
-     return "ERROR NOT FOUND.Bot Info: " + botInfo;
+     return "ERROR CODE NOT FOUND." + code;
    }
 
    if (code == 'ECONNREFUSED') {
@@ -107,9 +116,6 @@ async function startFishing() {
   }
   if (isFishing) {
     stopFishing();
-    setTimeout( async() => {
-      await startFishing();
-    },500)
     return;
   }
   const hasRod = checkForFishingRodInInventory();
@@ -183,7 +189,14 @@ function onCollect(player, entity) {
 
   const totalCount = slots.filter(x => x.displayName == item.displayName).reduce((sum, x) => sum + x.count, 0);
 
-  logFn("Caught " + item.displayName + " count: " + totalCount);
+  const lootLog = {
+    time: getLogTime(),
+    name: item.name,
+    displayName: item.displayName,
+    count: totalCount,
+    img: null
+  }
+  logLootFn(lootLog);
 
   setTimeout(() => startFishing(), 500);
 }
@@ -226,5 +239,7 @@ module.exports = {
   onCollect,
   eat,
   getLogTime,
-  error
+  error,
+  getBotReady,
+  setLootLogFn
 };
