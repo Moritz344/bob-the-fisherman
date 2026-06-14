@@ -120,7 +120,7 @@ async function startFishing() {
   }
   const hasRod = checkForFishingRodInInventory();
   if (!hasRod) {
-    logFn("No fishing rod in my inventory");
+    logFn("Bot has no fishing rod in his inventory");
     return;
   }
   const foundWater = await checkForWaterNearby();
