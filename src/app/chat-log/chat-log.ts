@@ -1,4 +1,4 @@
-import { Component,Output,EventEmitter,signal,Injector,OnInit,ElementRef,inject,ViewChild,afterNextRender } from '@angular/core';
+import { Component,Output,EventEmitter,signal,Injector,OnInit,ElementRef,inject,ViewChild,ViewChildren,QueryList,afterNextRender,effect } from '@angular/core';
 import { CommonModule } from '@angular/common'; 
 import { FormsModule } from '@angular/forms'; 
 import { SettingsService } from '../settings-service';
@@ -16,6 +16,7 @@ export class ChatLog implements OnInit{
   @ViewChild("container") container!: ElementRef;
   @ViewChild("messages") messages!: ElementRef;
   @ViewChild("inputBox") input!: ElementRef;
+  @ViewChildren("msg") messagesList!: QueryList<ElementRef>;
   @Output() command = new EventEmitter<string>;
 
   public timeMsg: string = "";
@@ -23,12 +24,18 @@ export class ChatLog implements OnInit{
   public commandInput = signal<string>("");
   public started = this.settings.started;
 
+  public commandsToUse = signal<string[]>(["start","stop","follow"]);
+  public foundCommands = signal<string[]>([]);
+
+  public searchValue = signal<string>("");
+
   constructor() {
-    this.data();
+    effect(() => {
+      this.data();
+      this.scrollToBottom();
+    })
     afterNextRender(() => this.scrollToBottom(), { injector: this.injector });
     afterNextRender(() => this.input.nativeElement.focus(), { injector: this.injector });
-
-    console.log("data",this.data());
 
   }
 
@@ -37,26 +44,54 @@ export class ChatLog implements OnInit{
   }
 
   scrollToBottom() {
+   if (!this.messages) { return; }
    const element = this.messages.nativeElement;
    if (element) {
     element.scrollTop = element.scrollHeight
    }
   }
+
   generateTestLogs() {
-    for (let i=0;i<10;i++) {
+    for (let i=0;i<50;i++) {
       this.data.update( (x: any) => [...x, {msg: "test" + i,time: "",type: "info"}])
     }
   }
 
-  onCommand() {
+  onSearchLogs() {
+    const firstMatch = this.messagesList.find(el =>
+      el.nativeElement.classList.contains('mark')
+    );
+    if (firstMatch) {
+      firstMatch.nativeElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  }
+
+  onPasteCommand(command: string) {
+    this.foundCommands.set([]);
+    this.commandInput.set(command);
+  }
+
+  onCommand(event: any) {
     if (!this.started()) {
+      return;
+    }
+
+    this.foundCommands.set(this.commandsToUse().filter( (command: string) => command.includes(this.commandInput())));
+
+    if (this.commandInput() == "") {
+      this.foundCommands.set([]);
+    }
+
+    if (event.key != "Enter") {
       return;
     }
 
     if (this.commandInput().trim() == "start") {
       this.command.emit("start");
+      this.commandInput.set("");
     } else if (this.commandInput().trim() == "stop") {
       this.command.emit("stop");
+      this.commandInput.set("");
     } else if (this.commandInput().split(" ")[0] == "follow") {
       const splitCommand = this.commandInput().split(" ");
       let player = splitCommand[1];
@@ -64,10 +99,11 @@ export class ChatLog implements OnInit{
         player = "";
       }
       this.command.emit(splitCommand[0] + " " + player);
+      this.commandInput.set("");
     } else if (this.commandInput().trim() == "help") {
-      this.settings.sendLog("Available commands: start,stop,follow <name>");
+      this.settings.sendLog("Available commands: " + this.commandsToUse());
+      this.commandInput.set("");
     }
-    this.commandInput.set("");
   }
 
   ngOnInit(): void {

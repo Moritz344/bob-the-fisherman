@@ -19,11 +19,11 @@
 .message-container{
   display: grid;
   grid-template-columns: repeat(2,90px);
+  max-height: 91%;
   padding: 10px;
   min-height: 0;
   line-height: 30px;
   overflow-y: scroll;
-
   overflow-x: hidden;
 }
 
@@ -75,4 +75,25 @@
   align-items: center;
 }
 
+.autocomplete-container{
+  border-radius: 5px;
+  position: absolute;
+  bottom: 50px;
+  right: 10px;
+  padding: 5px;
+  left: 10px;
+}
 
+.autocomplete-items{
+  display: flex;
+  flex-direction: column;
+}
+
+.autocomplete-items button{
+  font-size: 22px;
+  border-radius: 0px;
+}
+
+.mark{
+  color: yellow;
+}
