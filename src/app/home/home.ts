@@ -68,9 +68,7 @@ export class Home implements OnInit {
   }
 
   async onStopFishing() {
-    if (!this.isFishing()) {
-      return;
-    }
+    console.log("stop called");
     this.isFollowingPlayer.set(false);
     this.isLookingForWater.set(false);
 
@@ -81,17 +79,15 @@ export class Home implements OnInit {
   }
 
   async onStartFishing() {
-    if (this.isFishing()) {
-      return;
-    }
+    console.log("start called");
 
     this.isFollowingPlayer.set(false);
     this.isLookingForWater.set(false);
-
-    await this.settings.startFishing();
     this.currentBotTask.set("Fishing");
 
     this.isFishing.set(true);
+
+    await this.settings.startFishing();
   }
 
   async onFindWater() {
