@@ -85,6 +85,10 @@ async function initBot(auth,host, port,username,version) {
 
     });
 
+    bot.on("death",() => {
+      win.webContents.send("game-logs",  engine.getLogTime() + " Bot died");
+    })
+
     bot.on("error",(err) => {
       console.log(err);
       const errorMessage = engine.error(err.code,{ host,port});
