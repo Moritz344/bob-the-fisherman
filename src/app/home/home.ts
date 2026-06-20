@@ -34,6 +34,7 @@ export class Home implements OnInit {
 
   async initBotSettings() {
     const settings = await this.settings.getLastBotSettings();
+    console.log("settings:",settings);
     settings.started = false;
     this.currentSelected.set(settings);
 
@@ -68,7 +69,6 @@ export class Home implements OnInit {
   }
 
   async onStopFishing() {
-    console.log("stop called");
     this.isFollowingPlayer.set(false);
     this.isLookingForWater.set(false);
 
@@ -79,8 +79,6 @@ export class Home implements OnInit {
   }
 
   async onStartFishing() {
-    console.log("start called");
-
     this.isFollowingPlayer.set(false);
     this.isLookingForWater.set(false);
     this.currentBotTask.set("Fishing");
