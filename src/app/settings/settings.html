@@ -4,46 +4,38 @@
   <h1 class="h-center">General Bot Settings</h1>
   <div class="settings">
     <form [formRoot]="settingsForm">
-      <div>
+      <div class="settings-item">
         <label for="mode">Mode:</label>
-        <br>
         <select id="mode" [formField]="settingsForm.auth" (change)="saveBotGeneralSettings()">
           <option value="offline">offline</option>
           <option value="microsoft">online</option>
         </select>
       </div>
-        <br>
-      <div>
-        <label for="version">Version:</label>
-        <br>
+      <div class="settings-item">
+        <label style="margin-top: 5px" for="version">Version:</label>
         <select id="version" [formField]="settingsForm.version" (change)="saveBotGeneralSettings()">
           @for (version of versionData(); track $index) {
             <option [value]="version">{{ version }}</option>
           }
         </select>
       </div>
-        <br>
-      <div>
-        <label for="port">Port:</label>
-        <br>
+      <div class="settings-item">
+        <label style="margin-top: 5px" for="port">Port:</label>
         <input id="port" [formField]="$any(settingsForm.port)" placeholder="25565" (change)="saveBotGeneralSettings()">
       </div>
-        <br>
-      <div>
-        <label for="username">Username:</label>
-        <br>
+      <div class="settings-item">
+        <label style="margin-top: 5px" for="username">Username:</label>
         <div>
           <input id="username" [formField]="settingsForm.username" [class.error]="settingsForm.username().value() == ''" (change)="saveBotGeneralSettings()">
           <div class="error-container">
             @for (error of settingsForm.username().errors(); track $index) {
               <span class="error">{{ error.message }}</span>
             }
-        <br>
           </div>
         </div>
       </div>
-      <div>
-        <label for="host">Server:</label>
+      <div class="settings-item">
+        <label style="margin-top: 5px" for="host">Server:</label>
         <div>
           <input id="host" [formField]="settingsForm.host" spellcheck="false" [class.error]="settingsForm.host().value() == ''" (change)="saveBotGeneralSettings()">
           <div class="error-container">
