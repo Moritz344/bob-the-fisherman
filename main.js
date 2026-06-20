@@ -3,12 +3,11 @@ const {
   app,
   BrowserWindow,
   ipcMain,
-  dialog
+  dialog,
+  Notification
 } = require("electron");
 const engine = require("./bot-engine.cjs");
 const mineflayer = require('mineflayer');
-
-// TODO: send notifcation that bot caught something when window is not focused
 
 let bot;
 let win;
@@ -17,6 +16,9 @@ let store;
 const botStartCooldown = 2000;
 
 function stopBot() {
+  if (!bot) {
+    return;
+  }
   bot.quit();
 }
 
@@ -34,7 +36,7 @@ async function getItemImage(name) {
         "Content-Type": "application/json"
       }
     })
-    return response.url;
+    return response;
 
   } catch (err) {
     console.log("Error getting img for item",err);
@@ -42,6 +44,20 @@ async function getItemImage(name) {
 
 }
 
+async function sendNotificationWhenItemCaughtOnNotFocused(msg) {
+    if (!msg.name) {
+      console.log("item name not found");
+      return;
+    }
+   const { nativeImage } = require("electron");
+   const responseImg = await getItemImage(msg.name);
+   let icon;
+   if (responseImg.ok) {
+      const buffer = Buffer.from(await responseImg.arrayBuffer());
+      icon = nativeImage.createFromBuffer(buffer);
+   }
+   new Notification({title: "Bob The Fisherman",body: "Caught "  + msg.displayName + "!",icon}).show();
+}
 
 
 async function initBot(auth,host, port,username,version) {
@@ -73,8 +89,11 @@ async function initBot(auth,host, port,username,version) {
       win.webContents.send("game-logs", engine.getLogTime() + " " + msg);
     });
 
-    engine.setLootLogFn((msg) => {
+    engine.setLootLogFn(async(msg) => {
       win.webContents.send("loot-log",msg);
+      if (!win.isFocused()) {
+        sendNotificationWhenItemCaughtOnNotFocused(msg);
+      }
     });
 
     bot.once('spawn', async() => {
@@ -95,7 +114,7 @@ async function initBot(auth,host, port,username,version) {
       win.webContents.send("bot-error",errorMessage);
     })
     bot.on("end",() => {
-      win.webContents.send("game-log","Bot stopped");
+      win.webContents.send("game-logs","Bot stopped");
     })
 
 
@@ -151,6 +170,7 @@ async function createWindow() {
       preload: path.join(__dirname, "preload.js"),
     },
   });
+
 
   ipcMain.handle("get-minecraft-versions",(_) => {
     return mineflayer.testedVersions
@@ -216,12 +236,12 @@ async function createWindow() {
 
 
     return await Promise.all(slots.map(async (x) => {
-    let r = await getItemImage(x.name);
+    const responseItemImg = await getItemImage(x.name);
     return {
         name: x.name,
         displayName: x.displayName,
         count: x.count,
-        img: r ? r : null
+        img: responseItemImg.url ? responseItemImg.url : null
     }
   }));
 
