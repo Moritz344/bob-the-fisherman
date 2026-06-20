@@ -90,6 +90,9 @@ function followPlayer(playerName) {
 }
 
 function stopFollowingPlayer() {
+  if (!bot.pathfinder) {
+    return;
+  }
   logFn("Stop following player");
   bot.pathfinder.stop();
   bot.pathfinder.setGoal(null);
@@ -133,12 +136,13 @@ async function startFishing() {
     await eat();
   }
   isFishing = true;
+  bot.removeListener("playerCollect", onCollect);
   bot.on("playerCollect", onCollect);
   try {
     await bot.equip(bot.registry.itemsByName.fishing_rod.id, 'hand');
     await bot.fish();
   } catch (err) {
-    console.log(err);
+    logFn("Stopped fishing");
   }
   isFishing = false;
 }
@@ -172,7 +176,8 @@ async function checkForWaterNearby() {
   }
 }
 
-function onCollect(player, entity) {
+
+async function onCollect(player, entity) {
   if (player !== bot.entity) return;
   if (entity.type == "orb" || entity.name == 'experience_orb') return;
 
