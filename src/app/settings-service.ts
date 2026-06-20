@@ -3,7 +3,6 @@ import { Subject,BehaviorSubject } from 'rxjs';
 import { Router } from '@angular/router';
 import { currentSelectedType,currentSelectedActionType } from './models/current.model';
 
-// TODO: track currentMode across routes
 
 @Injectable({
   providedIn: 'root',
