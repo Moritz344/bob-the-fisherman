@@ -18,7 +18,7 @@
 
 .message-container{
   display: grid;
-  grid-template-columns: repeat(2,90px);
+  grid-template-columns: repeat(2,100px);
   max-height: 91%;
   padding: 10px;
   min-height: 0;
@@ -48,6 +48,10 @@
   background-color: transparent;
 }
 
+.warn{
+  color: var(--warning);
+}
+
 .command{
   color: var(--text-muted);
 
@@ -64,7 +68,7 @@
 }
 
 .msg{
-  width: 90vw;
+  white-space: nowrap;
 }
 
 .nothing {

@@ -62,7 +62,7 @@ export class ChatLog implements OnInit{
       el.nativeElement.classList.contains('mark')
     );
     if (firstMatch) {
-      firstMatch.nativeElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      firstMatch.nativeElement.scrollIntoView({ behavior: 'smooth' });
     }
   }
 
