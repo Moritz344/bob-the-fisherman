@@ -11,7 +11,7 @@ import { NgOptimizedImage } from '@angular/common';
 })
 export class Loot implements OnInit {
   public settings = inject(SettingsService);
-  public items = this.settings.caughtItems;
+  public items = this.settings.loot;
 
   constructor() {
   }
