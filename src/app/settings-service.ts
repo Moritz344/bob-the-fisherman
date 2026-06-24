@@ -1,7 +1,27 @@
-import { Injectable,inject,signal } from '@angular/core';
+import { Injectable,inject,signal,computed } from '@angular/core';
 import { Subject,BehaviorSubject } from 'rxjs';
 import { Router } from '@angular/router';
 import { currentSelectedType,currentSelectedActionType } from './models/current.model';
+
+interface LogMessage {
+  msg: string,
+  level: 'info' | 'warn' | 'error' | 'loot',
+  timestamp: string,
+
+  // loot log
+  img?: string | null,
+  count?: number,
+  name?: string,
+  displayName?: string
+}
+
+interface Loot {
+  img: string | null,
+  count: number,
+  name: string,
+  displayName: string
+
+}
 
 
 @Injectable({
@@ -9,11 +29,13 @@ import { currentSelectedType,currentSelectedActionType } from './models/current.
 })
 export class SettingsService {
   router = inject(Router);
-  public logs = signal<{msg: string,time: string,type: string}[]>([]);
   public started = signal<boolean>(false);
   public currentTab = signal<string>("");
   public currentTask = signal<string>("Nothing");
-  public error = signal<{title: string,msg: string,error: boolean}>({title: "",msg: "",error: false});
+
+  public logs = signal<LogMessage[]>([]);
+  public error = computed( () => this.logs().filter((log: LogMessage) => log.level == 'error'));
+  public loot = signal<LogMessage[]>([]);
 
   public settingsSelected = signal<currentSelectedType>({
     username: "fishermanbob69",
@@ -29,7 +51,6 @@ export class SettingsService {
     playerToFollow: ""
   })
 
-  public caughtItems = signal<{displayName: string,name: string,count: number,img: string}[]>([]);
 
 
   constructor() {
@@ -77,7 +98,7 @@ export class SettingsService {
         unique_items.push(x);
       }
     })
-    this.caughtItems.set(unique_items);
+    this.loot.set(unique_items);
   }
 
   async saveActionSettings(data: currentSelectedActionType) {
@@ -154,52 +175,30 @@ export class SettingsService {
   }
 
   public showFormsError(msg: string) {
-  (window as any).electronAPI.showError("Forms Error", msg);
+    (window as any).electronAPI.showError("Forms Error", msg);
+  }
+
+  private async updateLootLog(entry: LogMessage) {
+      const itemAlreadyExists = this.loot().find((x: any) => x.name == entry.name);
+      if (itemAlreadyExists) {
+        entry.img = await this.getItemImage(entry.name || "");
+      }
+      this.loot.update((list: any) => {
+        if (itemAlreadyExists) {
+          return list.map((x: any) => x.name == entry.name ? { ...x, count: x.count + 1 } : x);
+        }
+        return [...list,entry];
+      });
   }
 
   private async initGameLogs() {
-      (window as any).electronAPI.gameLogs((msg: string) => {
-        if (msg.includes("died")) {
-          this.currentTask.set("Nothing");
-        } else if (msg.includes("No fishing rod")) {
-          this.currentTask.set("Nothing");
+      (window as any).electronAPI.log(async(entry: LogMessage) => {
+        if (entry.level == "loot") {
+          this.updateLootLog(entry);
         }
-        const match = msg.match(/^(\d{2}:\d{2}:\d{2})\s+(.*)/);
-        let time = match![1];
-        if (!time) {
-          time = "";
-        }
-        let message = match![2];
-        if (!message) {
-          message = "";
-        }
-        this.logs.update((old: {msg: string,time: string,type:string}[]) => [...old,{msg:message,time:time,type: "info"}]);
-      });
+        this.logs.update(list => [...list,entry]);
+    });
 
-      (window as any).electronAPI.botError((msg: string) => {
-        this.logs.update((old: {msg: string,time: string,type:string}[]) => [...old, {msg: msg,time: this.getLogTime(),type: "error"}]);
-        this.currentTask.set("Nothing");
-        this.started.set(false);
-      });
-
-
-      (window as any).electronAPI.loot(async(loot: { name: string,displayName: string,count: number,img: string}) => {
-          this.logs.update((old: {msg: string,time: string,type:string}[]) => [...old,{msg:"Caught " + loot.displayName + "!" + " (" + loot.count   + ")",time:this.getLogTime(),type: "info"}]);
-          const exists = this.caughtItems().find(x => x.name === loot.name);
-          if (!exists) {
-            loot.img = await this.getItemImage(loot.name);
-          }
-
-        this.caughtItems.update( (items: {displayName: string,name: string,count: number,img: string}[]) => {
-          if (exists) {
-            return items.map((x) =>
-              x.name === loot.name ? { ...x,count: x.count + 1 }: x,
-            );
-          }
-
-          return [...items,loot];
-        });
-      });
   }
 
   public goto(route: string) {
