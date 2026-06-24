@@ -62,10 +62,11 @@ async function sendNotificationWhenItemCaughtOnNotFocused(msg) {
 
 async function initBot(auth,host, port,username,version) {
     try {
-
-      console.log("auth:",auth);
-      console.log("port",port);
-      win.webContents.send("game-logs",  engine.getLogTime() + " Creating Bot...");
+      win.webContents.send("log", {
+        msg: "Creating Bot...",
+        timestamp: engine.getLogTime(),
+        level: "info"
+      });
       bot = mineflayer.createBot({
         host,
         ...(port ? { port: Number(port) } : {}),
@@ -85,19 +86,21 @@ async function initBot(auth,host, port,username,version) {
 
     const mcData = require('minecraft-data')(bot.version);
     engine.setBot(bot, mcData);
-    engine.setLogFn((msg) => {
-      win.webContents.send("game-logs", engine.getLogTime() + " " + msg);
-    });
-
-    engine.setLootLogFn(async(msg) => {
-      win.webContents.send("loot-log",msg);
-      if (!win.isFocused()) {
-        sendNotificationWhenItemCaughtOnNotFocused(msg);
+    engine.setLogFn((logMsg) => {
+      if (logMsg.level == "loot") {
+        if (!win.isFocused()) {
+          sendNotificationWhenItemCaughtOnNotFocused(logMsg);
+        }
       }
+      win.webContents.send("log",logMsg);
     });
 
     bot.once('spawn', async() => {
-      win.webContents.send("game-logs",  engine.getLogTime() + " Bot spawned");
+      win.webContents.send("log", {
+        msg: "Bot spawned",
+        timestamp: engine.getLogTime(),
+        level: "info"
+      });
       setTimeout( () => {
         engine.setBotReady(true);
       },botStartCooldown);
@@ -105,17 +108,38 @@ async function initBot(auth,host, port,username,version) {
     });
 
     bot.on("death",() => {
-      win.webContents.send("game-logs",  engine.getLogTime() + " Bot died");
+      win.webContents.send("log", {
+        msg: "Bot died",
+        timestamp: engine.getLogTime(),
+        level: "error"
+      });
     })
 
     bot.on("error",(err) => {
-      console.log(err);
-      const errorMessage = engine.error(err.code,{ host,port});
-      win.webContents.send("bot-error",errorMessage);
+      win.webContents.send("log", {
+        msg: err.message,
+        timestamp: engine.getLogTime(),
+        level: "error"
+      });
     })
-    bot.on("end",() => {
-      win.webContents.send("game-logs","Bot stopped");
-    })
+    bot.on("end",(reason) => {
+      // TODO: limit attempts?
+      //if (reason == "socketClosed") {
+      //  win.webContents.send("log", {
+      //    msg: "Reconnecting in 5s...",
+      //    timestamp: engine.getLogTime(),
+      //    level: "info"
+      //  });
+      //  setTimeout( () => {
+      //    initBot(auth,host,port,username,version);
+      //  },500);
+      //}
+      win.webContents.send("log", {
+        msg: "Bot stopped",
+        timestamp: engine.getLogTime(),
+        level: "info"
+      });
+    });
 
 
     bot.on('whisper', async(username, message) => {
@@ -224,7 +248,11 @@ async function createWindow() {
   });
 
   ipcMain.handle("start-bot",async(_,host,port,version,auth,username) => {
-    win.webContents.send("game-logs",engine.getLogTime() + " Starting Bot...");
+    win.webContents.send("log", {
+      msg: "Starting Bot...",
+      timestamp: engine.getLogTime(),
+      level: "info"
+    });
     await initBot(auth,host,port,username,version);
   });
 
