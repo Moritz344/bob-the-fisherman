@@ -4,12 +4,11 @@ import { FormsModule } from '@angular/forms';
 import { ChatLog } from '../chat-log/chat-log';
 import { Topbar } from '../topbar/topbar';
 import { SettingsService } from '../settings-service';
-import { Alert } from '../alert/alert';
 
 
 @Component({
   selector: 'app-home',
-  imports: [ChatLog,Topbar,CommonModule,FormsModule,Alert],
+  imports: [ChatLog,Topbar,CommonModule,FormsModule],
   templateUrl: './home.html',
   styleUrl: './home.css',
 })
