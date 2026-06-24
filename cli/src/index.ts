@@ -11,6 +11,13 @@ import path from 'path';
 const program = new Command();
 const pkg = JSON.parse(fs.readFileSync(path.join(__dirname, "../package.json"), "utf-8"));
 
+interface LogMessage {
+  color?: string,
+  level?: string,
+  msg: string,
+  timestamp: string
+}
+
 let bot: any;
 const currentBotCommands = [
   {name: "!start",desc: "start fishing"},
@@ -25,7 +32,10 @@ const botStartCooldown = 2000;
 // colors
 const resetColor = '\x1b[0m';
 const red = '\x1b[31m';
+const orange = '\x1b[38;5;214m';
 const gray = '\x1b[90m';
+const white = '\x1b[37m';
+
 
 function HandleCommands() {
   program
@@ -84,28 +94,36 @@ function initBot(auth: string,username: string,port: number | string,version: st
 
 
     bot.on('error', (err: any) => {
-      const errorMessage = engine.error(err.code,{ port,host});
-      prettyLog(red + errorMessage + resetColor);
+      prettyLog({
+        msg: err.message,
+        timestamp: engine.getLogTime(),
+        color: red
+      });
     });
 
     const mcData = require('minecraft-data')(bot.version);
     engine.setBot(bot, mcData);
-    engine.setLootLogFn( (msg: {time: string,name: string,displayName: string,count: number,img: null }) => {
-      prettyLog("Caught " + msg.displayName + "! (" + msg.count + ")");
-    });
 
     bot.loadPlugin(pathfinder);
 
     bot.once('spawn', async() => {
-      prettyLog("Bot spawned on " + host );
+      prettyLog({
+        msg: "Bot spawned on " + host,
+        timestamp: engine.getLogTime(),
+        color: white
+      });
       setTimeout( () => {
         engine.setBotReady(true);
       },botStartCooldown);
     })
 
 
-    bot.on("end",(reason: any) => {
-      prettyLog("Bot stopped");
+    bot.on("end",() => {
+      prettyLog({
+        msg: "Bot stopped",
+        timestamp: engine.getLogTime(),
+        color: red
+      });
     })
 
 
@@ -160,8 +178,10 @@ function showInventory() {
 
 }
 
-function prettyLog(msg: string) {
-  const logString = gray + engine.getLogTime() + resetColor + " " + msg;
+function prettyLog(logMsg: LogMessage) {
+  const colorMap: Record<string,string> = { loot: white,info: white, warn: orange, error: red };
+  const color = logMsg.color || colorMap[logMsg.level || 'info'] || gray;
+  const logString = gray + logMsg.timestamp + resetColor + " " + color + logMsg.msg + resetColor;
   console.log(logString);
 }
 
