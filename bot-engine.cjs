@@ -2,10 +2,11 @@ const pathfinder = require('mineflayer-pathfinder').pathfinder;
 const Movements = require('mineflayer-pathfinder').Movements;
 const { GoalFollow } = require('mineflayer-pathfinder').goals;
 
+// TODO: deposit loot in chest
+
 let bot;
 let mcData;
 let logFn = console.log;
-let logLootFn = console.log;
 
 let botReady = false;
 let isFishing = false;
@@ -14,14 +15,11 @@ function setLogFn(fn) {
   logFn = fn;
 }
 
-function setLootLogFn(fn) {
-  logLootFn = fn;
-}
-
 function setBot(botInstance, mcDataInstance) {
   bot = botInstance;
   mcData = mcDataInstance;
 }
+
 
 function getBot() {
   return bot;
@@ -39,40 +37,22 @@ function getBotReady() {
   return botReady;
 }
 
-function error(code,botInfo) {
-   if (!code) {
-     return "ERROR CODE NOT FOUND." + code;
-   }
-
-   if (code == 'ECONNREFUSED') {
-     return "ERROR: Port " + botInfo.port + " on "  + botInfo.host + " not found";
-   } else if (code == 'ENOTFOUND') {
-     return "ERROR: Server " + botInfo.host + " not found";
-   } else if (code == 'ETIMEDOUT') {
-     return "ERROR: Server unreachable";
-   } else if (code == 'ECONNRESET') {
-     return "ERROR: Connection was killed";
-   } else if (code == 'EHOSTUNREACH') {
-     return "ERROR: No route to host";
-   } else if (code == 'EAI_AGAIN') {
-     return 'ERROR: DNS temporary failure';
-   } else if (code == 'EPIPE') {
-     return 'ERROR: Wrote to a closed connection';
-   } else if (code == 'ERR_SOCKET_BAD_PORT') {
-     return "ERROR: Bad port " + botInfo.port ;
-   } else {
-     return "ERROR: unexpected error: " + code;
-   }
-
-}
 
 function followPlayer(playerName) {
   if (!bot) {
-    logFn("Bot not found",bot);
+    logFn({
+      msg: "Bot not found",
+      timestamp: getLogTime(),
+      level: "error"
+    });
     return;
   }
   if (!playerName) {
-    logFn("No player specified");
+    logFn({
+      msg: "No player specified",
+      timestamp: getLogTime(),
+      level: "warn"
+    });
     return;
   }
   if (isFishing) {
@@ -81,10 +61,18 @@ function followPlayer(playerName) {
   bot.loadPlugin(pathfinder);
   const playerEntity = bot.nearestEntity(e => e.type == "player" && e.username == playerName);
   if (!playerEntity) {
-    logFn("I can't find this player to follow");
+    logFn({
+      msg: "I can't find this player to follow",
+      timestamp: getLogTime(),
+      level: "warn"
+    });
     return;
   }
-  logFn("Lead the way " + playerName + "!");
+  logFn({
+    msg: "Lead the way " + playerName + "!",
+    timestamp: getLogTime(),
+    level: "info"
+  });
   bot.pathfinder.setMovements(new Movements(bot, mcData));
   bot.pathfinder.setGoal(new GoalFollow(playerEntity, 1), true);
 }
@@ -93,7 +81,11 @@ function stopFollowingPlayer() {
   if (!bot.pathfinder) {
     return;
   }
-  logFn("Stop following player");
+  logFn({
+    msg: "Stop following player",
+    timestamp: getLogTime(),
+    level: "info"
+  });
   bot.pathfinder.stop();
   bot.pathfinder.setGoal(null);
 }
@@ -114,7 +106,11 @@ function getLogTime() {
 
 async function startFishing() {
   if (!botReady) {
-    logFn("Bot is not ready please wait a second");
+    logFn({
+      msg: "Bot is not ready please wait a second",
+      timestamp: getLogTime(),
+      level: "warn"
+    });
     return;
   }
   if (isFishing) {
@@ -123,16 +119,28 @@ async function startFishing() {
   }
   const hasRod = checkForFishingRodInInventory();
   if (!hasRod) {
-    logFn("Bot has no fishing rod in his inventory");
+    logFn({
+      msg: "Bot has no fishing rod in his inventory",
+      timestamp: getLogTime(),
+      level: "warn"
+    });
     return;
   }
   const foundWater = await checkForWaterNearby();
   if (!foundWater) {
-    logFn("No water nearby");
+    logFn({
+      msg: "No water nearby",
+      timestamp: getLogTime(),
+      level: "warn"
+    });
     return;
   }
   if (bot.food < 20) {
-    logFn("I need to eat! Hunger: " + bot.food);
+    logFn({
+      msg: "I need to eat! Hunger: " + bot.food,
+      timestamp: getLogTime(),
+      level: "warn"
+    });
     await eat();
   }
   isFishing = true;
@@ -142,7 +150,11 @@ async function startFishing() {
     await bot.equip(bot.registry.itemsByName.fishing_rod.id, 'hand');
     await bot.fish();
   } catch (err) {
-    logFn("Stopped fishing");
+    logFn({
+      msg: "Stopped fishing",
+      timestamp: getLogTime(),
+      level: "info"
+    });
   }
   isFishing = false;
 }
@@ -165,7 +177,11 @@ async function checkForWaterNearby() {
       maxDistance: maxDistance
     });
     if (!waterBlock) {
-      logFn("No water found in distance of " + maxDistance + " blocks");
+      logFn({
+        msg: "No water found in distance of " + maxDistance + " blocks",
+        timestamp: getLogTime(),
+        level: "warn"
+      });
       return false;
     }
     await bot.lookAt(waterBlock.position.offset(0.5, 2, 0.5), true);
@@ -192,16 +208,18 @@ async function onCollect(player, entity) {
 
   bot.removeListener("playerCollect", onCollect);
 
-  const totalCount = slots.filter(x => x.displayName == item.displayName).reduce((sum, x) => sum + x.count, 0);
+  const totalCount = slots.filter(x => x.displayName == item.displayName).reduce((sum, x) => sum + x.count, 0) + 1;
 
   const lootLog = {
-    time: getLogTime(),
+    timestamp: getLogTime(),
     name: item.name,
     displayName: item.displayName,
     count: totalCount,
-    img: null
+    img: null,
+    msg: "Caught " + item.displayName + " (" + totalCount + ")",
+    level: "loot"
   }
-  logLootFn(lootLog);
+  logFn(lootLog);
 
   setTimeout(() => startFishing(), 500);
 }
@@ -212,20 +230,32 @@ async function eat() {
   const items = slots.filter(x => x != null && bot.registry.foodsByName[x.name]);
 
   if (items.length == 0) {
-    logFn("No food in my inventory.");
+    logFn({
+      msg: "No food in my inventory.",
+      timestamp: getLogTime(),
+      level: "warn"
+    });
     return;
   }
 
   try {
     await bot.equip(items[0], 'hand');
   } catch (err) {
-    return logFn(err.message);
+    return logFn({
+      msg: err.message,
+      timestamp: getLogTime(),
+      level: "error"
+    });
   }
 
   try {
     await bot.consume();
   } catch (err) {
-    logFn(err.message);
+    logFn({
+      msg: err.message,
+      timestamp: getLogTime(),
+      level: "error"
+    });
   }
 }
 
@@ -244,7 +274,5 @@ module.exports = {
   onCollect,
   eat,
   getLogTime,
-  error,
   getBotReady,
-  setLootLogFn
 };
