@@ -21,6 +21,7 @@ interface LogMessage {
 let bot: any;
 const currentBotCommands = [
   {name: "!start",desc: "start fishing"},
+  {name: "!deposit",desc: "deposit loot"},
   {name: "!show inventory",desc: "list every item with name,count and slot number"},
   {name: "!find water",desc: "find water nearby and look at it"},
   {name: "!stop",desc: "stop fishing"},
@@ -172,6 +173,14 @@ function initBot(auth: string,username: string,port: number | string,version: st
         showInventory();
       } else if (message == "!help") {
         showHelp();
+      } else if (message == "!deposit") {
+        engine.depositLoot();
+      } else if (message.startsWith("!") && !currentBotCommands.includes(message)) {
+        prettyLog({
+          msg: "No such command found",
+          timestamp: engine.getLogTime(),
+          level: "error",
+        })
       }
     })
 
