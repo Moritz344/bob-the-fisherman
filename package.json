@@ -8,7 +8,8 @@
     "electron-dev": "cross-env ELECTRON_DEV=true electron .",
     "build": "ng build",
     "build:electron": "ng build && electron-builder --linux AppImage",
-    "electron-prod": "ng build && electron ."
+    "electron-prod": "ng build && electron .",
+    "release": "standard-version"
   },
   "prettier": {
     "printWidth": 100,
@@ -49,6 +50,7 @@
     "@angular/cli": "^21.0.2",
     "@angular/compiler-cli": "^21.0.0",
     "jsdom": "^27.1.0",
+    "standard-version": "^9.5.0",
     "typescript": "~5.9.2",
     "vitest": "^4.0.8"
   }
