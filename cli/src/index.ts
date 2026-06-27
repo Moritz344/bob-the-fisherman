@@ -80,8 +80,27 @@ function printAsciiArt(username: string) {
   console.log(ascii);
 }
 
+function getVersionSupport(version: string) {
+    const supportedVersions = engine.getSupportedVersions();
+    if (!supportedVersions.includes(version)) {
+      return false;
+    }
+    return true;
+
+}
 
 function initBot(auth: string,username: string,port: number | string,version: string,host: string) {
+
+    const isSupported = getVersionSupport(version);
+    if (!isSupported) {
+      prettyLog({
+        msg: "The Version " + version + " is not supported :/",
+        timestamp: engine.getLogTime(),
+        color: red
+      })
+      return;
+    }
+
     printAsciiArt(username);
     bot = mineflayer.createBot({
       host,
