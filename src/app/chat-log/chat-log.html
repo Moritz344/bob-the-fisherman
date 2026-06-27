@@ -25,8 +25,11 @@
   @if (foundCommands().length > 0) {
     <div class="autocomplete-container">
       <div class="autocomplete-items">
-        @for (command of foundCommands();track $index) {
-          <button (click)="onPasteCommand(command)" >{{ command }} </button>
+        @for (cmd of foundCommands();track $index) {
+            <button (click)="onPasteCommand(cmd.command)" >
+            <span style="font-size: 25px;margin-bottom: 0px">{{ cmd.command }} </span>
+            <p style="color: var(--text-muted);margin-top: 0px">{{ cmd.description }}</p>
+            </button>
         }
       </div>
     </div>
