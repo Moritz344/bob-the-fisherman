@@ -3,6 +3,11 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms'; 
 import { SettingsService } from '../settings-service';
 
+interface Command {
+  command: string,
+  description: string
+}
+
 @Component({
   selector: 'app-chat-log',
   imports: [CommonModule,FormsModule],
@@ -24,8 +29,14 @@ export class ChatLog implements OnInit{
   public commandInput = signal<string>("");
   public started = this.settings.started;
 
-  public commandsToUse = signal<string[]>(["start","stop","follow"]);
-  public foundCommands = signal<string[]>([]);
+  public commandsToUse = signal<Command[]>(
+    [
+      { command: "start",description: "Bot starts fishing" , },
+      { command: "stop",description: "Stop Bot Task" , },
+      { command: "follow",description: "Bot follows given player" , },
+  ]
+  );
+  public foundCommands = signal<Command[]>([]);
 
   public searchValue = signal<string>("");
 
@@ -76,7 +87,7 @@ export class ChatLog implements OnInit{
       return;
     }
 
-    this.foundCommands.set(this.commandsToUse().filter( (command: string) => command.includes(this.commandInput())));
+    this.foundCommands.set(this.commandsToUse().filter((x: any) => x.command.includes(this.commandInput()) ));
 
     if (this.commandInput() == "") {
       this.foundCommands.set([]);
