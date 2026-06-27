@@ -124,21 +124,22 @@ async function initBot(auth,host, port,username,version) {
     })
     bot.on("end",(reason) => {
       // TODO: limit attempts?
-      //if (reason == "socketClosed") {
-      //  win.webContents.send("log", {
-      //    msg: "Reconnecting in 5s...",
-      //    timestamp: engine.getLogTime(),
-      //    level: "info"
-      //  });
-      //  setTimeout( () => {
-      //    initBot(auth,host,port,username,version);
-      //  },500);
-      //}
+      if (reason == "socketClosed") {
+        //win.webContents.send("log", {
+        //  msg: "Reconnecting in 5s...",
+        //  timestamp: engine.getLogTime(),
+        //  level: "info"
+        //});
+        //setTimeout( () => {
+        //  initBot(auth,host,port,username,version);
+        //},500);
+      }
       win.webContents.send("log", {
         msg: "Bot stopped",
         timestamp: engine.getLogTime(),
-        level: "info"
+        level: "error"
       });
+      engine.setBotReady(false);
     });
 
 
@@ -197,7 +198,7 @@ async function createWindow() {
 
 
   ipcMain.handle("get-minecraft-versions",(_) => {
-    return mineflayer.testedVersions
+    return engine.getSupportedVersions();
   });
 
 
