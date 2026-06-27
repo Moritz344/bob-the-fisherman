@@ -2,6 +2,7 @@ const pathfinder = require('mineflayer-pathfinder').pathfinder;
 const Movements = require('mineflayer-pathfinder').Movements;
 const { GoalFollow } = require('mineflayer-pathfinder').goals;
 
+
 // TODO: deposit loot in chest
 
 let bot;
@@ -20,6 +21,10 @@ function setBot(botInstance, mcDataInstance) {
   mcData = mcDataInstance;
 }
 
+function getSupportedVersions() {
+  const mineflayer = require('mineflayer');
+  return mineflayer.testedVersions
+}
 
 function getBot() {
   return bot;
@@ -107,9 +112,9 @@ function getLogTime() {
 async function startFishing() {
   if (!botReady) {
     logFn({
-      msg: "Bot is not ready please wait a second",
+      msg: "Bot is not ready",
       timestamp: getLogTime(),
-      level: "warn"
+      level: "error"
     });
     return;
   }
@@ -275,4 +280,5 @@ module.exports = {
   eat,
   getLogTime,
   getBotReady,
+  getSupportedVersions
 };
