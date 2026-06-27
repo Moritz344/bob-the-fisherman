@@ -91,11 +91,17 @@
 .autocomplete-items{
   display: flex;
   flex-direction: column;
+  gap: 5px;
 }
+
 
 .autocomplete-items button{
   font-size: 22px;
-  border-radius: 0px;
+  border-radius: 5px;
+  padding: 10px;
+  text-align: left;
+  height: 80px;
+  width: 100%;
 }
 
 .mark{
