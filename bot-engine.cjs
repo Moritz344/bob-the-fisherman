@@ -1,3 +1,5 @@
+const { timestamp } = require('rxjs');
+
 const pathfinder = require('mineflayer-pathfinder').pathfinder;
 const Movements = require('mineflayer-pathfinder').Movements;
 const { GoalFollow } = require('mineflayer-pathfinder').goals;
@@ -10,6 +12,7 @@ let mcData;
 let logFn = console.log;
 
 let botReady = false;
+let isFollowingPlayer = false;
 let isFishing = false;
 
 function setLogFn(fn) {
@@ -40,6 +43,45 @@ function setBotReady(v) {
 
 function getBotReady() {
   return botReady;
+}
+
+async function depositLoot() {
+  const itemsToDeposit = bot.inventory.slots.filter(x => x != null && x.name != "fishing_rod");
+  if (itemsToDeposit.length == 0) {
+    logFn({
+      msg: "No loot to deposit",
+      timestamp: getLogTime(),
+      level: "error"
+    })
+    return;
+  }
+  if (isFishing) {
+    stopFishing();
+  }
+
+  if (isFollowingPlayer) {
+    stopFollowingPlayer();
+  }
+
+  const maxDistance = 10;
+
+  const chest = await bot.findBlock({
+    point: bot.entity.position,
+    matching: (block) => block.name === 'chest',
+    maxDistance: maxDistance
+  });
+  if (!chest) {
+    return;
+  }
+  await bot.lookAt(chest.position);
+  const chestContainer = await bot.openChest(chest);
+  for (const item  of itemsToDeposit) {
+    const countOfItem = bot.inventory.count(item.type)
+    await chestContainer.deposit(item.type, null, countOfItem);
+  }
+
+  chestContainer.close();
+
 }
 
 
@@ -78,6 +120,7 @@ function followPlayer(playerName) {
     timestamp: getLogTime(),
     level: "info"
   });
+  isFollowingPlayer = true;
   bot.pathfinder.setMovements(new Movements(bot, mcData));
   bot.pathfinder.setGoal(new GoalFollow(playerEntity, 1), true);
 }
@@ -91,6 +134,7 @@ function stopFollowingPlayer() {
     timestamp: getLogTime(),
     level: "info"
   });
+  isFollowingPlayer = false;
   bot.pathfinder.stop();
   bot.pathfinder.setGoal(null);
 }
@@ -280,5 +324,6 @@ module.exports = {
   eat,
   getLogTime,
   getBotReady,
-  getSupportedVersions
+  getSupportedVersions,
+  depositLoot
 };
