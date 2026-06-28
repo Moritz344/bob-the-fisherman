@@ -81,6 +81,10 @@ export class SettingsService {
     return await (window as any).electronAPI.findWater();
   }
 
+  async depositLoot() {
+    return await (window as any).electronAPI.depositLoot();
+  }
+
   sendLog(msg: string,type?: string) {
     this.logs.update( (x: any) => [...x,{msg: msg,time: this.getLogTime(),type: (type) ? type : ""}])
   }
