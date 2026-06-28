@@ -11,6 +11,7 @@ import path from 'path';
 const program = new Command();
 const pkg = JSON.parse(fs.readFileSync(path.join(__dirname, "../package.json"), "utf-8"));
 
+// TODO: make a file to store all interfaces
 interface LogMessage {
   color?: string,
   level?: string,
@@ -18,15 +19,14 @@ interface LogMessage {
   timestamp: string
 }
 
+interface BotCommand {
+  name: string,
+  desc: string,
+  onlyCli: boolean
+}
+
 let bot: any;
-const currentBotCommands = [
-  {name: "!start",desc: "start fishing"},
-  {name: "!deposit",desc: "deposit loot"},
-  {name: "!show inventory",desc: "list every item with name,count and slot number"},
-  {name: "!find water",desc: "find water nearby and look at it"},
-  {name: "!stop",desc: "stop fishing"},
-  {name: "!stop follow",desc: "stop following player"},
-]
+let currentBotCommands: BotCommand[] = [];
 
 const botStartCooldown = 2000;
 
@@ -68,6 +68,11 @@ function HandleCommands() {
 
 }
 HandleCommands();
+
+function initCommands() {
+  currentBotCommands = engine.getCommands();
+}
+initCommands();
 
 function printAsciiArt(username: string) {
     if (!username) {
@@ -153,7 +158,15 @@ function initBot(auth: string,username: string,port: number | string,version: st
           engine.startFishing()
         },1000);
       } else if (message == "!stop") {
-        engine.stopFishing();
+        const isFishing = engine.getIsFishing();
+        const isFollowingPlayer = engine.getIsFollowingPlayer();
+
+        if (isFishing) {
+          engine.stopFishing();
+        } else if (isFollowingPlayer) {
+          engine.stopFollowingPlayer();
+        }
+
       } else if (message == "!eat") {
         setTimeout( () => {
         engine.eat();
@@ -164,8 +177,6 @@ function initBot(auth: string,username: string,port: number | string,version: st
           const playerToFollow = msg[1].trim("");
           engine.followPlayer(playerToFollow);
         }
-      } else if (message == "!stop follow") {
-        engine.stopFollowingPlayer();
       } else if (message == "!find water") {
         engine.checkForWaterNearby();
       } else if (message == "!show inventory") {
