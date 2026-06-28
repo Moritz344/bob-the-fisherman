@@ -3,9 +3,10 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms'; 
 import { SettingsService } from '../settings-service';
 
-interface Command {
-  command: string,
-  description: string
+interface BotCommand {
+  name: string,
+  desc: string,
+  onlyCli: boolean
 }
 
 @Component({
@@ -29,19 +30,13 @@ export class ChatLog implements OnInit{
   public commandInput = signal<string>("");
   public started = this.settings.started;
 
-  public commandsToUse = signal<Command[]>(
-    [
-      { command: "start",description: "Bot starts fishing" , },
-      { command: "stop",description: "Stop Bot Task" , },
-      { command: "follow",description: "Bot follows given player" , },
-      { command: "deposit",description: "deposit loot" , },
-  ]
-  );
-  public foundCommands = signal<Command[]>([]);
+  public commandsToUse = signal<BotCommand[]>([]);
+  public foundCommands = signal<BotCommand[]>([]);
 
   public searchValue = signal<string>("");
 
   constructor() {
+    this.initBotCommands();
     effect(() => {
       this.data();
       this.scrollToBottom();
@@ -53,6 +48,13 @@ export class ChatLog implements OnInit{
 
   clear() {
     this.data.set([]);
+  }
+
+  async initBotCommands() {
+    const commands = await this.settings.getBotCommands();
+    console.log(commands)
+    this.commandsToUse.set(commands.filter((cmd: BotCommand) => !cmd.onlyCli));
+    console.log("bot cmd",this.commandsToUse());
   }
 
   scrollToBottom() {
@@ -88,7 +90,7 @@ export class ChatLog implements OnInit{
       return;
     }
 
-    this.foundCommands.set(this.commandsToUse().filter((x: any) => x.command.includes(this.commandInput()) ));
+    this.foundCommands.set(this.commandsToUse().filter((x: any) => x.name.includes(this.commandInput()) ));
 
     if (this.commandInput() == "") {
       this.foundCommands.set([]);
@@ -100,23 +102,35 @@ export class ChatLog implements OnInit{
       return;
     }
 
-    if (this.commandInput().trim() == "start") {
-      this.command.emit("start");
-    } else if (this.commandInput().trim() == "stop") {
-      this.command.emit("stop");
-    } else if (this.commandInput().split(" ")[0] == "follow") {
-      const splitCommand = this.commandInput().split(" ");
-      let player = splitCommand[1];
-      if (!player) {
-        player = "";
-      }
-      this.command.emit(splitCommand[0] + " " + player);
-    } else if (this.commandInput().trim() == "help") {
-      this.settings.sendLog("Available commands: " + this.commandsToUse());
-    } else if (this.commandInput().trim() == "deposit") {
-      this.command.emit("deposit");
+    const input = this.commandInput().trim();
+    const cmd = input.split(" ")[0];
+
+    switch (cmd) {
+      case "start":
+        this.command.emit("start");
+        break;
+      case "stop":
+        this.command.emit("stop");
+        break;
+      case "follow":
+        const splitCommand = this.commandInput().split(" ");
+        let player = splitCommand[1];
+        if (!player) {
+          player = "";
+        }
+        this.command.emit(cmd + " " + player);
+        break;
+      case "help":
+        this.settings.sendLog("Commands: " + this.commandsToUse());
+        break;
+      case "deposit":
+        this.command.emit("deposit");
+        break;
+      default:
+        break;
     }
-    this.commandInput.set("");
+
+   this.commandInput.set("");
   }
 
   ngOnInit(): void {
