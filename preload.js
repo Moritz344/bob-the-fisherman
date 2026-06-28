@@ -17,4 +17,5 @@ contextBridge.exposeInMainWorld("electronAPI", {
   showError: (title,msg) => ipcRenderer.invoke("show-error",title,msg),
   followPlayer: (name) => ipcRenderer.invoke("follow-player",name),
   findWater: () => ipcRenderer.invoke("find-water"),
+  depositLoot: () => ipcRenderer.invoke("deposit-loot"),
 });
