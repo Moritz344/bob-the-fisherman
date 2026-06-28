@@ -46,7 +46,10 @@ function getBotReady() {
 }
 
 async function depositLoot() {
-  const itemsToDeposit = bot.inventory.slots.filter(x => x != null && x.name != "fishing_rod");
+  const itemsToDeposit = bot.inventory.slots.filter(x => x != null && x.name != "fishing_rod")
+  .map(x => [x.type, { name: x.displayName, type: x.type }]);
+  const uniqueItemsToDeposit = [...new Map(itemsToDeposit).values()];
+
   if (itemsToDeposit.length == 0) {
     logFn({
       msg: "No loot to deposit",
@@ -75,13 +78,27 @@ async function depositLoot() {
   }
   await bot.lookAt(chest.position);
   const chestContainer = await bot.openChest(chest);
-  for (const item  of itemsToDeposit) {
+  for (const item  of uniqueItemsToDeposit) {
     const countOfItem = bot.inventory.count(item.type)
-    await chestContainer.deposit(item.type, null, countOfItem);
+    try {
+      await chestContainer.deposit(item.type, null, countOfItem);
+      logFn({
+        msg: "Deposited " + item.name + " (" + countOfItem + ")",
+        timestamp: getLogTime(),
+        level: "info"
+      })
+    } catch (err) {
+      logFn({
+        msg: "Error depositing item",
+        timestamp: getLogTime(),
+        level: "error"
+      });
+
+    }
   }
 
   chestContainer.close();
-
+  await checkForWaterNearby();
 }
 
 
