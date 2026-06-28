@@ -64,8 +64,15 @@ export class Home implements OnInit {
       if (playerToFollow) {
         this.onFollowPlayer(playerToFollow);
       }
+    } else if (command == "deposit") {
+      this.onDepositLoot();
     }
   }
+
+  async onDepositLoot() {
+    this.settings.depositLoot();
+  }
+
 
   async onStopFishing() {
     this.isFollowingPlayer.set(false);
