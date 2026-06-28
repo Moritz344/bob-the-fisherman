@@ -33,12 +33,26 @@ function getIsFishing() {
   return isFishing;
 }
 
+function getIsFollowingPlayer() {
+  return isFollowingPlayer;
+}
+
 function setBotReady(v) {
   botReady = v;
 }
 
 function getBotReady() {
   return botReady;
+}
+
+function getCommands() {
+  return [
+    { name: "start",desc: "start fishing",onlyCli: false},
+    { name: "deposit",desc: "deposit loot",onlyCli: false},
+    { name: "show inventory",desc: "list every item with name,count and slot number",onlyCli: true},
+    { name: "stop",desc: "stop current task",onlyCli: false},
+    { name: "follow",desc: "follow a player",onlyCli: false},
+  ]
 }
 
 async function depositLoot() {
@@ -338,5 +352,7 @@ module.exports = {
   getLogTime,
   getBotReady,
   getSupportedVersions,
-  depositLoot
+  depositLoot,
+  getCommands,
+  getIsFollowingPlayer
 };
