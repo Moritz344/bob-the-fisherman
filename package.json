@@ -1,6 +1,6 @@
 {
   "name": "bob-the-fisherman",
-  "version": "0.0.183",
+  "version": "0.0.184",
   "main": "main.js",
   "scripts": {
     "ng": "ng",
