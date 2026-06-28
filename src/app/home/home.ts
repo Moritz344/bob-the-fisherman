@@ -54,18 +54,26 @@ export class Home implements OnInit {
 
   onCommand(command: string) {
     console.log("COMMAND:",command);
-    if (command == "start" ) {
-      this.onStartFishing();
-    } else if (command == "stop") {
-      this.onStopFollowingPlayer();
-      this.onStopFishing();
-    } else if (command.includes("follow")) {
-      const playerToFollow = command.split(" ")[1];
-      if (playerToFollow) {
-        this.onFollowPlayer(playerToFollow);
-      }
-    } else if (command == "deposit") {
-      this.onDepositLoot();
+    const cmd = command.split(" ")[0];
+    switch (cmd) {
+      case "start":
+        this.onStartFishing();
+        break;
+      case "stop":
+        this.onStopFollowingPlayer();
+        this.onStopFishing();
+        break;
+      case "follow":
+        const playerToFollow = command.split(" ")[1];
+        if (playerToFollow) {
+          this.onFollowPlayer(playerToFollow);
+        }
+        break;
+      case "deposit":
+        this.onDepositLoot();
+        break;
+      default:
+        break;
     }
   }
 
