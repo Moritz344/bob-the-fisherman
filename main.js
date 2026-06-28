@@ -131,7 +131,7 @@ async function initBot(auth,host, port,username,version) {
         //  level: "info"
         //});
         //setTimeout( () => {
-        //  initBot(auth,host,port,username,version);
+       //  initBot(auth,host,port,username,version);
         //},500);
       }
       win.webContents.send("log", {
@@ -246,6 +246,10 @@ async function createWindow() {
 
   ipcMain.handle("start-fishing",async(_) => {
     await engine.startFishing();
+  });
+
+  ipcMain.handle("deposit-loot",async(_) => {
+    await engine.depositLoot();
   });
 
   ipcMain.handle("start-bot",async(_,host,port,version,auth,username) => {
