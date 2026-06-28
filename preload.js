@@ -18,4 +18,5 @@ contextBridge.exposeInMainWorld("electronAPI", {
   followPlayer: (name) => ipcRenderer.invoke("follow-player",name),
   findWater: () => ipcRenderer.invoke("find-water"),
   depositLoot: () => ipcRenderer.invoke("deposit-loot"),
+  getBotCommands: () => ipcRenderer.invoke("get-bot-commands"),
 });

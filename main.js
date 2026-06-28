@@ -252,6 +252,10 @@ async function createWindow() {
     await engine.depositLoot();
   });
 
+  ipcMain.handle("get-bot-commands",async(_) => {
+    return await engine.getCommands();
+  });
+
   ipcMain.handle("start-bot",async(_,host,port,version,auth,username) => {
     win.webContents.send("log", {
       msg: "Starting Bot...",
