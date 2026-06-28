@@ -34,6 +34,7 @@ export class ChatLog implements OnInit{
       { command: "start",description: "Bot starts fishing" , },
       { command: "stop",description: "Stop Bot Task" , },
       { command: "follow",description: "Bot follows given player" , },
+      { command: "deposit",description: "deposit loot" , },
   ]
   );
   public foundCommands = signal<Command[]>([]);
@@ -82,7 +83,7 @@ export class ChatLog implements OnInit{
     this.commandInput.set(command);
   }
 
-  onCommand(event: any) {
+  onFindCommand() {
     if (!this.started()) {
       return;
     }
@@ -92,17 +93,17 @@ export class ChatLog implements OnInit{
     if (this.commandInput() == "") {
       this.foundCommands.set([]);
     }
+  }
 
-    if (event.key != "Enter") {
+  onCommand() {
+    if (!this.started()) {
       return;
     }
 
     if (this.commandInput().trim() == "start") {
       this.command.emit("start");
-      this.commandInput.set("");
     } else if (this.commandInput().trim() == "stop") {
       this.command.emit("stop");
-      this.commandInput.set("");
     } else if (this.commandInput().split(" ")[0] == "follow") {
       const splitCommand = this.commandInput().split(" ");
       let player = splitCommand[1];
@@ -110,11 +111,12 @@ export class ChatLog implements OnInit{
         player = "";
       }
       this.command.emit(splitCommand[0] + " " + player);
-      this.commandInput.set("");
     } else if (this.commandInput().trim() == "help") {
       this.settings.sendLog("Available commands: " + this.commandsToUse());
-      this.commandInput.set("");
+    } else if (this.commandInput().trim() == "deposit") {
+      this.command.emit("deposit");
     }
+    this.commandInput.set("");
   }
 
   ngOnInit(): void {
