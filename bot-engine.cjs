@@ -1,11 +1,7 @@
-const { timestamp } = require('rxjs');
-
 const pathfinder = require('mineflayer-pathfinder').pathfinder;
 const Movements = require('mineflayer-pathfinder').Movements;
 const { GoalFollow } = require('mineflayer-pathfinder').goals;
 
-
-// TODO: deposit loot in chest
 
 let bot;
 let mcData;
