@@ -91,7 +91,6 @@ function getVersionSupport(version: string) {
 }
 
 function initBot(auth: string,username: string,port: number | string,version: string,host: string) {
-
     const isSupported = getVersionSupport(version);
     if (!isSupported) {
       prettyLog({
