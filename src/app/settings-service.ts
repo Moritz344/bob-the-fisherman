@@ -85,6 +85,11 @@ export class SettingsService {
     return await (window as any).electronAPI.depositLoot();
   }
 
+
+  async getBotCommands() {
+    return await (window as any).electronAPI.getBotCommands();
+  }
+
   sendLog(msg: string,type?: string) {
     this.logs.update( (x: any) => [...x,{msg: msg,time: this.getLogTime(),type: (type) ? type : ""}])
   }
