@@ -46,7 +46,6 @@ export class Home implements OnInit {
     this.started.update( (x: boolean) => !x );
     if (this.started()) {
       await this.settings.startBot(this.currentSelected());
-      await this.settings.initLootItems();
     } else {
       await this.settings.stopBot();
     }
@@ -78,7 +77,8 @@ export class Home implements OnInit {
   }
 
   async onDepositLoot() {
-    this.settings.depositLoot();
+    await this.settings.depositLoot();
+    await this.settings.initLootItems();
   }
 
 
