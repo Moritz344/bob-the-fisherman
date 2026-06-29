@@ -51,12 +51,11 @@ export class Settings implements OnInit{
       started: this.settings.getStarted()
     });
 
-    const actionSettings = this.settings.getActionSettings();
-    this.currentSelectedAction.set({
-      playerToFollow: actionSettings.playerToFollow,
-      waterMaxDistance: actionSettings.waterMaxDistance,
-    });
-    console.log("settings got:",this.currentSelectedAction());
+    //const actionSettings = this.settings.getActionSettings();
+    //this.currentSelectedAction.set({
+    //  playerToFollow: actionSettings.playerToFollow,
+    //  waterMaxDistance: actionSettings.waterMaxDistance,
+    //});
   }
 
    async initVersions() {
