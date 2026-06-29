@@ -1,36 +1,21 @@
 import { createRequire } from 'module';
 const require = createRequire(import.meta.url);
 const engine = require("../../bot-engine.cjs");
-
 const mineflayer = require('mineflayer')
 const pathfinder = require('mineflayer-pathfinder').pathfinder;
 import { Command } from 'commander';
 import fs from 'fs';
 import path from 'path';
+import type { BotCommand, LogMessage, Profile } from './types.ts';
 
 const program = new Command();
 const pkg = JSON.parse(fs.readFileSync(path.join(__dirname, "../package.json"), "utf-8"));
 
-// TODO: make a file to store all interfaces
-interface LogMessage {
-  color?: string,
-  level?: string,
-  msg: string,
-  timestamp: string
-}
-
-interface BotCommand {
-  name: string,
-  desc: string,
-  onlyCli: boolean
-}
-
 let bot: any;
 let currentBotCommands: BotCommand[] = [];
-
 const botStartCooldown = 2000;
+let botProfiles: Profile[] = [];
 
-// colors
 const resetColor = '\x1b[0m';
 const red = '\x1b[31m';
 const orange = '\x1b[38;5;214m';
@@ -56,6 +41,14 @@ function HandleCommands() {
     })
     .description("start bot")
 
+  program
+    .command("profile")
+    .argument("<name>")
+    .action((name: string) => {
+      initBotWithProfile(name);
+    })
+    .description("start bot with a profile")
+
 
   program
     .command("commands")
@@ -67,12 +60,12 @@ function HandleCommands() {
   program.parse(process.argv);
 
 }
+initCommands();
 HandleCommands();
 
 function initCommands() {
   currentBotCommands = engine.getCommands();
 }
-initCommands();
 
 function printAsciiArt(username: string) {
     if (!username) {
@@ -95,11 +88,41 @@ function getVersionSupport(version: string) {
 
 }
 
+function initProfiles() {
+  const rawProfilesFile = fs.readFileSync(path.join(__dirname, "profiles.json"), "utf-8");
+  botProfiles = JSON.parse(rawProfilesFile);
+}
+
+function initBotWithProfile(name: string) {
+  initProfiles();
+  if (!botProfiles) {
+    prettyLog({
+      msg: "Couldn't load profile",
+      timestamp: engine.getLogTime(),
+      color: red
+    })
+    return;
+  }
+
+  const botProfile = botProfiles.find((profile: any) => profile.name == name);
+  if (!botProfile) {
+    prettyLog({
+      msg: "Profile '" + name + "' not found",
+      timestamp: engine.getLogTime(),
+      color: red
+    })
+    return;
+  }
+
+  initBot(botProfile.auth,botProfile.username,botProfile.port ?? 0,botProfile.version,botProfile.host)
+
+}
+
 function initBot(auth: string,username: string,port: number | string,version: string,host: string) {
     const isSupported = getVersionSupport(version);
     if (!isSupported) {
       prettyLog({
-        msg: "The Version " + version + " is not supported :/",
+        msg: "The Version " + version + " is not supported",
         timestamp: engine.getLogTime(),
         color: red
       })
@@ -118,11 +141,13 @@ function initBot(auth: string,username: string,port: number | string,version: st
 
 
     bot.on('error', (err: any) => {
-      prettyLog({
-        msg: err.message,
-        timestamp: engine.getLogTime(),
-        color: red
-      });
+      if (err.message.length > 0) {
+        prettyLog({
+          msg: err.message,
+          timestamp: engine.getLogTime(),
+          color: red
+        });
+      }
     });
 
     const mcData = require('minecraft-data')(bot.version);
@@ -197,7 +222,7 @@ function initBot(auth: string,username: string,port: number | string,version: st
 }
 
 function showHelp() {
-  currentBotCommands.forEach( (command: {name: string,desc: string}) => {
+  currentBotCommands.forEach( (command: BotCommand) => {
     console.log(command.name + " - " + command.desc);
   });
   console.log("");
