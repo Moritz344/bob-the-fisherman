@@ -86,6 +86,7 @@ export class SettingsService {
   }
 
 
+
   async getBotCommands() {
     return await (window as any).electronAPI.getBotCommands();
   }
@@ -112,7 +113,6 @@ export class SettingsService {
 
   async saveActionSettings(data: currentSelectedActionType) {
     this.settingsActionSelected.set(data);
-    console.log(this.settingsActionSelected());
     return await (window as any).electronAPI.saveBotActionSettings(data);
   }
 
@@ -163,6 +163,7 @@ export class SettingsService {
     return await (window as any).electronAPI.getActionSettings();
   }
 
+
   async getLastBotSettings() {
     return await (window as any).electronAPI.getBotSettings();
   }
@@ -189,7 +190,7 @@ export class SettingsService {
 
   private async updateLootLog(entry: LogMessage) {
       const itemAlreadyExists = this.loot().find((x: any) => x.name == entry.name);
-      if (itemAlreadyExists) {
+      if (!itemAlreadyExists) {
         entry.img = await this.getItemImage(entry.name || "");
       }
       this.loot.update((list: any) => {
