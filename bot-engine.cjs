@@ -260,7 +260,7 @@ async function checkForWaterNearby() {
       });
       return false;
     }
-    await bot.lookAt(waterBlock.position.offset(0.5, 2, 0.5), true);
+    await bot.lookAt(waterBlock.position.offset(0.5, 2, 0.5), false);
     return true;
   } catch (err) {
     console.log(err);
