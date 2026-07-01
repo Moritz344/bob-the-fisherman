@@ -10,6 +10,7 @@ let logFn = console.log;
 let botReady = false;
 let isFollowingPlayer = false;
 let isFishing = false;
+let isDepositing = false;
 
 function setLogFn(fn) {
   logFn = fn;
@@ -27,6 +28,21 @@ function getSupportedVersions() {
 
 function getBot() {
   return bot;
+}
+
+function stopCurrentTask(task) {
+  switch (task) {
+    case "Fishing":
+      stopFishing();
+      break;
+    case "Following":
+      stopFollowingPlayer();
+      break;
+    default:
+      break;
+  }
+
+
 }
 
 function getIsFishing() {
@@ -92,6 +108,7 @@ async function depositLoot() {
     const countOfItem = bot.inventory.count(item.type)
     try {
       await chestContainer.deposit(item.type, null, countOfItem);
+      isDepositing = true;
       logFn({
         msg: "Deposited " + item.name + " (" + countOfItem + ")",
         timestamp: getLogTime(),
@@ -103,14 +120,20 @@ async function depositLoot() {
         timestamp: getLogTime(),
         level: "error"
       });
-
     }
   }
 
   chestContainer.close();
+  isDepositing = false;
   await checkForWaterNearby();
 }
 
+async function stopDepositing() {
+  chestContainer.close();
+  isDepositing = false;
+  await checkForWaterNearby();
+
+}
 
 function followPlayer(playerName) {
   if (!bot) {
@@ -354,5 +377,6 @@ module.exports = {
   getSupportedVersions,
   depositLoot,
   getCommands,
-  getIsFollowingPlayer
+  getIsFollowingPlayer,
+  stopCurrentTask
 };
