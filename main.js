@@ -115,6 +115,7 @@ async function initBot(auth,host, port,username,version) {
       });
     })
 
+
     bot.on("error",(err) => {
       win.webContents.send("log", {
         msg: err.message,
@@ -201,6 +202,9 @@ async function createWindow() {
     return engine.getSupportedVersions();
   });
 
+  ipcMain.handle("stop-current-task",(_,task) => {
+    engine.stopCurrentTask(task);
+  })
 
   ipcMain.handle("follow-player",(_,name) => {
     engine.followPlayer(name);
