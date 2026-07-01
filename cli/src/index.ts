@@ -16,6 +16,8 @@ let currentBotCommands: BotCommand[] = [];
 const botStartCooldown = 2000;
 let botProfiles: Profile[] = [];
 
+const profileExample: Profile[] = [{ name: "main", auth: "microsoft", username: "example_bot_name", version: "1.18.2", host: "localhost", port: 43863 }];
+
 const resetColor = '\x1b[0m';
 const red = '\x1b[31m';
 const orange = '\x1b[38;5;214m';
@@ -89,8 +91,19 @@ function getVersionSupport(version: string) {
 }
 
 function initProfiles() {
-  const rawProfilesFile = fs.readFileSync(path.join(__dirname, "profiles.json"), "utf-8");
-  botProfiles = JSON.parse(rawProfilesFile);
+  try {
+    const rawProfilesFile = fs.readFileSync(path.join(__dirname, "profiles.json"), "utf-8");
+    botProfiles = JSON.parse(rawProfilesFile);
+  } catch (error: any) {
+   if (error.code === 'ENOENT') {
+    fs.writeFileSync(path.join(__dirname, "profiles.json"),JSON.stringify(profileExample,null,2));
+   } else if (error instanceof SyntaxError) {
+     console.error("profiles.json has invalid JSON");
+   } else {
+     throw error;
+   }
+
+  }
 }
 
 function initBotWithProfile(name: string) {
