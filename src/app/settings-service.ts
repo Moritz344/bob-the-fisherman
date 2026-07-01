@@ -69,6 +69,10 @@ export class SettingsService {
     return await (window as any).electronAPI.stopFishing();
   }
 
+  async stopCurrentTask(task: string) {
+    return await (window as any).electronAPI.stopCurrentTask(task);
+  }
+
   async followPlayer(name: string) {
     return await (window as any).electronAPI.followPlayer(name);
   }
@@ -84,7 +88,6 @@ export class SettingsService {
   async depositLoot() {
     return await (window as any).electronAPI.depositLoot();
   }
-
 
 
   async getBotCommands() {
