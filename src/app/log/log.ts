@@ -2,8 +2,6 @@ import { Component } from '@angular/core';
 import { Topbar } from '../topbar/topbar';
 import { ChatLog } from '../chat-log/chat-log';
 
-// TODO: Search for logs
-
 @Component({
   selector: 'app-log',
   imports: [Topbar,ChatLog],
