@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms'; 
 import { SettingsService } from '../settings-service';
 
+
 interface BotCommand {
   name: string,
   desc: string,
@@ -34,6 +35,8 @@ export class ChatLog implements OnInit{
   public foundCommands = signal<BotCommand[]>([]);
 
   public searchValue = signal<string>("");
+  public currentBotTask = this.settings.currentTask;
+
 
   constructor() {
     this.initBotCommands();
@@ -97,6 +100,7 @@ export class ChatLog implements OnInit{
     }
   }
 
+
   onCommand() {
     if (!this.started()) {
       return;
@@ -107,24 +111,32 @@ export class ChatLog implements OnInit{
 
     switch (cmd) {
       case "start":
-        this.command.emit("start");
+        this.settings.stopCurrentTask(this.currentBotTask());
+        this.currentBotTask.set("Fishing");
+        this.settings.startFishing();
         break;
       case "stop":
-        this.command.emit("stop");
+        this.settings.stopCurrentTask(this.currentBotTask());
+        this.currentBotTask.set("Nothing");
         break;
       case "follow":
+        this.settings.stopCurrentTask(this.currentBotTask());
         const splitCommand = this.commandInput().split(" ");
         let player = splitCommand[1];
         if (!player) {
-          player = "";
+          this.currentBotTask.set("Nothing");
+          return;
         }
-        this.command.emit(cmd + " " + player);
+        this.currentBotTask.set("Following");
+        this.settings.followPlayer(player);
         break;
       case "help":
         this.settings.sendLog("Commands: " + this.commandsToUse());
         break;
       case "deposit":
-        this.command.emit("deposit");
+        this.settings.stopCurrentTask(this.currentBotTask());
+        this.currentBotTask.set("Depositing");
+        this.settings.depositLoot();
         break;
       default:
         break;
