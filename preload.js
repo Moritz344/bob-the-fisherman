@@ -19,4 +19,5 @@ contextBridge.exposeInMainWorld("electronAPI", {
   findWater: () => ipcRenderer.invoke("find-water"),
   depositLoot: () => ipcRenderer.invoke("deposit-loot"),
   getBotCommands: () => ipcRenderer.invoke("get-bot-commands"),
+  stopCurrentTask: (task) => ipcRenderer.invoke("stop-current-task",task),
 });
