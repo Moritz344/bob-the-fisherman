@@ -1,5 +1,5 @@
 {
-  "name": "bob-fisher-engine",
+  "name": "bob-the-fisherman-cli",
   "version": "0.0.183",
   "module": "index.ts",
   "type": "module",
