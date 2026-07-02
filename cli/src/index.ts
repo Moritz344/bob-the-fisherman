@@ -6,7 +6,7 @@ const pathfinder = require('mineflayer-pathfinder').pathfinder;
 import { Command } from 'commander';
 import fs from 'fs';
 import os from 'os';
-import toml from 'bun:toml';
+import toml from 'toml';
 import { resolve } from "path";
 import path from 'path';
 import type { BotCommand, LogMessage, Profile } from './utils/types.ts';
