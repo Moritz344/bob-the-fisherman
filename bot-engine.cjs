@@ -11,9 +11,18 @@ let botReady = false;
 let isFollowingPlayer = false;
 let isFishing = false;
 let isDepositing = false;
+let botFishingCooldown = 500;
 
 function setLogFn(fn) {
   logFn = fn;
+}
+
+function setBotFishingCooldown(cooldown) {
+  botFishingCooldown = cooldown;
+}
+
+function getBotFishingCooldown() {
+  return botFishingCooldown;
 }
 
 function setBot(botInstance, mcDataInstance) {
@@ -68,6 +77,7 @@ function getCommands() {
     { name: "show inventory",desc: "list every item with name,count and slot number",onlyCli: true},
     { name: "stop",desc: "stop current task",onlyCli: false},
     { name: "follow",desc: "follow a player",onlyCli: false},
+    { name: "drop",desc: "drop an item",onlyCli: false},
   ]
 }
 
@@ -128,11 +138,27 @@ async function depositLoot() {
   await checkForWaterNearby();
 }
 
-async function stopDepositing() {
-  chestContainer.close();
-  isDepositing = false;
-  await checkForWaterNearby();
+async function dropItem(name) {
+  const itemToDrop = bot.inventory.slots.find(item => item != null && item.name == name);
+  if (!itemToDrop) {
+    logFn({
+      msg: "Item not found in inventory",
+      timestamp: getLogTime(),
+      level: "error"
+    })
+    return;
+  }
 
+  const countOfItem = bot.inventory.count(itemToDrop.type)
+  try {
+    await bot.toss(itemToDrop.type,itemToDrop.metadata,countOfItem);
+  } catch (error) {
+    logFn({
+      msg: error.message,
+      timestamp: getLogTime(),
+      level: "error"
+    })
+  }
 }
 
 function followPlayer(playerName) {
@@ -301,7 +327,7 @@ async function onCollect(player, entity) {
   const item = slots.find(x => x.type == itemId);
 
   if (!item) {
-    setTimeout(() => startFishing(), 500);
+    setTimeout(() => startFishing(), botFishingCooldown);
     return;
   }
 
@@ -320,7 +346,7 @@ async function onCollect(player, entity) {
   }
   logFn(lootLog);
 
-  setTimeout(() => startFishing(), 500);
+  setTimeout(() => startFishing(), botFishingCooldown);
 }
 
 async function eat() {
@@ -378,5 +404,7 @@ module.exports = {
   depositLoot,
   getCommands,
   getIsFollowingPlayer,
-  stopCurrentTask
+  stopCurrentTask,
+  setBotFishingCooldown,
+  dropItem
 };
