@@ -5,16 +5,20 @@ const mineflayer = require('mineflayer')
 const pathfinder = require('mineflayer-pathfinder').pathfinder;
 import { Command } from 'commander';
 import fs from 'fs';
+import os from 'os';
+import toml from 'bun:toml';
+import { resolve } from "path";
 import path from 'path';
-import type { BotCommand, LogMessage, Profile } from './types.ts';
+import type { BotCommand, LogMessage, Profile } from './utils/types.ts';
 
 const program = new Command();
-const pkg = JSON.parse(fs.readFileSync(path.join(__dirname, "../package.json"), "utf-8"));
+const pkg = JSON.parse(fs.readFileSync(path.join(resolve(import.meta.dirname, "../package.json")), "utf-8"));
 
 let bot: any;
 let currentBotCommands: BotCommand[] = [];
 const botStartCooldown = 2000;
 let botProfiles: Profile[] = [];
+let config: any;
 
 const profileExample: Profile[] = [{ name: "main", auth: "microsoft", username: "example_bot_name", version: "1.18.2", host: "localhost", port: 43863 }];
 
@@ -62,18 +66,26 @@ function HandleCommands() {
   program.parse(process.argv);
 
 }
-initCommands();
-HandleCommands();
+
+function main() {
+  loadConfigFile();
+  initCommands();
+  HandleCommands();
+  engine.setLogFn(prettyLog);
+
+}
+main();
 
 function initCommands() {
   currentBotCommands = engine.getCommands();
 }
 
+
 function printAsciiArt(username: string) {
     if (!username) {
       return;
     }
-    const asciiArt = fs.readFileSync(path.join(__dirname,"./ascii.txt"),"utf-8");
+    const asciiArt = fs.readFileSync(path.join(__dirname,"./utils/ascii.txt"),"utf-8");
     const ascii = `
     ${asciiArt}
     Whisper me with /msg ${username}
@@ -168,17 +180,27 @@ function initBot(auth: string,username: string,port: number | string,version: st
 
     bot.loadPlugin(pathfinder);
 
-    bot.once('spawn', async() => {
+    bot.once('spawn', () => {
       prettyLog({
         msg: "Bot spawned on " + host,
         timestamp: engine.getLogTime(),
         color: white
       });
-      setTimeout( () => {
+      setTimeout( async() => {
         engine.setBotReady(true);
+        if (config.general.auto_fish_on_start) {
+          await engine.startFishing();
+        }
       },botStartCooldown);
     })
 
+    bot.on("death",() => {
+      prettyLog({
+        msg: "Bot died",
+        timestamp: engine.getLogTime(),
+        color: red
+      })
+    })
 
     bot.on("end",() => {
       prettyLog({
@@ -191,46 +213,51 @@ function initBot(auth: string,username: string,port: number | string,version: st
 
     bot.on('whisper', (username: any, message: any) => {
       if (username === bot.username) return
-      if (message == "!start") {
-        setTimeout( () => {
-          engine.startFishing()
-        },1000);
-      } else if (message == "!stop") {
-        const isFishing = engine.getIsFishing();
-        const isFollowingPlayer = engine.getIsFollowingPlayer();
+      handleWhisper(message);
+    });
 
-        if (isFishing) {
-          engine.stopFishing();
-        } else if (isFollowingPlayer) {
-          engine.stopFollowingPlayer();
-        }
+}
 
-      } else if (message == "!eat") {
-        setTimeout( () => {
-        engine.eat();
-        },500);
-      } else if (message.includes("!follow")) {
-        const msg = message.split(" ");
-        if (msg.length >= 2) {
-          const playerToFollow = msg[1].trim("");
-          engine.followPlayer(playerToFollow);
-        }
-      } else if (message == "!find water") {
-        engine.checkForWaterNearby();
-      } else if (message == "!show inventory") {
-        showInventory();
-      } else if (message == "!help") {
-        showHelp();
-      } else if (message == "!deposit") {
-        engine.depositLoot();
-      } else if (message.startsWith("!") && !currentBotCommands.includes(message)) {
-        prettyLog({
-          msg: "No such command found",
-          timestamp: engine.getLogTime(),
-          level: "error",
-        })
+
+async function handleWhisper(message: any){
+    if (message == "!start") {
+       await engine.startFishing()
+    } else if (message == "!stop") {
+      // TODO: use stopCurrentTask 
+      const isFishing = engine.getIsFishing();
+      const isFollowingPlayer = engine.getIsFollowingPlayer();
+      if (isFishing) {
+        engine.stopFishing();
+      } else if (isFollowingPlayer) {
+        engine.stopFollowingPlayer();
       }
-    })
+    } else if (message == "!eat") {
+        await engine.eat();
+    } else if (message.includes("!follow")) {
+      const msg = message.split(" ");
+      if (msg.length >= 2) {
+        const playerToFollow = msg[1].trim("");
+        engine.followPlayer(playerToFollow);
+      }
+    } else if (message == "!find water") {
+      await engine.checkForWaterNearby();
+    } else if (message == "!show inventory") {
+      showInventory();
+    } else if (message == "!help") {
+      showHelp();
+    } else if (message == "!deposit") {
+      await engine.depositLoot();
+    } else if (message.startsWith("!drop")) {
+      const itemToDrop = message.split(" ")[1];
+      await engine.dropItem(itemToDrop);
+
+    } else if (message.startsWith("!") && !currentBotCommands.some(cmd => cmd.name === message)) {
+      prettyLog({
+        msg: "Command '" + message + "' not found",
+        timestamp: engine.getLogTime(),
+        level: "error",
+      })
+    }
 
 }
 
@@ -238,11 +265,52 @@ function showHelp() {
   currentBotCommands.forEach( (command: BotCommand) => {
     console.log(command.name + " - " + command.desc);
   });
-  console.log("");
+}
+
+async function loadConfigFile() {
+  const defaultConfigPath = os.homedir() + "/.config/bob-the-fisherman-cli/config.toml";
+  const file = Bun.file(defaultConfigPath);
+  const fileExists = await file.exists();
+
+  if (!fileExists) {
+    await Bun.write(defaultConfigPath, Bun.file(resolve(import.meta.dirname, "./config.toml")));
+  }
+
+  try {
+    const text = await Bun.file(defaultConfigPath).text();
+    config = toml.parse(text);
+
+    const botFishingCooldown = config.general.fishing_cooldown;
+
+    if (botFishingCooldown) {
+      engine.setBotFishingCooldown(botFishingCooldown);
+    }
+
+  } catch (error: any) {
+    prettyLog({
+      msg: error.message || "Error loading config file",
+      timestamp: engine.getLogTime(),
+      color: red
+    });
+
+  }
+
+
 }
 
 function showInventory() {
-    const items = bot.inventory.slots.filter( (x: any) => x != null).map( (x: any) => ({ slot: x.slot,count: x.count,name: x.displayName}));
+    const items = bot.inventory.slots
+      .filter( (x: any) => x != null).map( (x: any) => ({ slot: x.slot,count: x.count,name: x.displayName}));
+
+    if (items.length == 0) {
+      prettyLog({
+        msg: "No items in my inventory",
+        timestamp: engine.getLogTime(),
+        color: red
+      })
+      return;
+    }
+
     const Table = require('cli-table3');
 
     const table = new Table();
@@ -261,4 +329,3 @@ function prettyLog(logMsg: LogMessage) {
   console.log(logString);
 }
 
-engine.setLogFn(prettyLog);
