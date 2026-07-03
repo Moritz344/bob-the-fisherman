@@ -7,7 +7,8 @@ import { SettingsService } from '../settings-service';
 interface BotCommand {
   name: string,
   desc: string,
-  onlyCli: boolean
+  onlyCli: boolean,
+  args: string[]
 }
 
 @Component({
@@ -55,9 +56,8 @@ export class ChatLog implements OnInit{
 
   async initBotCommands() {
     const commands = await this.settings.getBotCommands();
-    console.log(commands)
     this.commandsToUse.set(commands.filter((cmd: BotCommand) => !cmd.onlyCli));
-    console.log("bot cmd",this.commandsToUse());
+    console.log(this.commandsToUse());
   }
 
   scrollToBottom() {
@@ -93,7 +93,7 @@ export class ChatLog implements OnInit{
       return;
     }
 
-    this.foundCommands.set(this.commandsToUse().filter((x: any) => x.name.includes(this.commandInput()) ));
+    this.foundCommands.set(this.commandsToUse().filter((x: any) => x.name.includes(this.commandInput().trim())));
 
     if (this.commandInput() == "") {
       this.foundCommands.set([]);
@@ -107,9 +107,10 @@ export class ChatLog implements OnInit{
     }
 
     const input = this.commandInput().trim();
-    const cmd = input.split(" ")[0];
+    const commandName = input.split(" ")[0];
+    const command = input.split(" ");
 
-    switch (cmd) {
+    switch (commandName) {
       case "start":
         this.settings.stopCurrentTask(this.currentBotTask());
         this.currentBotTask.set("Fishing");
@@ -131,12 +132,17 @@ export class ChatLog implements OnInit{
         this.settings.followPlayer(player);
         break;
       case "help":
-        this.settings.sendLog("Commands: " + this.commandsToUse());
+        this.settings.showHelp();
         break;
       case "deposit":
         this.settings.stopCurrentTask(this.currentBotTask());
         this.currentBotTask.set("Depositing");
         this.settings.depositLoot();
+        break;
+      case "drop":
+        this.settings.stopCurrentTask(this.currentBotTask());
+        this.currentBotTask.set("Drop");
+        this.settings.dropLoot(command[1]);
         break;
       default:
         break;
