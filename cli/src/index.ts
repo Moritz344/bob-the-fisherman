@@ -244,7 +244,7 @@ async function handleWhisper(message: any){
     } else if (message == "!show inventory") {
       showInventory();
     } else if (message == "!help") {
-      showHelp();
+      engine.showHelp();
     } else if (message == "!deposit") {
       await engine.depositLoot();
     } else if (message.startsWith("!drop")) {
