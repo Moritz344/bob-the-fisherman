@@ -70,14 +70,27 @@ function getBotReady() {
   return botReady;
 }
 
+function showHelp() {
+  let help = "Available commands: ";
+  getCommands().forEach(command => {
+    help += " " + command.name + ",";
+  })
+  logFn({
+    msg: help,
+    timestamp: getLogTime(),
+    level: "info"
+  })
+}
+
 function getCommands() {
   return [
-    { name: "start",desc: "start fishing",onlyCli: false},
-    { name: "deposit",desc: "deposit loot",onlyCli: false},
-    { name: "show inventory",desc: "list every item with name,count and slot number",onlyCli: true},
-    { name: "stop",desc: "stop current task",onlyCli: false},
-    { name: "follow",desc: "follow a player",onlyCli: false},
-    { name: "drop",desc: "drop an item",onlyCli: false},
+    { name: "start",desc: "start fishing",args: ["start"],onlyCli: false},
+    { name: "help",desc: "show available commands",args: ["help"],onlyCli: false},
+    { name: "deposit",desc: "deposit loot to a chest",args: ["deposit","itenName"],onlyCli: false},
+    { name: "show inventory",desc: "list every item with name,count and slot number",args: ["show inventory"],onlyCli: true},
+    { name: "stop",desc: "stop the current task",args: ["stop"],onlyCli: false},
+    { name: "follow",desc: "follow a player",args: ["follow","playerName"],onlyCli: false},
+    { name: "drop",desc: "drop an item",args: ["drop","itemName"],onlyCli: false},
   ]
 }
 
@@ -142,7 +155,7 @@ async function dropItem(name) {
   const itemToDrop = bot.inventory.slots.find(item => item != null && item.name == name);
   if (!itemToDrop) {
     logFn({
-      msg: "Item not found in inventory",
+      msg: "Please provide an item name",
       timestamp: getLogTime(),
       level: "error"
     })
@@ -406,5 +419,6 @@ module.exports = {
   getIsFollowingPlayer,
   stopCurrentTask,
   setBotFishingCooldown,
-  dropItem
+  dropItem,
+  showHelp
 };
