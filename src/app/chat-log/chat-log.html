@@ -27,14 +27,14 @@
       <div class="autocomplete-items">
         @for (cmd of foundCommands();track $index) {
             <button (click)="onPasteCommand(cmd.name)" >
-            <span style="font-size: 25px;margin-bottom: 0px">{{ cmd.name }} </span>
-            <p style="color: var(--text-muted);margin-top: 0px">{{ cmd.desc }}</p>
+              <span style="font-size: 25px;margin-bottom: 0px">{{ cmd.name }} </span>
+              <p style="color: var(--text-muted);margin-top: 0px">{{ cmd.desc }}</p>
             </button>
         }
       </div>
     </div>
   }
-  <input placeholder="Type a command!" #inputBox class="input-box" [(ngModel)]="commandInput" (keyup)="onFindCommand()" (keydown.code.enter)="onCommand()">
+  <input placeholder="Type a command!" [disabled]="!started()" #inputBox class="input-box" [(ngModel)]="commandInput" (keyup)="onFindCommand()" (keydown.code.enter)="onCommand()">
 </div>
 
 
