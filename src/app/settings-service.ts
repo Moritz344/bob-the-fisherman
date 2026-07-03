@@ -81,6 +81,14 @@ export class SettingsService {
     return await (window as any).electronAPI.stopFollowing();
   }
 
+  async dropLoot(itemName: string) {
+    return await (window as any).electronAPI.dropLoot(itemName);
+  }
+
+  async showHelp() {
+    return await (window as any).electronAPI.showHelp();
+  }
+
   async findWater() {
     return await (window as any).electronAPI.findWater();
   }
