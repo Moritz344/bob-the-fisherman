@@ -202,6 +202,14 @@ async function createWindow() {
     return engine.getSupportedVersions();
   });
 
+  ipcMain.handle("drop-loot",(_,name) => {
+    engine.dropItem(name);
+  })
+
+  ipcMain.handle("show-help",(_) => {
+    engine.showHelp();
+  })
+
   ipcMain.handle("stop-current-task",(_,task) => {
     engine.stopCurrentTask(task);
   })

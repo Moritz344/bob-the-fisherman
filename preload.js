@@ -20,4 +20,6 @@ contextBridge.exposeInMainWorld("electronAPI", {
   depositLoot: () => ipcRenderer.invoke("deposit-loot"),
   getBotCommands: () => ipcRenderer.invoke("get-bot-commands"),
   stopCurrentTask: (task) => ipcRenderer.invoke("stop-current-task",task),
+  dropLoot: (name) => ipcRenderer.invoke("drop-loot",name),
+  showHelp: () => ipcRenderer.invoke("show-help"),
 });
