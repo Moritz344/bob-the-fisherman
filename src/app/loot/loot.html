@@ -1,16 +1,19 @@
 <app-topbar></app-topbar>
 
+<!-- TODO: make a drop button next to the item name? -->
+
 @if (items().length > 0 && started()) {
   <div class="container">
     <table>
        <tr style="width: 100%">
         <th class="table-header">Item</th>
         @for (item of items(); track $index) {
-              <td animate.enter="enter-animation"  style="display: flex;flex-direction: row;justify-content: left">
+              <td animate.enter="enter-animation"  style="display: flex;flex-direction: row;align-items: center">
               @if (item.img) {
-                <img animate.enter="enter-animation" [ngSrc]="item.img" width="30" height="30" style="float: left;margin-right: 5px">
+                <img animate.enter="enter-animation" [ngSrc]="item.img" width="30" height="30" style="margin-right: 5px">
               }
-               <span style="font-size: 20px" >{{ item.displayName }}</span>
+              <span style="font-size: 20px" >{{ item.displayName }}</span>
+              <button (click)="onDrop(item.name)" style="margin-left: auto"><img title="Drop {{ item.displayName }} to ground" src="close.svg"></button>
               </td>
         }
        </tr>
@@ -28,3 +31,4 @@
     <span style="margin-top: 5px">No loot to show!</span>
   </div>
 }
+

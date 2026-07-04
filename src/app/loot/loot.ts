@@ -15,13 +15,16 @@ export class Loot implements OnInit {
   public started = this.settings.started;
 
   constructor() {
-      this.settings.initLootItems();
+  }
+
+  async onDrop(name: any) {
+    await this.settings.dropLoot(name);
   }
 
 
 
   ngOnInit() {
-    console.log("loot:",this.items());
+      this.settings.initLootItems();
 
   }
 
