@@ -82,6 +82,7 @@ export class SettingsService {
   }
 
   async dropLoot(itemName: string) {
+    this.loot.update(list => list.filter(item => item.name !== itemName));
     return await (window as any).electronAPI.dropLoot(itemName);
   }
 
@@ -199,7 +200,7 @@ export class SettingsService {
     (window as any).electronAPI.showError("Forms Error", msg);
   }
 
-  private async updateLootLog(entry: LogMessage) {
+  async updateLootLog(entry: LogMessage) {
       const itemAlreadyExists = this.loot().find((x: any) => x.name == entry.name);
       if (!itemAlreadyExists) {
         entry.img = await this.getItemImage(entry.name || "");
