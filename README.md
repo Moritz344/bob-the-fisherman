@@ -25,6 +25,12 @@
 
 </details>
 
+# Features
+- [x] Start/Stop fishing
+- [x] Join Singleplayer/Multiplayer
+- [x] Follow a player
+- [x] Deposit loot in a chest
+- [x] Drop loot from inventory
 
 # Usage
 ```bash
