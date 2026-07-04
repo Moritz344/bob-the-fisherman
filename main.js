@@ -118,7 +118,7 @@ async function initBot(auth,host, port,username,version) {
 
     bot.on("error",(err) => {
       win.webContents.send("log", {
-        msg: err.message,
+        msg: err.message || "Error starting bot",
         timestamp: engine.getLogTime(),
         level: "error"
       });
