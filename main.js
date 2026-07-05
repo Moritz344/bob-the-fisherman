@@ -13,6 +13,9 @@ let bot;
 let win;
 let store;
 
+const MAX_RECONNECTS = 3;
+let reconnects = 0;
+
 const botStartCooldown = 2000;
 
 function stopBot() {
@@ -122,19 +125,20 @@ async function initBot(auth,host, port,username,version) {
         timestamp: engine.getLogTime(),
         level: "error"
       });
+      engine.setBotReady(false);
     })
     bot.on("end",(reason) => {
-      // TODO: limit attempts?
       if (reason == "socketClosed") {
-        //win.webContents.send("log", {
-        //  msg: "Reconnecting in 5s...",
-        //  timestamp: engine.getLogTime(),
-        //  level: "info"
-        //});
-        //setTimeout( () => {
-       //  initBot(auth,host,port,username,version);
-        //},500);
+        autoReconnect({
+          auth,
+          host,
+          port,
+          username,
+          version
+        });
+        return;
       }
+
       win.webContents.send("log", {
         msg: "Bot stopped",
         timestamp: engine.getLogTime(),
@@ -183,6 +187,20 @@ function getInventory() {
   return bot.inventory.slots.filter( (x) => x != null);
 }
 
+function autoReconnect({ auth,host,port,username,version}) {
+  if (reconnects >= MAX_RECONNECTS) {
+    return;
+  }
+  reconnects += 1;
+  win.webContents.send("log", {
+    msg: "Reconnecting in 3s attempt " + reconnects,
+    timestamp: engine.getLogTime(),
+    level: "error"
+  });
+  setTimeout( () => {
+   initBot(auth,host,port,username,version);
+  },3000);
+}
 
 async function createWindow() {
   win = new BrowserWindow({
