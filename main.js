@@ -15,6 +15,7 @@ let store;
 
 const MAX_RECONNECTS = 3;
 let reconnects = 0;
+let shouldReconnect = true;
 
 const botStartCooldown = 2000;
 
@@ -125,10 +126,11 @@ async function initBot(auth,host, port,username,version) {
         timestamp: engine.getLogTime(),
         level: "error"
       });
+      shouldReconnect = false;
       engine.setBotReady(false);
     })
     bot.on("end",(reason) => {
-      if (reason == "socketClosed") {
+      if (reason == "socketClosed" && shouldReconnect) {
         autoReconnect({
           auth,
           host,
