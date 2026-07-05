@@ -1,7 +1,7 @@
 [general]
 auto_fish_on_start = false
 fishing_cooldown = 300
-junk_items_to_auto_drop = []
-prefer_entchanted_rod = false
+junk_items_to_auto_drop = [] # not implemented
+prefer_entchanted_rod = false # not implemented 
 
 
