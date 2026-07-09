@@ -11,6 +11,7 @@ contextBridge.exposeInMainWorld("electronAPI", {
   saveBotActionSettings: (data) => ipcRenderer.invoke("save-action-settings",data),
   stopBot: () => ipcRenderer.invoke("stop-bot"),
   gameLogs: (callback) => ipcRenderer.on("game-logs", (_event, data) => callback(data)),
+  botSkinData: (callback) => ipcRenderer.on("bot-skin", (_event, data) => callback(data)),
   log: (callback) => ipcRenderer.on("log",(_event,logMsg) => callback(logMsg)),
   initLoot: () => ipcRenderer.invoke("init-loot"),
   startFishing: () => ipcRenderer.invoke("start-fishing"),
