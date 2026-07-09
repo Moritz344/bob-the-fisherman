@@ -15,6 +15,11 @@ interface LogMessage {
   displayName?: string
 }
 
+interface SkinData {
+  username: string,
+  texture: string
+}
+
 interface Loot {
   img: string | null,
   count: number,
@@ -46,6 +51,8 @@ export class SettingsService {
     started: false
   });
 
+  public skinData = signal<SkinData>({ username: "",texture: ""});
+
   public settingsActionSelected = signal<currentSelectedActionType>({
     waterMaxDistance: 10,
     playerToFollow: ""
@@ -55,6 +62,7 @@ export class SettingsService {
 
   constructor() {
     this.initGameLogs();
+    this.initBotSkinData();
   }
 
   getLogTime() {
@@ -211,6 +219,16 @@ export class SettingsService {
         }
         return [...list,entry];
       });
+  }
+
+  async initBotSkinData() {
+    (window as any).electronAPI.botSkinData((data: { texture: string,username: string}) => {
+      if (this.settingsSelected().auth == "offline") {
+        this.skinData.set({ texture: "404.png",username: data.username});
+        return;
+      }
+      this.skinData.set(data);
+    })
   }
 
   private async initGameLogs() {
