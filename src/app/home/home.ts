@@ -27,13 +27,15 @@ export class Home implements OnInit {
   public currentBotTask = this.settings.currentTask;
   public logs = this.settings.logs;
 
+  public botSkinData = this.settings.skinData;
+
   constructor() {
     this.initBotSettings();
   }
 
+
   async initBotSettings() {
     const settings = await this.settings.getLastBotSettings();
-    console.log("settings:",settings);
     settings.started = false;
     this.currentSelected.set(settings);
 
@@ -42,7 +44,6 @@ export class Home implements OnInit {
   }
 
   async onStart() {
-    console.log(this.currentSelected());
     this.started.update( (x: boolean) => !x );
     if (this.started()) {
       await this.settings.startBot(this.currentSelected());
