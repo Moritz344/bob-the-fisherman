@@ -54,6 +54,18 @@ function stopCurrentTask(task) {
 
 }
 
+function getBotHead() {
+  if (!bot || !bot.username) {
+    logFn({
+      msg: "Bot head not found!",
+      timestamp: getLogTime(),
+      level: "error"
+    })
+    return null;
+  }
+  return "https://mc-heads.net/avatar/" + bot.username;
+}
+
 function getIsFishing() {
   return isFishing;
 }
@@ -84,13 +96,13 @@ function showHelp() {
 
 function getCommands() {
   return [
-    { name: "start",desc: "start fishing",args: ["start"],onlyCli: false},
-    { name: "help",desc: "show available commands",args: ["help"],onlyCli: false},
-    { name: "deposit",desc: "deposit loot to a chest",args: ["deposit","itenName"],onlyCli: false},
-    { name: "show inventory",desc: "list every item with name,count and slot number",args: ["show inventory"],onlyCli: true},
-    { name: "stop",desc: "stop the current task",args: ["stop"],onlyCli: false},
-    { name: "follow",desc: "follow a player",args: ["follow","playerName"],onlyCli: false},
-    { name: "drop",desc: "drop an item",args: ["drop","itemName"],onlyCli: false},
+    { name: "!start",desc: "start fishing",args: ["start"],onlyCli: false},
+    { name: "!help",desc: "show available commands",args: ["help"],onlyCli: false},
+    { name: "!deposit",desc: "deposit loot to a chest",args: ["deposit","itenName"],onlyCli: false},
+    { name: "!show inventory",desc: "list every item with name,count and slot number",args: ["show inventory"],onlyCli: true},
+    { name: "!stop",desc: "stop the current task",args: ["stop"],onlyCli: false},
+    { name: "!follow",desc: "follow a player",args: ["follow","playerName"],onlyCli: false},
+    { name: "!drop",desc: "drop an item",args: ["drop","itemName"],onlyCli: false},
   ]
 }
 
@@ -420,5 +432,6 @@ module.exports = {
   stopCurrentTask,
   setBotFishingCooldown,
   dropItem,
-  showHelp
+  showHelp,
+  getBotHead
 };
