@@ -23,6 +23,7 @@ function stopBot() {
   if (!bot) {
     return;
   }
+  shouldReconnect = false;
   bot.quit();
 }
 
@@ -105,6 +106,10 @@ async function initBot(auth,host, port,username,version) {
         timestamp: engine.getLogTime(),
         level: "info"
       });
+      win.webContents.send("bot-skin",{
+        texture: engine.getBotHead(),
+        username: bot.username
+      })
       setTimeout( () => {
         engine.setBotReady(true);
       },botStartCooldown);
@@ -117,6 +122,16 @@ async function initBot(auth,host, port,username,version) {
         timestamp: engine.getLogTime(),
         level: "error"
       });
+    })
+
+
+    bot.on("chat",(username,message) => {
+      const chatMessage = username + ": " + message
+      win.webContents.send("log",{
+        msg: chatMessage,
+        timestamp: engine.getLogTime(),
+        level: "info"
+      })
     })
 
 
@@ -216,6 +231,7 @@ async function createWindow() {
       preload: path.join(__dirname, "preload.js"),
     },
   });
+
 
 
   ipcMain.handle("get-minecraft-versions",(_) => {
