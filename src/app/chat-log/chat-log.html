@@ -34,7 +34,7 @@
       </div>
     </div>
   }
-  <input placeholder="Type a command!" [disabled]="!started()" #inputBox class="input-box" [(ngModel)]="commandInput" (keyup)="onFindCommand()" (keydown.code.enter)="onCommand()">
+  <input placeholder="Type a help to see available commands!" [disabled]="!started()" #inputBox class="input-box" [(ngModel)]="commandInput" (keyup)="onFindCommand()" (keydown.code.enter)="onCommand()">
 </div>
 
 
