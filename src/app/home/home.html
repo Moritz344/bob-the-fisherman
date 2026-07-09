@@ -1,8 +1,10 @@
 <app-topbar></app-topbar>
 
 <div class="bot-state-container">
+  <img style="margin: 5px;border-radius: 5px" src="{{ botSkinData().texture }}">
   <div class="left">
-    <span animate.enter="enter-animation" style="font-size: 25px;margin-top: 10px">
+    <span >{{ botSkinData().username }}</span>
+    <span animate.enter="enter-animation" [class.green]="started()" [class.red]="!started()" style="font-size: 25px;display: flex;flex-direction: column">
       @if (started()) {
         Running
       }@else {
