@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms'; 
 import { SettingsService } from '../settings-service';
 
+// TODO: send minecraft chat messages
 
 interface BotCommand {
   name: string,
@@ -57,7 +58,6 @@ export class ChatLog implements OnInit{
   async initBotCommands() {
     const commands = await this.settings.getBotCommands();
     this.commandsToUse.set(commands.filter((cmd: BotCommand) => !cmd.onlyCli));
-    console.log(this.commandsToUse());
   }
 
   scrollToBottom() {
@@ -111,16 +111,16 @@ export class ChatLog implements OnInit{
     const command = input.split(" ");
 
     switch (commandName) {
-      case "start":
+      case "!start":
         this.settings.stopCurrentTask(this.currentBotTask());
         this.currentBotTask.set("Fishing");
         this.settings.startFishing();
         break;
-      case "stop":
+      case "!stop":
         this.settings.stopCurrentTask(this.currentBotTask());
         this.currentBotTask.set("Nothing");
         break;
-      case "follow":
+      case "!follow":
         this.settings.stopCurrentTask(this.currentBotTask());
         const splitCommand = this.commandInput().split(" ");
         let player = splitCommand[1];
@@ -131,15 +131,15 @@ export class ChatLog implements OnInit{
         this.currentBotTask.set("Following");
         this.settings.followPlayer(player);
         break;
-      case "help":
+      case "!help":
         this.settings.showHelp();
         break;
-      case "deposit":
+      case "!deposit":
         this.settings.stopCurrentTask(this.currentBotTask());
         this.currentBotTask.set("Depositing");
         this.settings.depositLoot();
         break;
-      case "drop":
+      case "!drop":
         this.settings.stopCurrentTask(this.currentBotTask());
         this.currentBotTask.set("Drop");
         this.settings.dropLoot(command[1]);
