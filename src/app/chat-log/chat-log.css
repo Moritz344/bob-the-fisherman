@@ -94,6 +94,9 @@
   gap: 5px;
 }
 
+.autocomplete-items button:hover{
+  background-color: #646467;
+}
 
 .autocomplete-items button{
   font-size: 22px;
