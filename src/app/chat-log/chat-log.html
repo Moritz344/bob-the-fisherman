@@ -4,12 +4,6 @@
     <button title="Clear logs" (click)="clear()"><img src="clear.svg"></button>
     <button title="Scroll to the Bottom" (click)="scrollToBottom()"><img src="bottom.svg"></button>
   </div>
-    @if (data().length == 0) {
-      <div class="nothing">
-        <img src="404.png">
-        <span>Generate some logs by starting the bot! <br>Use the settings to configure your Bot!</span>
-      </div>
-    }
   <div #messages  class="message-container">
     @for (msg of data(); track $index) {
       <span animate.enter="chat-enter-animation" style="color: var(--text-muted);width: 100%">  {{ msg.timestamp }} </span>
@@ -34,7 +28,7 @@
       </div>
     </div>
   }
-  <input placeholder="Type a help to see available commands!" [disabled]="!started()" #inputBox class="input-box" [(ngModel)]="commandInput" (keyup)="onFindCommand()" (keydown.code.enter)="onCommand()">
+  <input placeholder="Type !help to see available commands" [disabled]="!started()" #inputBox class="input-box" [(ngModel)]="commandInput" (keyup)="onFindCommand()" (keydown.code.enter)="onCommand()">
 </div>
 
 
