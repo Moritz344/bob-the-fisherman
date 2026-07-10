@@ -8,15 +8,13 @@
 > [!WARNING]
 > **This project is a work in progress. Expect changes and possible instability.**
 
-
-<img width="1322" height="932" alt="bot_2" src="https://github.com/user-attachments/assets/66648fc6-395d-428a-b9f2-523fe12d4962" />
+<img width="1250" height="918" alt="screenshot-2026-07-10_10-21-11" src="https://github.com/user-attachments/assets/69e6f52b-e3ed-4899-89eb-4cdf9eab5cd1" />
 
 
 <details>
   <summary> More Screenshots </summary>
 
-  <img width="1433" height="937" alt="screenshot-2026-06-04_17-13-08" src="https://github.com/user-attachments/assets/ecbdd59e-88a6-41b7-a2bc-bf64f23d83e0" />
-
+  <img width="1219" height="911" alt="screenshot-2026-07-10_10-22-39" src="https://github.com/user-attachments/assets/30552453-ce88-4859-8e04-f2f94d4b8036" />
 
   <img width="1045" height="785" alt="screenshot-2026-06-04_17-16-20" src="https://github.com/user-attachments/assets/af9b7d3b-3bc3-4239-b87c-23513492b83b" />
 
