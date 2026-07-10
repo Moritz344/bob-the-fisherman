@@ -232,6 +232,9 @@ async function createWindow() {
     },
   });
 
+  ipcMain.handle("send-chat-message",(_,message) => {
+    bot.chat(message);
+  });
 
 
   ipcMain.handle("get-minecraft-versions",(_) => {

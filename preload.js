@@ -23,4 +23,5 @@ contextBridge.exposeInMainWorld("electronAPI", {
   stopCurrentTask: (task) => ipcRenderer.invoke("stop-current-task",task),
   dropLoot: (name) => ipcRenderer.invoke("drop-loot",name),
   showHelp: () => ipcRenderer.invoke("show-help"),
+  sendMinecraftChatMessage: (message) => ipcRenderer.invoke("send-chat-message",message),
 });
