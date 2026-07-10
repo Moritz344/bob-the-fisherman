@@ -85,6 +85,10 @@ export class SettingsService {
     return await (window as any).electronAPI.followPlayer(name);
   }
 
+  async sendMinecraftChatMessage(message: string) {
+    return await (window as any).electronAPI.sendMinecraftChatMessage(message);
+  }
+
   async stopFollowingPlayer() {
     return await (window as any).electronAPI.stopFollowing();
   }
@@ -235,6 +239,9 @@ export class SettingsService {
       (window as any).electronAPI.log(async(entry: LogMessage) => {
         if (entry.level == "loot") {
           this.updateLootLog(entry);
+        }
+        if (entry.level == "error") {
+          this.started.set(false);
         }
         this.logs.update(list => [...list,entry]);
     });
