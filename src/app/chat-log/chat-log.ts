@@ -145,6 +145,7 @@ export class ChatLog implements OnInit{
         this.settings.dropLoot(command[1]);
         break;
       default:
+        this.settings.sendMinecraftChatMessage(this.commandInput());
         break;
     }
 
