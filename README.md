@@ -33,6 +33,7 @@
 - [x] Join Singleplayer/Multiplayer
 - [x] Follow a player
 - [x] Deposit loot in a chest
+- [x] See ingame chat messages
 - [x] Drop loot from inventory
 
 # Usage
