@@ -1,29 +1,18 @@
 <app-topbar></app-topbar>
 
-<!-- TODO: make a drop button next to the item name? -->
-
+<div class="container">
 @if (items().length > 0 && started()) {
-  <div class="container">
-    <table>
-       <tr style="width: 100%">
-        <th class="table-header">Item</th>
-        @for (item of items(); track $index) {
-              <td animate.enter="enter-animation"  style="display: flex;flex-direction: row;align-items: center">
-              @if (item.img) {
-                <img animate.enter="enter-animation" [ngSrc]="item.img" width="30" height="30" style="margin-right: 5px">
-              }
-              <span style="font-size: 20px" >{{ item.displayName }}</span>
-              <button (click)="onDrop(item.name)" style="margin-left: auto"><img title="Drop {{ item.displayName }} to ground" src="close.svg"></button>
-              </td>
+  <div class="item-list">
+    @for (item of items(); track $index) {
+      <div animate.enter="enter-animation" class="item-row">
+        @if (item.img) {
+          <img [ngSrc]="item.img" width="32" height="32">
         }
-       </tr>
-      <tr style="width: 20%">
-        <th class="table-header">Count</th>
-        @for (item of items();track $index) {
-          <td animate.enter="enter-animation"  style="font-size: 20px;text-align: center">{{ item.count }}</td>
-        }
-      </tr>
-    </table>
+        <span class="item-name">{{ item.displayName }}</span>
+        <span class="item-count">{{ item.count }}</span>
+        <button (click)="onDrop(item.name)" title="Drop {{ item.displayName }}"><img src="close.svg"></button>
+      </div>
+    }
   </div>
 }@else{
   <div class="nothing">
@@ -32,3 +21,4 @@
   </div>
 }
 
+</div>

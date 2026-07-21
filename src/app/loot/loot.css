@@ -1,7 +1,57 @@
-.container{
-  margin-top: 20px
+:host {
+  overflow: hidden;
 }
 
+.container {
+  position: absolute;
+  top: 10%;
+  right: 0;
+  left: 0;
+}
+
+.item-list {
+  display: flex;
+  flex-direction: column;
+  margin: 10px 20px;
+  border-radius: var(--radius);
+  background-color: var(--surface-color);
+  overflow-y: auto;
+  max-height: calc(100vh - 60px);
+}
+
+.item-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 16px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.item-row:last-child {
+  border-bottom: none;
+}
+
+.item-name {
+  flex: 1;
+  font-size: 16px;
+}
+
+.item-count {
+  font-size: 14px;
+  color: var(--text-muted);
+}
+
+.item-row button {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+}
+
+.item-row button:hover {
+  background-color: var(--hover-color);
+}
 
 .nothing {
   display: flex;
