@@ -223,7 +223,8 @@ async function createWindow() {
   win = new BrowserWindow({
     width: 1200,
     height: 800,
-    frame: true,
+    frame: false,
+    roundedCorners: "10",
     //titleBarStyle: "hidden",
     webPreferences: {
       nodeIntegration: false,
@@ -234,6 +235,10 @@ async function createWindow() {
 
   ipcMain.handle("send-chat-message",(_,message) => {
     bot.chat(message);
+  });
+
+  ipcMain.handle("exit",() => {
+    app.quit();
   });
 
 
