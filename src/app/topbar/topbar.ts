@@ -18,6 +18,9 @@ export class Topbar implements OnInit {
   ngOnInit(): void {
   }
 
+  onClose() {
+    this.settings.exit();
+  }
 
   onTab(tab: string) {
     this.currentSelectedTab.set(tab);

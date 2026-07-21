@@ -1,29 +1,61 @@
 .container{
-  display: flex;
-  justify-content: center;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  background-color: var(--header-bar);
+  padding: 10px;
+  -webkit-app-region: drag;
 }
 
 .options-container{
   display: flex;
+  justify-content: center;
   flex-direction: row;
   gap: 10px;
 }
 
 .options-container button{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-weight: bold;
   font-size: 18px;
   font-family: var(--default-font);
+  -webkit-app-region: no-drag;
+  width: 90px;
+  height: 34px;
+  padding: 12px;
+  background: transparent;
 }
 
-.active{
+.options-container img {
+  filter: brightness(0) invert(1);
+  width: 24px;
+  margin-right: 5px;
+}
+
+.options-container button:hover {
   background-color: var(--hover-color);
 }
 
-.settings{
-  position: absolute;
-  top: 10px;
-  right: 10px;
-  display: flex;
-  justify-content: center;
+.options-container .active{
+  background-color: var(--hover-color);
 }
 
 
+.exit {
+  position: absolute;
+  right: 10px;
+  top: 10px;
+  border-radius: 15px;
+  display: flex;
+  justify-content: center;
+  -webkit-app-region: no-drag;
+  width: 30px;
+  height: 30px;
+}
+
+.exit img {
+  width: 18px;
+}

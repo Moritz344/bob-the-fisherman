@@ -1,9 +1,13 @@
 
 <div class="container">
   <div class="options-container">
-    <button (click)="onTab('')" [class.active]="currentSelectedTab() == ''">Home </button>
-    <button (click)="onTab('log')"  [class.active]="currentSelectedTab() == 'log'">Log</button>
-    <button (click)="onTab('loot')" [class.active]="currentSelectedTab() == 'loot'">Loot</button>
-    <button class="settings" (click)="onTab('settings')" [class.active]="currentSelectedTab() == 'settings'"><img src="settings.svg"></button>
+    <button (click)="onTab('')" [class.active]="currentSelectedTab() == ''"><img src="home.svg">Home </button>
+    <button (click)="onTab('log')"  [class.active]="currentSelectedTab() == 'log'"><img src="log.svg">Log</button>
+    <button (click)="onTab('loot')" [class.active]="currentSelectedTab() == 'loot'"><img src="loot.svg">Loot</button>
+    <button (click)="onTab('settings')" [class.active]="currentSelectedTab() == 'settings'" style="width: 110px"><img src="settings.svg">Settings</button>
   </div>
+  <button class="exit" (click)="onClose()"><img src="close.svg"></button>
 </div>
+
+<br>
+<br>
