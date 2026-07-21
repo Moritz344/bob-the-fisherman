@@ -8,19 +8,14 @@
 > [!WARNING]
 > **This project is a work in progress. Expect changes and possible instability.**
 
-<img width="1250" height="918" alt="screenshot-2026-07-10_10-21-11" src="https://github.com/user-attachments/assets/69e6f52b-e3ed-4899-89eb-4cdf9eab5cd1" />
+<img width="1232" height="842" alt="Bildschirmfoto vom 2026-07-21 07-38-12" src="https://github.com/user-attachments/assets/3e3d2b48-c41e-41a6-a42c-fd0d027946b3" />
 
 
 <details>
   <summary> More Screenshots </summary>
-
-  <img width="1219" height="911" alt="screenshot-2026-07-10_10-22-39" src="https://github.com/user-attachments/assets/30552453-ce88-4859-8e04-f2f94d4b8036" />
-
-  
-  <img width="1239" height="916" alt="screenshot-2026-07-10_10-21-40" src="https://github.com/user-attachments/assets/e4e544c9-e43c-4114-973d-56f1f2f36057" />
-
-
-  <img width="1045" height="785" alt="screenshot-2026-06-04_17-16-20" src="https://github.com/user-attachments/assets/af9b7d3b-3bc3-4239-b87c-23513492b83b" />
+  <img width="1232" height="842" alt="Bildschirmfoto vom 2026-07-21 07-38-18" src="https://github.com/user-attachments/assets/002098c3-7033-4af0-b6d4-9a62ff6b96cd" />
+  <img width="1232" height="842" alt="Bildschirmfoto vom 2026-07-21 07-38-23" src="https://github.com/user-attachments/assets/ab77d508-1821-4f7a-8113-3d019620f60e" />
+  <img width="1232" height="842" alt="Bildschirmfoto vom 2026-07-21 07-38-26" src="https://github.com/user-attachments/assets/92bb32e6-4a64-4626-9fbb-2de77af74825" />
 
 
   <img width="1916" height="1080" alt="screenshot-2026-06-11_16-48-00" src="https://github.com/user-attachments/assets/762d5786-fd4b-4a4b-a22b-a4803e1eba81" />
