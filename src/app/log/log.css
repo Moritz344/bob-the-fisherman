@@ -1,4 +1,12 @@
-app-chat-log{
-  margin-top: 20px;
-  height: 93vh;
+:host {
+  display: flex;
+  flex-direction: column;
+  height: 98vh;
 }
+
+app-chat-log{
+  flex: 1;
+  min-height: 0;
+}
+
+
