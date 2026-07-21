@@ -1,6 +1,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
 :root {
+  --header-bar: #2E2E32;
   --bg-secondary: #2d2d2d;
   --bg-elevated: #333333;
   --bg-sidebar: #181818;
@@ -59,23 +60,6 @@ input[type="checkbox"]:checked::after {
   font-weight: bold;
 }
 
-table {
-  display: flex;
-  height: 93vh;
-  border-collapse: collapse;
-  background-color: var(--surface-color);
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius);
-  overflow: hidden;
-  color: var(--text-color);
-  font-size: 14px;
-}
-
-tr {
-  width: 100%;
-  border-right: 1px solid var(--border-color);
-  transition: background-color var(--transition);
-}
 
 .chat-enter-animation{
   animation: 0.5s fadeIn;
@@ -103,26 +87,6 @@ tr:last-child {
   border-bottom: none;
 }
 
-td {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  padding: 10px 12px;
-  height: 30px;
-  text-align: left;
-}
-
-td:hover{
-  background-color: var(--ghost);
-}
-
-.table-header{
-  display: flex;
-  justify-content: center;
-  font-weight: bold;
-  margin-top: 5px;
-  font-size: 22px;
-}
 
 
 
