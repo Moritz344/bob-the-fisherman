@@ -6,14 +6,15 @@
   </div>
   <div #messages  class="message-container">
     @for (msg of data(); track $index) {
-      <span animate.enter="chat-enter-animation" style="color: var(--text-muted);width: 100%">  {{ msg.timestamp }} </span>
-      <span #msg animate.enter="chat-enter-animation"
-        class="msg"
-        [class.mark]="this.searchValue() && msg.msg.includes(this.searchValue())"
-        [class.warn]="msg.level == 'warn'"
-        [class.error]="msg.level== 'error'">
-        {{msg.msg}}
-      </span>
+      <div class="msg">
+        <span animate.enter="chat-enter-animation" style="color: var(--text-muted);width: 100%">  {{ msg.timestamp }} </span>
+        <span style="margin-left: 5px" #msg animate.enter="chat-enter-animation"
+          [class.mark]="this.searchValue() && msg.msg.includes(this.searchValue())"
+          [class.warn]="msg.level == 'warn'"
+          [class.error]="msg.level== 'error'">
+          {{msg.msg}}
+        </span>
+      </div>
     }
   </div>
   @if (foundCommands().length > 0) {
@@ -28,7 +29,15 @@
       </div>
     </div>
   }
-  <input placeholder="Type !help to see available commands" [disabled]="!started()" #inputBox class="input-box" [(ngModel)]="commandInput" (keyup)="onFindCommand()" (keydown.code.enter)="onCommand()">
+  <input 
+  placeholder="Type !help to see available commands"
+  [disabled]="!started()"
+  #inputBox
+  class="input-box"
+  [(ngModel)]="commandInput"
+  (keyup)="onFindCommand()"
+  spellcheck="false"
+  (keydown.code.enter)="onCommand()">
 </div>
 
 
