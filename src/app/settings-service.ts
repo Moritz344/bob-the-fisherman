@@ -73,6 +73,10 @@ export class SettingsService {
     return await (window as any).electronAPI.startFishing();
   }
 
+  async exit() {
+    return await (window as any).electronAPI.exit();
+  }
+
   async stopFishing() {
     return await (window as any).electronAPI.stopFishing();
   }
