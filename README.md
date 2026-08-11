@@ -5,6 +5,8 @@
   Bob The Fisherman 
 </h1>
 
+Minecraft bot for AFK fishing, built on Mineflayer.
+
 > [!WARNING]
 > **This project is a work in progress. Expect changes and possible instability.**
 
@@ -25,7 +27,7 @@
 
 # Features
 - [x] Start/Stop fishing
-- [x] Join Singleplayer/Multiplayer
+- [x] Join Singleplayer/Multiplayer Worlds
 - [x] Follow a player
 - [x] Deposit loot in a chest
 - [x] See ingame chat messages
