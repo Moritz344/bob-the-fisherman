@@ -10,7 +10,7 @@ Minecraft bot for AFK fishing, built on Mineflayer.
 > [!WARNING]
 > **This project is a work in progress. Expect changes and possible instability.**
 
-<img width="1232" height="842" alt="Bildschirmfoto vom 2026-07-21 07-38-12" src="https://github.com/user-attachments/assets/3e3d2b48-c41e-41a6-a42c-fd0d027946b3" />
+<img width="1192" height="822" alt="image" src="https://github.com/user-attachments/assets/82b162d5-70c5-44de-ab07-ea328295aa98" />
 
 
 <details>
