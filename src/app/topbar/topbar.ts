@@ -2,6 +2,8 @@ import { Component,signal,OnInit,inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { SettingsService } from '../settings-service';
 
+//TODO: add menu button
+
 @Component({
   selector: 'app-topbar',
   imports: [],
