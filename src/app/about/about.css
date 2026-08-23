@@ -1,0 +1,68 @@
+.screen {
+  background-color: #222226;
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+}
+
+.container {
+  display: flex;
+  justify-content: center;
+  margin-top: 60px;
+  text-align: center;
+}
+
+.about {
+  display: flex;
+  flex-direction: column;
+}
+
+h1{
+  font-size: 30px;
+}
+
+a {
+  color: #75BBE5;
+}
+
+.topbar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  -webkit-app-region: drag;
+}
+
+.exit {
+  position: relative;
+  margin: 10px;
+  float: right;
+  border-radius: 10px;
+  display: flex;
+  justify-content: center;
+  -webkit-app-region: no-drag;
+}
+
+.exit:hover {
+  background-color: var(--hover-color);
+}
+
+a:hover{
+  color: #81D0FF;
+  cursor: pointer;
+}
+
+h1,h2,p{
+  margin: 0;
+}
+
+img {
+  filter: brightness(0) invert(1);
+}
+
+button {
+  background: transparent;
+}
+

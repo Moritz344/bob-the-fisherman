@@ -1,0 +1,13 @@
+<div class="screen">
+  <div class="topbar">
+    <button class="exit" (click)="onClose()"><img width="35" height="35" src="close.svg"></button>
+  </div>
+  <div class="container">
+    <div class="about">
+      <h1>{{ data().name }}</h1>
+      <span>{{ data().version }}</span>
+      <a (click)="openGithub()">Github</a>
+    </div>
+  </div>
+</div>
+
