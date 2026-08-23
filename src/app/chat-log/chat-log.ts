@@ -26,7 +26,6 @@ export class ChatLog implements OnInit{
   @ViewChild("messages") messages!: ElementRef;
   @ViewChild("inputBox") input!: ElementRef;
   @ViewChildren("msg") messagesList!: QueryList<ElementRef>;
-  @Output() command = new EventEmitter<string>;
 
   public timeMsg: string = "";
   public msg: string = "";
