@@ -97,6 +97,15 @@ export class SettingsService {
     return await (window as any).electronAPI.stopFollowing();
   }
 
+  async openExternal(link: string) {
+    return await (window as any).electronAPI.openExternal(link);
+  }
+
+  async closeAboutWindow() {
+    return await (window as any).electronAPI.closeAboutWindow();
+  }
+
+
   async dropLoot(itemName: string) {
     this.loot.update(list => list.filter(item => item.name !== itemName));
     return await (window as any).electronAPI.dropLoot(itemName);
@@ -208,12 +217,24 @@ export class SettingsService {
     return await (window as any).electronAPI.stopBot();
   }
 
+  async minimizeWindow() {
+    return await (window as any).electronAPI.minimize();
+  }
+
   public getCurrentLogs() {
     return this.logs();
   }
 
   public showFormsError(msg: string) {
     (window as any).electronAPI.showError("Forms Error", msg);
+  }
+
+  async openAbout() {
+    (window as any).electronAPI.openAbout();
+  }
+
+  async getAboutData() {
+    return (window as any).electronAPI.getAboutData();
   }
 
   async updateLootLog(entry: LogMessage) {
