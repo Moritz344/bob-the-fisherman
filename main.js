@@ -1,7 +1,9 @@
 const path = require("path");
+const fs = require("fs");
 const {
   app,
   BrowserWindow,
+  shell,
   ipcMain,
   dialog,
   Notification
@@ -11,6 +13,7 @@ const mineflayer = require('mineflayer');
 
 let bot;
 let win;
+let aboutWindow;
 let store;
 
 const MAX_RECONNECTS = 3;
@@ -246,6 +249,15 @@ async function createWindow() {
     return engine.getSupportedVersions();
   });
 
+  ipcMain.handle("open-external", async (_, url) => {
+    await shell.openExternal(url);
+  });
+
+  ipcMain.handle("close-about-window",async(_,name) => {
+      aboutWindow.close();
+      aboutWindow = null;
+  });
+
   ipcMain.handle("drop-loot",(_,name) => {
     engine.dropItem(name);
   })
@@ -253,6 +265,43 @@ async function createWindow() {
   ipcMain.handle("show-help",(_) => {
     engine.showHelp();
   })
+
+
+  ipcMain.handle("get-about-data",async () => {
+    try {
+      const pkg = JSON.parse(fs.readFileSync(path.join(__dirname,"package.json")));
+
+      return {
+          name: pkg.name,
+          version: pkg.version,
+          description: pkg.description,
+          author: pkg.author
+        }
+      } catch (error) {
+        console.log("error:", error);
+      }
+  })
+
+  ipcMain.handle("open-about",async () => {
+   if (aboutWindow) {
+     return;
+   }
+   aboutWindow = new BrowserWindow({
+      maxWidth: 400,
+      maxHeight: 200,
+      frame: false,
+      parent: win,
+      modal: true,
+      webPreferences: {
+        contextIsolation: true,
+        enableRemoteModule: false,
+        preload: path.join(__dirname, "preload.js"),
+      },
+    });
+
+    //aboutWindow.openDevTools();
+    loadAngularRoute(aboutWindow, "about");
+});
 
   ipcMain.handle("stop-current-task",(_,task) => {
     engine.stopCurrentTask(task);
@@ -300,6 +349,10 @@ async function createWindow() {
     engine.stopFollowingPlayer();
   })
 
+  ipcMain.handle("minimize", (_) => {
+    BrowserWindow.getFocusedWindow()?.minimize()
+  });
+
   ipcMain.handle("start-fishing",async(_) => {
     await engine.startFishing();
   });
@@ -345,6 +398,16 @@ async function createWindow() {
     win.webContents.openDevTools();
   } else {
     win.loadFile(path.join(__dirname, "dist/bob-fisher/browser/index.html"));
+  }
+}
+
+function loadAngularRoute(window, route = "") {
+  if (process.env.ELECTRON_DEV) {
+    window.loadURL(`http://localhost:4200/${route}`);
+  } else {
+    window.loadFile(path.join(__dirname, 'dist/bob-the-fisherman/browser/index.html'), {
+      hash: '/' + route,
+    });
   }
 }
 

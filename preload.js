@@ -25,4 +25,9 @@ contextBridge.exposeInMainWorld("electronAPI", {
   showHelp: () => ipcRenderer.invoke("show-help"),
   exit: () => ipcRenderer.invoke("exit"),
   sendMinecraftChatMessage: (message) => ipcRenderer.invoke("send-chat-message",message),
+    openAbout: () => ipcRenderer.invoke("open-about"),
+  getAboutData: () => ipcRenderer.invoke("get-about-data"),
+  closeAboutWindow: () => ipcRenderer.invoke("close-about-window"),
+  openExternal: (link) => ipcRenderer.invoke("open-external",link),
+  minimize: () => ipcRenderer.invoke("minimize"),
 });
