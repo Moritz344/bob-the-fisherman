@@ -148,16 +148,16 @@ async function initBot(auth,host, port,username,version) {
       engine.setBotReady(false);
     })
     bot.on("end",(reason) => {
-      if (reason == "socketClosed" && shouldReconnect) {
-        autoReconnect({
-          auth,
-          host,
-          port,
-          username,
-          version
-        });
-        return;
-      }
+      //if (reason == "socketClosed" && shouldReconnect) {
+      //  autoReconnect({
+      //    auth,
+      //    host,
+      //    port,
+      //    username,
+      //    version
+      //  });
+      //  return;
+      //}
 
       win.webContents.send("log", {
         msg: "Bot stopped",
@@ -193,6 +193,8 @@ async function initBot(auth,host, port,username,version) {
         items.forEach( (x) => {
           console.log(x.name);
         })
+      } else if (message == "!deposit") {
+        engine.depositLoot();
       }
     })
 
@@ -345,7 +347,6 @@ async function createWindow() {
   })
 
   ipcMain.handle("stop-following",async(_) => {
-    console.log("stop following player!");
     engine.stopFollowingPlayer();
   })
 
@@ -362,7 +363,7 @@ async function createWindow() {
   });
 
   ipcMain.handle("get-bot-commands",async(_) => {
-    return await engine.getCommands();
+    return engine.getCommands();
   });
 
   ipcMain.handle("start-bot",async(_,host,port,version,auth,username) => {
