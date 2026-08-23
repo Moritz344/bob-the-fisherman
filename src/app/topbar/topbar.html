@@ -1,4 +1,7 @@
 
+@if (menuSelected()) {
+  <app-menu (close)="onMenu()"></app-menu>
+}
 <div class="container">
   <div class="options-container">
     <button (click)="onTab('')" [class.active]="currentSelectedTab() == ''"><img src="home.svg">Home </button>
@@ -6,7 +9,11 @@
     <button (click)="onTab('loot')" [class.active]="currentSelectedTab() == 'loot'"><img src="loot.svg">Loot</button>
     <button (click)="onTab('settings')" [class.active]="currentSelectedTab() == 'settings'" style="width: 110px"><img src="settings.svg">Settings</button>
   </div>
-  <button class="exit" (click)="onClose()"><img src="close.svg"></button>
+   <div class="options-right">
+    <button class="button-with-bg" (click)="onMinimize()" ><img src="minimize.svg"></button>
+    <button class="menu" (click)="onMenu()" [class.selected]="menuSelected()"><img src="menu.svg"></button>
+    <button class="button-with-bg" (click)="onClose()"><img src="close.svg"></button>
+  </div>
 </div>
 
 <br>
