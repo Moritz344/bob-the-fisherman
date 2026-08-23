@@ -107,6 +107,14 @@ function getCommands() {
 }
 
 async function depositLoot() {
+  if (!botReady) {
+    logFn({
+      msg: "Bot is not ready",
+      timestamp: getLogTime(),
+      level: "warn"
+    });
+    return;
+  }
   const itemsToDeposit = bot.inventory.slots.filter(x => x != null && x.name != "fishing_rod")
   .map(x => [x.type, { name: x.displayName, type: x.type }]);
   const uniqueItemsToDeposit = [...new Map(itemsToDeposit).values()];
@@ -115,10 +123,11 @@ async function depositLoot() {
     logFn({
       msg: "No loot to deposit",
       timestamp: getLogTime(),
-      level: "error"
-    })
+      level: "warn"
+    });
     return;
   }
+
   if (isFishing) {
     stopFishing();
   }
@@ -127,7 +136,7 @@ async function depositLoot() {
     stopFollowingPlayer();
   }
 
-  const maxDistance = 10;
+  const maxDistance = 6;
 
   const chest = await bot.findBlock({
     point: bot.entity.position,
@@ -135,6 +144,11 @@ async function depositLoot() {
     maxDistance: maxDistance
   });
   if (!chest) {
+    logFn({
+      msg: "No chest found nearby!",
+      timestamp: getLogTime(),
+      level: "warn"
+    });
     return;
   }
   await bot.lookAt(chest.position);
@@ -153,7 +167,7 @@ async function depositLoot() {
       logFn({
         msg: "Error depositing item",
         timestamp: getLogTime(),
-        level: "error"
+        level: "info"
       });
     }
   }
