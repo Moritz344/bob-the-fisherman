@@ -21,15 +21,15 @@
     <div class="autocomplete-container">
       <div class="autocomplete-items">
         @for (cmd of foundCommands();track $index) {
-            <button (click)="onPasteCommand(cmd.name)" >
-              <span style="font-size: 25px;margin-bottom: 0px">{{ cmd.name }} </span>
-              <p style="color: var(--text-muted);margin-top: 0px">{{ cmd.desc }}</p>
+            <button (click)="onPasteCommand(cmd.name)">
+              <span class="autocomplete-name">{{ cmd.name }}</span>
+              <p class="autocomplete-desc">{{ cmd.desc }}</p>
             </button>
         }
       </div>
     </div>
   }
-  <input 
+  <input
   placeholder="Type !help to see available commands"
   [disabled]="!started()"
   #inputBox
