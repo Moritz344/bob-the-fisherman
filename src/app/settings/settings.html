@@ -1,32 +1,33 @@
 <app-topbar></app-topbar>
 
-<div class="container">
-  <h1 class="h-center">General Bot Settings</h1>
-  <div class="settings">
+<div class="page">
+  <h1 class="page-title">General Bot Settings</h1>
+
+  <div class="settings-group">
     <form [formRoot]="settingsForm">
-      <div class="settings-item">
-        <label for="mode">Mode:</label>
+      <div class="row">
+        <label class="row-title" for="mode">Mode</label>
         <select id="mode" [formField]="settingsForm.auth" (change)="saveBotGeneralSettings()">
           <option value="offline">offline</option>
           <option value="microsoft">online</option>
         </select>
       </div>
-      <div class="settings-item">
-        <label style="margin-top: 5px" for="version">Version:</label>
+      <div class="row">
+        <label class="row-title" for="version">Version</label>
         <select id="version" [formField]="settingsForm.version" (change)="saveBotGeneralSettings()">
           @for (version of versionData(); track $index) {
             <option [value]="version">{{ version }}</option>
           }
         </select>
       </div>
-      <div class="settings-item">
-        <label style="margin-top: 5px" for="port">Port:</label>
+      <div class="row">
+        <label class="row-title" for="port">Port</label>
         <input id="port" [formField]="$any(settingsForm.port)" placeholder="25565" (change)="saveBotGeneralSettings()">
       </div>
-      <div class="settings-item">
-        <label style="margin-top: 5px" for="username">Username:</label>
-        <div>
-          <input id="username" [formField]="settingsForm.username" [class.error]="settingsForm.username().value() == ''" (change)="saveBotGeneralSettings()">
+      <div class="row">
+        <label class="row-title" for="username">Username</label>
+        <div class="control">
+          <input id="username" spellcheck="false" [formField]="settingsForm.username" [class.error]="settingsForm.username().value() == ''" (change)="saveBotGeneralSettings()">
           <div class="error-container">
             @for (error of settingsForm.username().errors(); track $index) {
               <span class="error">{{ error.message }}</span>
@@ -34,9 +35,9 @@
           </div>
         </div>
       </div>
-      <div class="settings-item">
-        <label style="margin-top: 5px" for="host">Server:</label>
-        <div>
+      <div class="row">
+        <label class="row-title" for="host">Server</label>
+        <div class="control">
           <input id="host" [formField]="settingsForm.host" spellcheck="false" [class.error]="settingsForm.host().value() == ''" (change)="saveBotGeneralSettings()">
           <div class="error-container">
             @for (error of settingsForm.host().errors(); track $index) {
@@ -47,6 +48,7 @@
       </div>
     </form>
   </div>
+
   <!--
   <h1 class="h-center">Bot Action Settings</h1>
   <div class="settings">
