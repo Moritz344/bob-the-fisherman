@@ -1,17 +1,23 @@
 <app-topbar></app-topbar>
 
 <div class="bot-state-container">
-  <img style="margin: 5px;border-radius: 5px" src="{{ botSkinData().texture }}">
   <div class="left">
-    <span >{{ botSkinData().username }}</span>
-    <span animate.enter="enter-animation" [class.green]="started()" [class.red]="!started()" style="font-size: 25px;display: flex;flex-direction: column">
-      @if (started()) {
-        Running
-      }@else {
-        Stopped
-      }
-    </span>
-    <span animate.enter="enter-animation"  style="color: var(--text-muted)">Task: {{ currentBotTask() }}  </span>
+    @if (botSkinData().texture) {
+      <img class="skin-img" src="{{ botSkinData().texture }}">
+    }@else {
+      <img class="skin-img" src="404.png">
+    }
+    <div class="bot-info">
+      <span style="font-size: 24px">{{ botSkinData().username }}</span>
+      <span animate.enter="enter-animation" [class.green]="started()" [class.red]="!started()" style="font-size: 24px;display: flex;flex-direction: column">
+        @if (started()) {
+          Running
+        }@else {
+          Stopped
+        }
+      </span>
+      <span animate.enter="enter-animation"  style="color: var(--text-muted)">Task: {{ currentBotTask() }}  </span>
+    </div>
   </div>
   <div class="right">
     <button [class.started]="started() == true" [class.stopped]="started() == false" (click)="onStart()">
