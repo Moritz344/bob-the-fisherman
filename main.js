@@ -160,7 +160,7 @@ async function initBot(auth,host, port,username,version) {
       //}
 
       win.webContents.send("log", {
-        msg: "Bot stopped",
+        msg: "Bot stopped: " + reason,
         timestamp: engine.getLogTime(),
         level: "error"
       });
