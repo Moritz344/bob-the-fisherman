@@ -221,6 +221,7 @@ function followPlayer(playerName) {
     stopFishing();
   }
   bot.loadPlugin(pathfinder);
+  const playerEntity = bot.nearestEntity(e => e.type == "player" && e.username == playerName);
   if (!playerEntity) {
     logFn({
       msg: "I can't find this player to follow",
