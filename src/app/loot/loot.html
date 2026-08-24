@@ -2,7 +2,7 @@
 
 <div class="container">
 @if (items().length > 0 && started()) {
-  <div class="item-list">
+  <div class="item-container">
     @for (item of items(); track $index) {
       <div animate.enter="enter-animation" class="item-row">
         @if (item.img) {
