@@ -71,7 +71,7 @@ async function sendNotificationWhenItemCaughtOnNotFocused(msg) {
 async function initBot(auth,host, port,username,version) {
     try {
       win.webContents.send("log", {
-        msg: "Creating Bot...",
+        msg: "Creating Bot... " ,
         timestamp: engine.getLogTime(),
         level: "info"
       });
@@ -81,14 +81,16 @@ async function initBot(auth,host, port,username,version) {
         auth,
         username,
         version,
+        profilesFolder: '/home/moritz/.config/bob-the-fisherman/auth-cache',
         onMsaCode: async (data) => {
           await dialog.showMessageBox(win, {
             type: 'info',
             authTitle: 'Microsoft Login Required',
-            message: data.message
+            message: data.message + '\n\nIf the wrong account opens, use a private browser window.'
           })
         },
-        hideErrors: true
+        hideErrors: true,
+        respawn: true,
       });
 
 
@@ -139,6 +141,7 @@ async function initBot(auth,host, port,username,version) {
 
 
     bot.on("error",(err) => {
+      console.log(err);
       win.webContents.send("log", {
         msg: err.message || "Error starting bot",
         timestamp: engine.getLogTime(),
@@ -147,7 +150,7 @@ async function initBot(auth,host, port,username,version) {
       shouldReconnect = false;
       engine.setBotReady(false);
     })
-    bot.on("end",(reason) => {
+    bot.on("end",(reason,err) => {
       //if (reason == "socketClosed" && shouldReconnect) {
       //  autoReconnect({
       //    auth,
@@ -158,6 +161,7 @@ async function initBot(auth,host, port,username,version) {
       //  });
       //  return;
       //}
+
 
       win.webContents.send("log", {
         msg: "Bot stopped: " + reason,
