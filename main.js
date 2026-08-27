@@ -135,7 +135,7 @@ async function initBot(auth,host, port,username,version) {
       win.webContents.send("log",{
         msg: chatMessage,
         timestamp: engine.getLogTime(),
-        level: "info"
+        level: "chat"
       })
     })
 
