@@ -3,21 +3,30 @@
     <input placeholder="Search..." [(ngModel)]="searchValue" (keyup)="onSearchLogs()">
     <button title="Clear logs" (click)="clear()"><img src="clear.svg"></button>
     <button title="Scroll to the Bottom" (click)="scrollToBottom()"><img src="bottom.svg"></button>
+    <button title="test" (click)="generateTestLogs()"><img src="bottom.svg"></button>
   </div>
   <div #messages  class="message-container">
-    @for (msg of data(); track $index) {
+    @for (m of data(); track $index) {
       <div class="msg">
-        <span animate.enter="chat-enter-animation" style="color: var(--text-muted);width: 100%">  {{ msg.timestamp }} </span>
-        <span style="margin-left: 5px" #msg animate.enter="chat-enter-animation"
-          [class.mark]="this.searchValue() && msg.msg.includes(this.searchValue())"
-          [class.warn]="msg.level == 'warn'"
-          [class.error]="msg.level== 'error'">
-          {{msg.msg}}
+        <span animate.enter="chat-enter-animation" style="color: var(--text-muted);width: 100%"> {{ m.timestamp }} </span>
+        <span style="margin-left: 5px" #m animate.enter="chat-enter-animation"
+          [class.mark]="this.searchValue() && m.msg.includes(this.searchValue())"
+          [class.warn]="m.level == 'warn'"
+          [class.error]="m.level== 'error'">
+
+          @if (m.level == 'chat') {
+            @let splitMessage = m.msg.split(":");
+            @let username = splitMessage[0];
+            @let message = splitMessage[1];
+            <span class="username-chat"><{{ username }}> </span> {{ message }}
+          }@else {
+            {{m.msg}}
+          }
         </span>
       </div>
     }
   </div>
-  @if (foundCommands().length > 0) {
+  @if (foundCommands().length > 0 && commandInput().startsWith("!")) {
     <div class="autocomplete-container">
       <div class="autocomplete-items">
         @for (cmd of foundCommands();track $index) {
