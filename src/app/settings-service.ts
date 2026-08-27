@@ -5,7 +5,7 @@ import { currentSelectedType,currentSelectedActionType } from './models/current.
 
 interface LogMessage {
   msg: string,
-  level: 'info' | 'warn' | 'error' | 'loot',
+  level: 'info' | 'warn' | 'error' | 'loot' | 'chat',
   timestamp: string,
 
   // loot log
@@ -267,6 +267,7 @@ export class SettingsService {
         }
         if (entry.level == "error") {
           this.started.set(false);
+          this.stopBot();
         }
         this.logs.update(list => [...list,entry]);
     });
