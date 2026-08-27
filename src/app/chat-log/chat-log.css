@@ -23,7 +23,7 @@
   padding: 10px;
   min-height: 0;
   line-height: 30px;
-  height: 91%;
+  height: 92%;
   overflow-y: auto;
   overflow-x: hidden;
 }
@@ -38,6 +38,10 @@
   justify-content: flex-end;
   padding: 5px;
   margin-top: 10px;
+}
+
+.username-chat {
+  color: var(--text-muted)
 }
 
 .err{
