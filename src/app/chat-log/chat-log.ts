@@ -3,8 +3,6 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms'; 
 import { SettingsService } from '../settings-service';
 
-// TODO: send minecraft chat messages
-
 interface BotCommand {
   name: string,
   desc: string,
@@ -45,7 +43,6 @@ export class ChatLog implements OnInit{
       this.data();
       this.scrollToBottom();
     })
-    afterNextRender(() => this.scrollToBottom(), { injector: this.injector });
     afterNextRender(() => this.input.nativeElement.focus(), { injector: this.injector });
 
   }
@@ -101,6 +98,7 @@ export class ChatLog implements OnInit{
 
 
   onCommand() {
+    this.scrollToBottom();
     if (!this.started()) {
       return;
     }
