@@ -1,7 +1,7 @@
 <app-topbar></app-topbar>
 
 <div class="container">
-@if (items().length > 0 && started()) {
+@if (items().length > 0 && started() ) {
   <div class="item-container">
     @for (item of items(); track $index) {
       <div animate.enter="enter-animation" class="item-row">
@@ -14,11 +14,17 @@
       </div>
     }
   </div>
-}@else{
+}@else if (items().length == 0 && !settings.lootIsLoading()){
   <div class="nothing">
     <img style="border-radius: 10px" src="404.png">
     <span style="margin-top: 5px">No loot to show!</span>
   </div>
 }
 
+@if (settings.lootIsLoading() && started() && items().length == 0) {
+  <div class="loading-container" >
+    <span class="load"></span>
+    <span style="margin-top: 5px">Loading items... </span>
+  </div>
+}
 </div>
