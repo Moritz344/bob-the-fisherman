@@ -36,7 +36,6 @@ export class Home implements OnInit {
 
   async initBotSettings() {
     const settings = await this.settings.getLastBotSettings();
-    settings.started = false;
     this.currentSelected.set(settings);
 
     const settingsAction = await this.settings.getLastBotActionSettings();
@@ -53,8 +52,7 @@ export class Home implements OnInit {
   }
 
   ngOnInit(): void {
-    this.started.set(this.started());
-
+    console.log(this.started());
   }
 
 
