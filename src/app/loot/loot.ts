@@ -23,9 +23,8 @@ export class Loot implements OnInit {
 
 
 
-  ngOnInit() {
-      this.settings.initLootItems();
-
+  async ngOnInit() {
+    await this.settings.initLootItems();
   }
 
 }
