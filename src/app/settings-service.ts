@@ -41,6 +41,7 @@ export class SettingsService {
   public logs = signal<LogMessage[]>([]);
   public error = computed( () => this.logs().filter((log: LogMessage) => log.level == 'error'));
   public loot = signal<LogMessage[]>([]);
+  public lootIsLoading = signal<boolean>(false);
 
   public settingsSelected = signal<currentSelectedType>({
     username: "fishermanbob69",
@@ -63,7 +64,11 @@ export class SettingsService {
   constructor() {
     this.initGameLogs();
     this.initBotSkinData();
+    if (this.started() == false) {
+      this.stopBot();
+    }
   }
+
 
   getLogTime() {
     const date = new Date();
@@ -133,6 +138,7 @@ export class SettingsService {
   }
 
   async initLootItems() {
+    this.lootIsLoading.set(true);
     const items = await (window as any).electronAPI.initLoot();
     const unique_items: any = [];
     items.forEach( (x: any) => {
@@ -140,12 +146,12 @@ export class SettingsService {
       if (exists) {
         const index = unique_items.indexOf(exists);
         unique_items[index].count = exists.count + x.count;
-      }
-      if (!exists) {
+      } else {
         unique_items.push(x);
       }
     })
     this.loot.set(unique_items);
+    this.lootIsLoading.set(false);
   }
 
   async saveActionSettings(data: currentSelectedActionType) {
