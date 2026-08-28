@@ -82,6 +82,7 @@ export class ChatLog implements OnInit{
   onPasteCommand(command: string) {
     this.foundCommands.set([]);
     this.commandInput.set(command);
+    this.input.nativeElement.focus();
   }
 
   onFindCommand() {
