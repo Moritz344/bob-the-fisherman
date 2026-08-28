@@ -125,7 +125,7 @@ async function initBot(auth,host, port,username,version) {
       win.webContents.send("log", {
         msg: "Bot died",
         timestamp: engine.getLogTime(),
-        level: "error"
+        level: "warn"
       });
     })
 
