@@ -10,14 +10,16 @@ Minecraft bot for AFK fishing, built on Mineflayer.
 > [!WARNING]
 > **This project is a work in progress. Expect changes and possible instability.**
 
-<img width="1192" height="822" alt="image" src="https://github.com/user-attachments/assets/82b162d5-70c5-44de-ab07-ea328295aa98" />
+<img width="1084" height="748" alt="screenshot-2026-08-30_11-35-36" src="https://github.com/user-attachments/assets/4b1c3a50-fbaf-4fe1-a8fa-95153156b9e0" />
+
 
 
 <details>
   <summary> More Screenshots </summary>
-  <img width="1232" height="842" alt="Bildschirmfoto vom 2026-07-21 07-38-18" src="https://github.com/user-attachments/assets/002098c3-7033-4af0-b6d4-9a62ff6b96cd" />
-  <img width="1232" height="842" alt="Bildschirmfoto vom 2026-07-21 07-38-23" src="https://github.com/user-attachments/assets/ab77d508-1821-4f7a-8113-3d019620f60e" />
-  <img width="1232" height="842" alt="Bildschirmfoto vom 2026-07-21 07-38-26" src="https://github.com/user-attachments/assets/92bb32e6-4a64-4626-9fbb-2de77af74825" />
+  <img width="1084" height="748" alt="screenshot-2026-08-30_11-35-40" src="https://github.com/user-attachments/assets/bcc01d7a-97af-49ba-855c-26d5b1fde276" />
+  <img width="1084" height="748" alt="screenshot-2026-08-30_11-35-45" src="https://github.com/user-attachments/assets/3a0ac0ad-8425-4da1-af95-e9946e139247" />
+  <img width="1084" height="748" alt="screenshot-2026-08-30_11-35-48" src="https://github.com/user-attachments/assets/bffca001-a8c7-4711-9af9-147a5dc86630" />
+
 
 
   <img width="1916" height="1080" alt="screenshot-2026-06-11_16-48-00" src="https://github.com/user-attachments/assets/762d5786-fd4b-4a4b-a22b-a4803e1eba81" />
