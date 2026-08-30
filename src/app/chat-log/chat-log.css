@@ -14,7 +14,7 @@
 }
 
 .msg{
-  white-space: nowrap;
+  white-space: wrap;
 }
 
 .message-container{
