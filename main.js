@@ -107,7 +107,7 @@ async function initBot(auth,host, port,username,version) {
 
     bot.once('spawn', async() => {
       win.webContents.send("log", {
-        msg: "Bot spawned",
+        msg: "Bot spawned on " + host,
         timestamp: engine.getLogTime(),
         level: "info"
       });
