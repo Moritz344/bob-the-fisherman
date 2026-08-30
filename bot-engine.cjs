@@ -273,7 +273,7 @@ async function startFishing() {
     logFn({
       msg: "Bot is not ready",
       timestamp: getLogTime(),
-      level: "error"
+      level: "warn"
     });
     return;
   }
