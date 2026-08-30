@@ -274,6 +274,8 @@ export class SettingsService {
         if (entry.level == "error") {
           this.started.set(false);
           this.stopBot();
+        } else if (entry.level == "warn") {
+          this.currentTask.set("Nothing");
         }
         this.logs.update(list => [...list,entry]);
     });
