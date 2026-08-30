@@ -272,9 +272,11 @@ export class SettingsService {
           this.updateLootLog(entry);
         }
         if (entry.level == "error") {
+          this.stopCurrentTask(this.currentTask());
           this.started.set(false);
           this.stopBot();
         } else if (entry.level == "warn") {
+          this.stopCurrentTask(this.currentTask())
           this.currentTask.set("Nothing");
         }
         this.logs.update(list => [...list,entry]);
