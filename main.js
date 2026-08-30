@@ -10,6 +10,8 @@ const {
 } = require("electron");
 const engine = require("./bot-engine.cjs");
 const mineflayer = require('mineflayer');
+const ChatMessage = require('prismarine-chat')
+const nbt = require('prismarine-nbt')
 
 let bot;
 let win;
@@ -139,6 +141,29 @@ async function initBot(auth,host, port,username,version) {
       })
     })
 
+    bot.on("kicked",(reason,loggedIn) => {
+      try {
+        let raw = typeof reason === 'string' ? JSON.parse(reason) : reason
+        if (raw?.type) {
+          raw = nbt.simplify(raw)
+        }
+        const Chat = require('prismarine-chat')(bot.version)
+        const text = new Chat(raw).toString()
+
+        win.webContents.send("log", {
+          msg: "Bot got kicked: " + text,
+          timestamp: engine.getLogTime(),
+          level: "error"
+        });
+      } catch (e) {
+        console.error('Failed to parse kicked reason', e)
+        win.webContents.send("log", {
+          msg: `Bot got kicked: ${typeof reason === 'string' ? reason : JSON.stringify(reason)}`,
+          timestamp: engine.getLogTime(),
+          level: "error"
+        });
+      }
+    })
 
     bot.on("error",(err) => {
       console.log(err);
@@ -164,7 +189,7 @@ async function initBot(auth,host, port,username,version) {
 
 
       win.webContents.send("log", {
-        msg: "Bot stopped: " + reason,
+        msg: "Bot stopped",
         timestamp: engine.getLogTime(),
         level: "error"
       });
@@ -208,6 +233,8 @@ async function initBot(auth,host, port,username,version) {
     }
 
 }
+
+
 
 function getInventory() {
   return bot.inventory.slots.filter( (x) => x != null);
