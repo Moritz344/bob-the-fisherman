@@ -165,9 +165,9 @@ async function depositLoot() {
       })
     } catch (err) {
       logFn({
-        msg: "Error depositing item",
+        msg: "Item could not be deposited!",
         timestamp: getLogTime(),
-        level: "info"
+        level: "warn"
       });
     }
   }
@@ -181,7 +181,7 @@ async function dropItem(name) {
   const itemToDrop = bot.inventory.slots.find(item => item != null && item.name == name);
   if (!itemToDrop) {
     logFn({
-      msg: "Please provide an item name",
+      msg: "Please provide an item name!",
       timestamp: getLogTime(),
       level: "warn"
     })
@@ -203,7 +203,7 @@ async function dropItem(name) {
 function followPlayer(playerName) {
   if (!bot) {
     logFn({
-      msg: "Bot not found",
+      msg: "Bot not found!",
       timestamp: getLogTime(),
       level: "error"
     });
@@ -211,7 +211,7 @@ function followPlayer(playerName) {
   }
   if (!playerName) {
     logFn({
-      msg: "No player specified",
+      msg: "No player specified!",
       timestamp: getLogTime(),
       level: "warn"
     });
@@ -224,7 +224,7 @@ function followPlayer(playerName) {
   const playerEntity = bot.nearestEntity(e => e.type == "player" && e.username == playerName);
   if (!playerEntity) {
     logFn({
-      msg: "I can't find this player to follow",
+      msg: "No player found nearby! Player " + playerName + " needs to be within render distance.",
       timestamp: getLogTime(),
       level: "warn"
     });
@@ -290,6 +290,7 @@ async function startFishing() {
     });
     return;
   }
+  
   const foundWater = await checkForWaterNearby();
   if (!foundWater) {
     logFn({
