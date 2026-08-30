@@ -13,7 +13,7 @@ import {form, FormField, FormRoot,required} from '@angular/forms/signals';
 export class Settings implements OnInit{
   public settingsModel = signal<currentSelectedType>({
     port: 0,
-    username: "Bob",
+    username: "demo",
     version: "1.21.11",
     auth: "offline",
     host: "localhost",
@@ -71,6 +71,11 @@ export class Settings implements OnInit{
     if (this.settingsForm().invalid()) {
       return;
     }
+    if (this.settingsModel().port.toString() == "") {
+      this.settingsModel().port = 0;
+    }
+    this.settingsModel().port = Number(this.settingsModel().port);
+
 
     this.saved.set(true);
     this.settings.saveSettings(this.settingsModel());
