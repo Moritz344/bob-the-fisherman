@@ -3,7 +3,7 @@
     <input placeholder="Search..." [(ngModel)]="searchValue" (keyup)="onSearchLogs()">
     <button title="Clear logs" (click)="clear()"><img src="clear.svg"></button>
     <button title="Scroll to the Bottom" (click)="scrollToBottom()"><img src="bottom.svg"></button>
-    <button title="test" (click)="generateTestLogs()"><img src="bottom.svg"></button>
+    <!--<button title="test" (click)="generateTestLogs()"><img src="bottom.svg"></button>-->
   </div>
   <div #messages  class="message-container">
     @for (m of data(); track $index) {
