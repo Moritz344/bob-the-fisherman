@@ -29,10 +29,10 @@ Minecraft bot for AFK fishing, built on Mineflayer.
 
 # Features
 - [x] Start/Stop fishing
+- [x] Send and receive ingame chat messages
 - [x] Join Singleplayer/Multiplayer Worlds
 - [x] Follow a player
 - [x] Deposit loot in a chest
-- [x] See ingame chat messages
 - [x] Drop loot from inventory
 
 # Usage
