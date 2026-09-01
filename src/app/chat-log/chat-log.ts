@@ -98,7 +98,7 @@ export class ChatLog implements OnInit{
   }
 
 
-  onCommand() {
+  async onCommand() {
     this.scrollToBottom();
     if (!this.started()) {
       return;
@@ -130,7 +130,13 @@ export class ChatLog implements OnInit{
         this.settings.followPlayer(player);
         break;
       case "!help":
-        this.settings.showHelp();
+        const commands = await this.settings.getBotCommands();
+        let filteredCommands = commands.filter((x: any) => !x.onlyCli).map((x: any) => x.name);
+        this.settings.logs.update(x => [...x,{
+          msg: filteredCommands.join(","),
+          level: "info",
+          timestamp: this.settings.getLogTime()
+        }]);
         break;
       case "!deposit":
         this.settings.stopCurrentTask(this.currentBotTask());
