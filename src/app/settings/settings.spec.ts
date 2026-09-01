@@ -33,4 +33,16 @@ describe('Settings', () => {
   it('should create', () => {
     expect(component).toBeTruthy();
   });
+
+  it('should populate the form from the default service settings', () => {
+    component.initCurrentSelected();
+    expect(component.settingsModel()).toEqual({
+      host: 'localhost',
+      auth: 'offline',
+      version: '1.21.11',
+      username: 'fishermanbob69',
+      port: 0,
+      started: false,
+    });
+  });
 });
