@@ -17,7 +17,6 @@ export class Home implements OnInit {
 
   public started = this.settings.started;
   public currentSelected = this.settings.settingsSelected;
-  public currentSelectedActionSettings = this.settings.settingsActionSelected;
   public versionData = signal([]);
 
   public isFishing = signal<boolean>(false);
@@ -36,10 +35,9 @@ export class Home implements OnInit {
 
   async initBotSettings() {
     const settings = await this.settings.getLastBotSettings();
-    this.currentSelected.set(settings);
-
-    const settingsAction = await this.settings.getLastBotActionSettings();
-    this.currentSelectedActionSettings.set(settingsAction)
+    if (settings) {
+      this.currentSelected.set(settings);
+    }
   }
 
   async onStart() {
