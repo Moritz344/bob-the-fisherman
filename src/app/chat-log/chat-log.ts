@@ -35,6 +35,7 @@ export class ChatLog implements OnInit{
 
   public searchValue = signal<string>("");
   public currentBotTask = this.settings.currentTask;
+  public lastInput = signal<string>("");
 
 
   constructor() {
@@ -85,7 +86,15 @@ export class ChatLog implements OnInit{
     this.input.nativeElement.focus();
   }
 
-  onFindCommand() {
+  pasteLastInput() {
+    this.commandInput.set(this.lastInput());
+  }
+
+  onFindCommand(event: any) {
+    if (event.key == "ArrowDown") {
+      this.pasteLastInput();
+      return;
+    }
     if (!this.started()) {
       return;
     }
@@ -153,6 +162,7 @@ export class ChatLog implements OnInit{
         break;
     }
 
+   this.lastInput.set(this.commandInput());
    this.commandInput.set("");
   }
 
