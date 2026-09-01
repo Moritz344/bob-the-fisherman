@@ -20,20 +20,12 @@ interface SkinData {
   texture: string
 }
 
-interface Loot {
-  img: string | null,
-  count: number,
-  name: string,
-  displayName: string
-
-}
-
 
 @Injectable({
   providedIn: 'root',
 })
 export class SettingsService {
-  router = inject(Router);
+  public router = inject(Router);
   public started = signal<boolean>(false);
   public currentTab = signal<string>("");
   public currentTask = signal<string>("Nothing");
@@ -54,10 +46,6 @@ export class SettingsService {
 
   public skinData = signal<SkinData>({ username: "",texture: ""});
 
-  public settingsActionSelected = signal<currentSelectedActionType>({
-    waterMaxDistance: 10,
-    playerToFollow: ""
-  })
 
 
 
@@ -150,10 +138,6 @@ export class SettingsService {
     this.lootIsLoading.set(false);
   }
 
-  async saveActionSettings(data: currentSelectedActionType) {
-    this.settingsActionSelected.set(data);
-    return await (window as any).electronAPI.saveBotActionSettings(data);
-  }
 
   async getItemImage(name: string) {
     const url = "https://atlas.playcdu.co/search/first/minecraft/" + name;
@@ -182,10 +166,6 @@ export class SettingsService {
 
   public getSettings() {
     return this.settingsSelected();
-  }
-
-  public getActionSettings() {
-    return this.settingsActionSelected();
   }
 
   public setStarted(value: boolean) {
