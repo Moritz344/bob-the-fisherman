@@ -1,6 +1,6 @@
 <div #container class="container">
   <div class="toolbar">
-    <input placeholder="Search..." [(ngModel)]="searchValue" (keyup)="onSearchLogs()">
+    <input placeholder="Search..." spellcheck="false" [(ngModel)]="searchValue" (keyup)="onSearchLogs()">
     <button title="Clear logs" (click)="clear()"><img src="clear.svg"></button>
     <button title="Scroll to the Bottom" (click)="scrollToBottom()"><img src="bottom.svg"></button>
     <!--<button title="test" (click)="generateTestLogs()"><img src="bottom.svg"></button>-->
@@ -16,9 +16,10 @@
 
           @if (m.level == 'chat') {
             @let splitMessage = m.msg.split(":");
-            @let username = splitMessage[0];
-            @let message = splitMessage[1];
+            @let username = splitMessage.slice(0,1);
+            @let message = splitMessage.slice(1).join(":").trim();
             <span class="username-chat"><{{ username }}> </span> {{ message }}
+
           }@else {
             {{m.msg}}
           }
@@ -44,7 +45,7 @@
   #inputBox
   class="input-box"
   [(ngModel)]="commandInput"
-  (keyup)="onFindCommand()"
+  (keyup)="onFindCommand($event)"
   spellcheck="false"
   (keydown.code.enter)="onCommand()">
 </div>
