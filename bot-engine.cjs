@@ -245,7 +245,7 @@ function stopFollowingPlayer() {
     return;
   }
   logFn({
-    msg: "Stop following player",
+    msg: "Bot Stopped following player",
     timestamp: getLogTime(),
     level: "info"
   });
@@ -308,6 +308,11 @@ async function startFishing() {
     });
     await eat();
   }
+  logFn({
+    msg: "Bot Started fishing",
+    timestamp: getLogTime(),
+    level: "info"
+  });
   isFishing = true;
   bot.removeListener("playerCollect", onCollect);
   bot.on("playerCollect", onCollect);
@@ -316,7 +321,7 @@ async function startFishing() {
     await bot.fish();
   } catch (err) {
     logFn({
-      msg: "Stopped fishing",
+      msg: "Bot Stopped fishing",
       timestamp: getLogTime(),
       level: "info"
     });
