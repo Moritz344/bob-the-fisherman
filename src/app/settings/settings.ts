@@ -42,6 +42,9 @@ export class Settings implements OnInit{
 
   initCurrentSelected() {
     const generalSettings = this.settings.getSettings();
+    if (!generalSettings) {
+      return;
+    }
     this.settingsModel.set({
       host: generalSettings.host,
       auth: generalSettings.auth,
@@ -51,20 +54,11 @@ export class Settings implements OnInit{
       started: this.settings.getStarted()
     });
 
-    //const actionSettings = this.settings.getActionSettings();
-    //this.currentSelectedAction.set({
-    //  playerToFollow: actionSettings.playerToFollow,
-    //  waterMaxDistance: actionSettings.waterMaxDistance,
-    //});
   }
 
    async initVersions() {
     const data = await this.settings.getVersions();
     this.versionData.set(data.reverse());
-  }
-
-  saveBotActionSettings() {
-    this.settings.saveActionSettings(this.currentSelectedAction());
   }
 
   saveBotGeneralSettings() {
