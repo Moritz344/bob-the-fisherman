@@ -10,7 +10,6 @@ const {
 } = require("electron");
 const engine = require("./bot-engine.cjs");
 const mineflayer = require('mineflayer');
-const ChatMessage = require('prismarine-chat')
 const nbt = require('prismarine-nbt')
 
 let bot;
@@ -87,7 +86,7 @@ async function initBot(auth,host, port,username,version) {
         onMsaCode: async (data) => {
           await dialog.showMessageBox(win, {
             type: 'info',
-            authTitle: 'Microsoft Login Required',
+            title: 'Microsoft Login Required',
             message: data.message + '\n\nIf the wrong account opens, use a private browser window.'
           })
         },
