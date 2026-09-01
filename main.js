@@ -429,7 +429,7 @@ async function createWindow() {
     win.loadURL("http://localhost:4200/");
     win.webContents.openDevTools();
   } else {
-    win.loadFile(path.join(__dirname, "dist/bob-fisher/browser/index.html"));
+    win.loadFile(path.join(__dirname, "dist/bob-the-fisherman/browser/index.html"));
   }
 }
 
