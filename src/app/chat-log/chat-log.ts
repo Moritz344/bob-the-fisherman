@@ -117,25 +117,23 @@ export class ChatLog implements OnInit{
     const commandName = input.split(" ")[0];
     const command = input.split(" ");
 
+    this.settings.stopCurrentTask(this.currentBotTask());
     switch (commandName) {
       case "!start":
-        this.settings.stopCurrentTask(this.currentBotTask());
-        this.currentBotTask.set("Fishing");
+        this.settings.setCurrentTask("Fishing");
         this.settings.startFishing();
         break;
       case "!stop":
-        this.settings.stopCurrentTask(this.currentBotTask());
-        this.currentBotTask.set("Nothing");
+        this.settings.setCurrentTask("Nothing");
         break;
       case "!follow":
-        this.settings.stopCurrentTask(this.currentBotTask());
         const splitCommand = this.commandInput().split(" ");
         let player = splitCommand[1];
         if (!player) {
-          this.currentBotTask.set("Nothing");
+          this.settings.setCurrentTask("Nothing");
           return;
         }
-        this.currentBotTask.set("Following");
+        this.settings.setCurrentTask("Following");
         this.settings.followPlayer(player);
         break;
       case "!help":
@@ -148,13 +146,11 @@ export class ChatLog implements OnInit{
         }]);
         break;
       case "!deposit":
-        this.settings.stopCurrentTask(this.currentBotTask());
-        this.currentBotTask.set("Depositing");
+        this.settings.setCurrentTask("Depositing");
         this.settings.depositLoot();
         break;
       case "!drop":
-        this.settings.stopCurrentTask(this.currentBotTask());
-        this.currentBotTask.set("Drop");
+        this.settings.setCurrentTask("Drop");
         this.settings.dropLoot(command[1]);
         break;
       default:

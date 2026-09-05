@@ -78,6 +78,11 @@ export class SettingsService {
     return await (window as any).electronAPI.stopCurrentTask(task);
   }
 
+  async setCurrentTask(task: string) {
+    this.currentTask.set(task);
+    return await (window as any).electronAPI.setCurrentTask(task);
+  }
+
   async followPlayer(name: string) {
     return await (window as any).electronAPI.followPlayer(name);
   }
@@ -253,7 +258,7 @@ export class SettingsService {
           this.stopBot();
         } else if (entry.level == "warn") {
           this.stopCurrentTask(this.currentTask())
-          this.currentTask.set("Nothing");
+          this.setCurrentTask("Nothing");
         }
         this.logs.update(list => [...list,entry]);
     });
