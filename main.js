@@ -10,15 +10,14 @@ const {
 } = require("electron");
 const engine = require("./bot-engine.cjs");
 const mineflayer = require('mineflayer');
-const nbt = require('prismarine-nbt')
+const nbt = require('prismarine-nbt');
+const { timestamp } = require("rxjs");
 
 let bot;
 let win;
 let aboutWindow;
 let store;
 
-const MAX_RECONNECTS = 3;
-let reconnects = 0;
 let shouldReconnect = true;
 
 const botStartCooldown = 2000;
@@ -29,6 +28,36 @@ function stopBot() {
   }
   shouldReconnect = false;
   bot.quit();
+}
+
+async function startFishingTask() {
+   if (!engine.getIsAllowedToStartFishing()) {
+
+     const isBotReady = engine.getBotReady();
+     if (!isBotReady) {
+       win.webContents.send("log",{
+          msg: "Bot is not ready",
+          timestamp: engine.getLogTime(),
+          level: "warn"
+       });
+       return;
+     }
+
+     const isWaterNearby = await engine.checkForWaterNearby();
+     if (!isWaterNearby) {
+       return;
+     }
+
+     engine.setIsAllowedToStartFishing(true);
+     win.webContents.send("log",{
+       msg: "Bot Started fishing",
+       timestamp: engine.getLogTime(),
+       level: "info"
+     });
+   }
+
+   await engine.startFishing();
+
 }
 
 async function initStore() {
@@ -54,10 +83,10 @@ async function getItemImage(name) {
 }
 
 async function sendNotificationWhenItemCaughtOnNotFocused(msg) {
-    if (!msg.name) {
-      console.log("item name not found");
-      return;
-    }
+   if (!msg.name) {
+     console.log("item name not found for notification");
+     return;
+   }
    const { nativeImage } = require("electron");
    const responseImg = await getItemImage(msg.name);
    let icon;
@@ -140,7 +169,7 @@ async function initBot(auth,host, port,username,version) {
       })
     })
 
-    bot.on("kicked",(reason,loggedIn) => {
+    bot.on("kicked",(reason) => {
       try {
         let raw = typeof reason === 'string' ? JSON.parse(reason) : reason
         if (raw?.type) {
@@ -150,9 +179,16 @@ async function initBot(auth,host, port,username,version) {
         const text = new Chat(raw).toString()
 
         win.webContents.send("log", {
-          msg: "Bot got kicked: " + text,
+          msg: text,
           timestamp: engine.getLogTime(),
           level: "error"
+        });
+        autoReconnect({
+          auth,
+          host,
+          port,
+          username,
+          version
         });
       } catch (e) {
         console.error('Failed to parse kicked reason', e)
@@ -165,7 +201,6 @@ async function initBot(auth,host, port,username,version) {
     })
 
     bot.on("error",(err) => {
-      console.log(err);
       win.webContents.send("log", {
         msg: err.message || "Error starting bot",
         timestamp: engine.getLogTime(),
@@ -174,57 +209,24 @@ async function initBot(auth,host, port,username,version) {
       shouldReconnect = false;
       engine.setBotReady(false);
     })
-    bot.on("end",(reason,err) => {
-      //if (reason == "socketClosed" && shouldReconnect) {
-      //  autoReconnect({
-      //    auth,
-      //    host,
-      //    port,
-      //    username,
-      //    version
-      //  });
-      //  return;
-      //}
-
-
+    bot.on("end",() => {
       win.webContents.send("log", {
         msg: "Bot stopped",
         timestamp: engine.getLogTime(),
         level: "error"
       });
+      shouldReconnect = false;
       engine.setBotReady(false);
     });
 
 
     bot.on('whisper', async(username, message) => {
-      if (username === bot.username) return
-      if (message == "!start") {
-        engine.startFishing();
-      } else if (message == "!stop") {
-        engine.stopFishing();
-      } else if (message == "!eat") {
-        setTimeout( () => {
-          engine.eat();
-        },500);
-      } else if (message.includes("!follow")) {
-        const msg = message.split(" ");
-        if (msg && msg.length >= 2) {
-          const playerToFollow = msg[1].trim("");
-          engine.followPlayer(playerToFollow);
-        }
-      } else if (message == "!stop follow") {
-        engine.stopFollowingPlayer();
-      } else if (message == "!find water") {
-        engine.checkForWaterNearby();
-      } else if (message == "!show inventory") {
-        const items = getInventory();
-        items.forEach( (x) => {
-          console.log(x.name);
-        })
-      } else if (message == "!deposit") {
-        engine.depositLoot();
-      }
-    })
+      win.webContents.send("log",{
+        msg: username + " whispered: " + message,
+        timestamp: engine.getLogTime(),
+        level: "info"
+      })
+    });
 
     } catch(err) {
       console.log("Error starting Bot:");
@@ -234,18 +236,9 @@ async function initBot(auth,host, port,username,version) {
 }
 
 
-
-function getInventory() {
-  return bot.inventory.slots.filter( (x) => x != null);
-}
-
 function autoReconnect({ auth,host,port,username,version}) {
-  if (reconnects >= MAX_RECONNECTS) {
-    return;
-  }
-  reconnects += 1;
   win.webContents.send("log", {
-    msg: "Reconnecting in 3s attempt " + reconnects,
+    msg: "Reconnecting in 3 seconds ...",
     timestamp: engine.getLogTime(),
     level: "error"
   });
@@ -260,7 +253,6 @@ async function createWindow() {
     height: 800,
     frame: false,
     roundedCorners: "10",
-    //titleBarStyle: "hidden",
     webPreferences: {
       nodeIntegration: false,
       contextIsolation: true,
@@ -339,6 +331,10 @@ async function createWindow() {
     engine.stopCurrentTask(task);
   })
 
+  ipcMain.handle("set-current-task",(_,task) => {
+    engine.setBotTask(task);
+  })
+
   ipcMain.handle("follow-player",(_,name) => {
     engine.followPlayer(name);
   });
@@ -374,6 +370,7 @@ async function createWindow() {
 
   ipcMain.handle("stop-fishing",async(_) => {
     engine.stopFishing();
+    engine.setIsAllowedToStartFishing(false);
   })
 
   ipcMain.handle("stop-following",async(_) => {
@@ -385,7 +382,7 @@ async function createWindow() {
   });
 
   ipcMain.handle("start-fishing",async(_) => {
-    await engine.startFishing();
+    await startFishingTask();
   });
 
   ipcMain.handle("deposit-loot",async(_) => {
@@ -410,7 +407,6 @@ async function createWindow() {
         await new Promise(r => setTimeout(r, 500));
     }
     const slots = bot.inventory.slots.filter( x => x != null);
-
 
     return await Promise.all(slots.map(async (x) => {
     const responseItemImg = await getItemImage(x.name);
