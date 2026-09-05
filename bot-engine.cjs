@@ -8,7 +8,9 @@ let mcData;
 let logFn = console.log;
 
 let botReady = false;
+let botTask = "Nothing";
 let isFollowingPlayer = false;
+let isAllowedToStartFishing = false;
 let isFishing = false;
 let isDepositing = false;
 let botFishingCooldown = 500;
@@ -21,8 +23,11 @@ function setBotFishingCooldown(cooldown) {
   botFishingCooldown = cooldown;
 }
 
-function getBotFishingCooldown() {
-  return botFishingCooldown;
+function getIsAllowedToStartFishing() {
+  return isAllowedToStartFishing;
+}
+function setIsAllowedToStartFishing(checked) {
+  isAllowedToStartFishing = checked;
 }
 
 function setBot(botInstance, mcDataInstance) {
@@ -39,8 +44,12 @@ function getBot() {
   return bot;
 }
 
-function stopCurrentTask(task) {
-  switch (task) {
+function setBotTask(task) {
+  botTask = task;
+}
+
+function stopCurrentTask() {
+  switch (botTask) {
     case "Fishing":
       stopFishing();
       break;
@@ -224,7 +233,7 @@ function followPlayer(playerName) {
   const playerEntity = bot.nearestEntity(e => e.type == "player" && e.username == playerName);
   if (!playerEntity) {
     logFn({
-      msg: "No player found nearby! Player " + playerName + " needs to be within render distance.",
+      msg: "No player found nearby! Player " + playerName + " needs to be within render distance",
       timestamp: getLogTime(),
       level: "warn"
     });
@@ -269,14 +278,6 @@ function getLogTime() {
 
 
 async function startFishing() {
-  if (!botReady) {
-    logFn({
-      msg: "Bot is not ready",
-      timestamp: getLogTime(),
-      level: "warn"
-    });
-    return;
-  }
   if (isFishing) {
     stopFishing();
     return;
@@ -290,16 +291,7 @@ async function startFishing() {
     });
     return;
   }
-  
-  const foundWater = await checkForWaterNearby();
-  if (!foundWater) {
-    logFn({
-      msg: "No water nearby",
-      timestamp: getLogTime(),
-      level: "warn"
-    });
-    return;
-  }
+
   if (bot.food < 20) {
     logFn({
       msg: "I need to eat! Hunger: " + bot.food,
@@ -308,11 +300,6 @@ async function startFishing() {
     });
     await eat();
   }
-  logFn({
-    msg: "Bot Started fishing",
-    timestamp: getLogTime(),
-    level: "info"
-  });
   isFishing = true;
   bot.removeListener("playerCollect", onCollect);
   bot.on("playerCollect", onCollect);
@@ -330,6 +317,7 @@ async function startFishing() {
 }
 
 function checkForFishingRodInInventory() {
+  console.log("checking for fishing rod...");
   if (!bot) {
     return false;
   }
@@ -339,6 +327,7 @@ function checkForFishingRodInInventory() {
 }
 
 async function checkForWaterNearby() {
+  console.log("checking for water...");
   try {
     const maxDistance = 10;
     const waterBlock = await bot.findBlock({
@@ -449,9 +438,12 @@ module.exports = {
   depositLoot,
   getCommands,
   getIsFollowingPlayer,
+  setBotTask,
   stopCurrentTask,
   setBotFishingCooldown,
   dropItem,
   showHelp,
-  getBotHead
+  getBotHead,
+  setIsAllowedToStartFishing,
+  getIsAllowedToStartFishing
 };
