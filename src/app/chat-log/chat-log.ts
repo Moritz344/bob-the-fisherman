@@ -117,7 +117,7 @@ export class ChatLog implements OnInit{
     const commandName = input.split(" ")[0];
     const command = input.split(" ");
 
-    this.settings.stopCurrentTask(this.currentBotTask());
+    await this.settings.stopCurrentTask(this.currentBotTask());
     switch (commandName) {
       case "!start":
         this.settings.setCurrentTask("Fishing");
@@ -135,15 +135,6 @@ export class ChatLog implements OnInit{
         }
         this.settings.setCurrentTask("Following");
         this.settings.followPlayer(player);
-        break;
-      case "!help":
-        const commands = await this.settings.getBotCommands();
-        let filteredCommands = commands.filter((x: any) => !x.onlyCli).map((x: any) => x.name);
-        this.settings.logs.update(x => [...x,{
-          msg: filteredCommands.join(","),
-          level: "info",
-          timestamp: this.settings.getLogTime()
-        }]);
         break;
       case "!deposit":
         this.settings.setCurrentTask("Depositing");
