@@ -11,7 +11,6 @@ const {
 const engine = require("./bot-engine.cjs");
 const mineflayer = require('mineflayer');
 const nbt = require('prismarine-nbt');
-const { timestamp } = require("rxjs");
 
 let bot;
 let win;
@@ -21,6 +20,45 @@ let store;
 let shouldReconnect = true;
 
 const botStartCooldown = 2000;
+
+function getFriendlyErrorMessage(err) {
+  const code = err && err.code;
+  if (code) {
+    const networkMessages = {
+      ECONNREFUSED: "Connection refused by the server. The server may be offline or blocking this connection",
+      ECONNRESET: "Connection was reset by the server",
+      ECONNABORTED: "Connection was aborted by the server",
+      ETIMEDOUT: "Connection to the server timed out",
+      ENOTFOUND: "Could not resolve the server address (hostname not found)",
+      EAI_AGAIN: "Could not resolve the server address, DNS is temporarily unavailable",
+      EHOSTUNREACH: "Server host is unreachable",
+      ENETUNREACH: "Network is unreachable"
+    };
+    if (networkMessages[code]) {
+      return networkMessages[code];
+    }
+  }
+
+  const msg = (err && err.message) || "";
+
+  if (msg.startsWith("This server is version")) {
+    return "Server version is not supported. Try updating the bot packages";
+  }
+  if (msg.startsWith("Unsupported protocol version")) {
+    return "Client and server protocol versions do not match. Try updating the bot packages";
+  }
+  if (msg.startsWith("Parse error") || msg.startsWith("Serialization error")) {
+    return "Protocol error while communicating with the server: " + msg;
+  }
+  if (msg.includes("client timed out after")) {
+    return "Connection to the server timed out (keepalive timeout)";
+  }
+  if (msg.includes("Failed to obtain profile data")) {
+    return "Microsoft authentication failed. The account may not own Minecraft or the login did not complete";
+  }
+
+  return msg || "Unknown error";
+}
 
 function stopBot() {
   if (!bot) {
@@ -32,11 +70,10 @@ function stopBot() {
 
 async function startFishingTask() {
    if (!engine.getIsAllowedToStartFishing()) {
-
      const isBotReady = engine.getBotReady();
      if (!isBotReady) {
        win.webContents.send("log",{
-          msg: "Bot is not ready",
+          msg: "Bot is not ready!",
           timestamp: engine.getLogTime(),
           level: "warn"
        });
@@ -145,8 +182,14 @@ async function initBot(auth,host, port,username,version) {
         texture: engine.getBotHead(),
         username: bot.username
       })
-      setTimeout( () => {
+      setTimeout( async() => {
         engine.setBotReady(true);
+        const task = engine.getBotTask();
+        if (task == "Fishing") {
+          setTimeout(async() => {
+            await startFishingTask();
+          },2000);
+        }
       },botStartCooldown);
 
     });
@@ -183,6 +226,7 @@ async function initBot(auth,host, port,username,version) {
           timestamp: engine.getLogTime(),
           level: "error"
         });
+        engine.setIsAllowedToStartFishing(false);
         autoReconnect({
           auth,
           host,
@@ -202,11 +246,12 @@ async function initBot(auth,host, port,username,version) {
 
     bot.on("error",(err) => {
       win.webContents.send("log", {
-        msg: err.message || "Error starting bot",
+        msg: getFriendlyErrorMessage(err),
         timestamp: engine.getLogTime(),
         level: "error"
       });
       shouldReconnect = false;
+      engine.setIsAllowedToStartFishing(false);
       engine.setBotReady(false);
     })
     bot.on("end",() => {
@@ -215,7 +260,6 @@ async function initBot(auth,host, port,username,version) {
         timestamp: engine.getLogTime(),
         level: "error"
       });
-      shouldReconnect = false;
       engine.setBotReady(false);
     });
 
@@ -240,7 +284,7 @@ function autoReconnect({ auth,host,port,username,version}) {
   win.webContents.send("log", {
     msg: "Reconnecting in 3 seconds ...",
     timestamp: engine.getLogTime(),
-    level: "error"
+    level: "info"
   });
   setTimeout( () => {
    initBot(auth,host,port,username,version);
@@ -329,11 +373,15 @@ async function createWindow() {
 
   ipcMain.handle("stop-current-task",(_,task) => {
     engine.stopCurrentTask(task);
-  })
+  });
 
   ipcMain.handle("set-current-task",(_,task) => {
     engine.setBotTask(task);
-  })
+  });
+
+  ipcMain.handle("get-current-task",(_) => {
+    return engine.getBotTask();
+  });
 
   ipcMain.handle("follow-player",(_,name) => {
     engine.followPlayer(name);
@@ -350,11 +398,11 @@ async function createWindow() {
 
   ipcMain.handle("save-settings",(_,data) => {
     store.set("settings",data);
-  })
+  });
 
   ipcMain.handle("save-action-settings",(_,data) => {
     store.set("actions",data);
-  })
+  });
 
   ipcMain.handle("show-error",(_,title,msg) => {
     dialog.showErrorBox(title,msg);
@@ -362,20 +410,20 @@ async function createWindow() {
 
   ipcMain.handle("get-bot-settings",(_) => {
     return store.get("settings");
-  })
+  });
 
   ipcMain.handle("get-bot-action-settings",(_) => {
     return store.get("actions");
-  })
+  });
 
   ipcMain.handle("stop-fishing",async(_) => {
     engine.stopFishing();
     engine.setIsAllowedToStartFishing(false);
-  })
+  });
 
   ipcMain.handle("stop-following",async(_) => {
     engine.stopFollowingPlayer();
-  })
+  });
 
   ipcMain.handle("minimize", (_) => {
     BrowserWindow.getFocusedWindow()?.minimize()
