@@ -1,7 +1,6 @@
 import { Injectable,inject,signal,computed } from '@angular/core';
-import { Subject,BehaviorSubject } from 'rxjs';
 import { Router } from '@angular/router';
-import { currentSelectedType,currentSelectedActionType } from './models/current.model';
+import { currentSelectedType} from './models/current.model';
 
 interface LogMessage {
   msg: string,
@@ -61,7 +60,8 @@ export class SettingsService {
   getLogTime() {
     const date = new Date();
     return date.getHours().toString().padStart(2,"0") + ":" + date.getMinutes().toString().padStart(2,"0") + ":" + date.getSeconds().toString().padStart(2,"0") ;
-}
+  }
+
   async startFishing() {
     return await (window as any).electronAPI.startFishing();
   }
@@ -247,22 +247,28 @@ export class SettingsService {
     })
   }
 
-  private async initGameLogs() {
-      (window as any).electronAPI.log(async(entry: LogMessage) => {
-        if (entry.level == "loot") {
-          this.updateLootLog(entry);
-        }
-        if (entry.level == "error") {
-          this.stopCurrentTask(this.currentTask());
-          this.started.set(false);
-          this.stopBot();
-        } else if (entry.level == "warn") {
-          this.stopCurrentTask(this.currentTask())
-          this.setCurrentTask("Nothing");
-        }
-        this.logs.update(list => [...list,entry]);
-    });
 
+  private async initGameLogs() {
+     (window as any).electronAPI.log(async(entry: LogMessage) => {
+       if (entry.level == "loot") {
+         this.updateLootLog(entry);
+       } else if (entry.level == "error") {
+         this.stopCurrentTask(this.currentTask());
+         this.started.set(false);
+         this.stopBot();
+       } else if (entry.level == "warn") {
+         this.stopCurrentTask(this.currentTask())
+         this.setCurrentTask("Nothing");
+       } else if (entry.level == "info") {
+         if (entry.msg.startsWith("Bot spawned") && !this.started()) {
+           this.started.set(true);
+           if (this.currentTask() != "Fishing") {
+              this.setCurrentTask("Nothing");
+           }
+         }
+       }
+       this.logs.update(list => [...list,entry]);
+    });
   }
 
   public goto(route: string) {
