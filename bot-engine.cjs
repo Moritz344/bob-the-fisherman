@@ -48,6 +48,10 @@ function setBotTask(task) {
   botTask = task;
 }
 
+function getBotTask() {
+  return botTask;
+}
+
 function stopCurrentTask() {
   switch (botTask) {
     case "Fishing":
@@ -106,7 +110,7 @@ function showHelp() {
 function getCommands() {
   return [
     { name: "!start",desc: "start fishing",args: ["start"],onlyCli: false},
-    { name: "!help",desc: "show available commands",args: ["help"],onlyCli: false},
+    { name: "!help",desc: "show available commands",args: ["help"],onlyCli: true},
     { name: "!deposit",desc: "deposit loot to a chest",args: ["deposit","itenName"],onlyCli: false},
     { name: "!show inventory",desc: "list every item with name,count and slot number",args: ["show inventory"],onlyCli: true},
     { name: "!stop",desc: "stop the current task",args: ["stop"],onlyCli: false},
@@ -317,17 +321,17 @@ async function startFishing() {
 }
 
 function checkForFishingRodInInventory() {
-  console.log("checking for fishing rod...");
+  const rodName = "fishing_rod";
   if (!bot) {
     return false;
   }
-
   const items = bot.inventory.slots.filter(x => x != null);
-  return items.some(x => x.name == "fishing_rod");
+  if (items.some(x => x.name == rodName)) {
+    return true;
+  }
 }
 
 async function checkForWaterNearby() {
-  console.log("checking for water...");
   try {
     const maxDistance = 10;
     const waterBlock = await bot.findBlock({
@@ -444,6 +448,7 @@ module.exports = {
   dropItem,
   showHelp,
   getBotHead,
+  getBotTask,
   setIsAllowedToStartFishing,
   getIsAllowedToStartFishing
 };
