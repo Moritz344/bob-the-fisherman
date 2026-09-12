@@ -117,7 +117,6 @@ export class ChatLog implements OnInit{
     const commandName = input.split(" ")[0];
     const command = input.split(" ");
 
-    await this.settings.stopCurrentTask(this.currentBotTask());
     switch (commandName) {
       case "!start":
         this.settings.setCurrentTask("Fishing");
