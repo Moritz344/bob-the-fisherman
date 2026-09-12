@@ -120,6 +120,7 @@ function getCommands() {
 }
 
 async function depositLoot() {
+  let wasFishing = false;
   if (!botReady) {
     logFn({
       msg: "Bot is not ready",
@@ -141,14 +142,6 @@ async function depositLoot() {
     return;
   }
 
-  if (isFishing) {
-    stopFishing();
-  }
-
-  if (isFollowingPlayer) {
-    stopFollowingPlayer();
-  }
-
   const maxDistance = 6;
 
   const chest = await bot.findBlock({
@@ -164,6 +157,16 @@ async function depositLoot() {
     });
     return;
   }
+
+  if (isFishing) {
+    wasFishing = true;
+    stopFishing();
+  }
+
+  if (isFollowingPlayer) {
+    stopFollowingPlayer();
+  }
+
   await bot.lookAt(chest.position);
   const chestContainer = await bot.openChest(chest);
   for (const item  of uniqueItemsToDeposit) {
@@ -188,6 +191,9 @@ async function depositLoot() {
   chestContainer.close();
   isDepositing = false;
   await checkForWaterNearby();
+  if (wasFishing) {
+    startFishing();
+  }
 }
 
 async function dropItem(name) {
