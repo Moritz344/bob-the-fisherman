@@ -148,7 +148,7 @@ async function initBot(auth,host, port,username,version) {
         auth,
         username,
         version,
-        profilesFolder: '/home/moritz/.config/bob-the-fisherman/auth-cache',
+        profilesFolder: path.join(app.getPath('userData'), 'auth-cache'),
         onMsaCode: async (data) => {
           await dialog.showMessageBox(win, {
             type: 'info',
@@ -203,7 +203,8 @@ async function initBot(auth,host, port,username,version) {
     })
 
 
-    bot.on("chat",(username,message) => {
+    bot.on("chat",(username,message,translate,jsonMsg) => {
+      if (translate != "<%s> %s") { return; }
       const chatMessage = username + ": " + message
       win.webContents.send("log",{
         msg: chatMessage,
@@ -361,6 +362,7 @@ async function createWindow() {
       parent: win,
       modal: true,
       webPreferences: {
+        nodeIntegration: false,
         contextIsolation: true,
         enableRemoteModule: false,
         preload: path.join(__dirname, "preload.js"),
