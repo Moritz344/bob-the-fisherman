@@ -225,16 +225,19 @@ async function initBot(auth,host, port,username,version) {
         win.webContents.send("log", {
           msg: text,
           timestamp: engine.getLogTime(),
-          level: "error"
+          level: "warn"
         });
         engine.setIsAllowedToStartFishing(false);
-        autoReconnect({
-          auth,
-          host,
-          port,
-          username,
-          version
-        });
+        if (shouldReconnect) {
+          autoReconnect({
+            auth,
+            host,
+            port,
+            username,
+            version
+          });
+
+        }
       } catch (e) {
         console.error('Failed to parse kicked reason', e)
         win.webContents.send("log", {
@@ -256,11 +259,11 @@ async function initBot(auth,host, port,username,version) {
       engine.setBotReady(false);
     })
     bot.on("end",() => {
-      win.webContents.send("log", {
-        msg: "Bot stopped",
-        timestamp: engine.getLogTime(),
-        level: "error"
-      });
+      //win.webContents.send("log", {
+      //  msg: "Bot stopped",
+      //  timestamp: engine.getLogTime(),
+      //  level: "error"
+      //});
       engine.setBotReady(false);
     });
 
